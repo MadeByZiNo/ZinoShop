@@ -1,2 +1,2 @@
-### JH Online Judge
+<center>### JH Online Judge</center>
 ---
