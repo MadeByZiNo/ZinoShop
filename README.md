@@ -1,4 +1,4 @@
-<h1><center> JH Online Judge</center><h1></h1>
+<h1><center> JH Online Judge</center></h1>
 
 ---
 
