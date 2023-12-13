@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.w3.org/1999/xhtml"
+      layout:decorate="layout/default_layout">
+<head>
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        window.onload = function () {
+            setTimeout(function () {
+                window.location.href = '/'; // 리다이렉트할 경로
+            }, 3000); // 3초 동안 메시지를 표시
+        };
+        /*]]>*/
+    </script>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="container mt-5">
+        <div class="alert alert-success" role="alert">
+            <h4 class="alert-heading" th:text="'반갑습니다,'"></h4>
+            <p>환영합니다! 웹사이트를 이용해주셔서 감사합니다. 3초후 홈으로 이동합니다.</p>
+        </div>
+    </div>
+</div>
+</body>
+</html>
