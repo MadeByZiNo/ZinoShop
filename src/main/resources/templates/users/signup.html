@@ -2,37 +2,83 @@
 <html xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
       layout:decorate="layout/default_layout">
+<head>
+  <style>
+    .field-error {
+      border-color: #dc3545;
+      color: #dc3545;
+    }
+    .form-label {
+      font-weight: bold;
+    }
+  </style>
+  <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+  <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+  <script  th:inline="javascript">
+    function findAddr() {
+        new daum.Postcode({
+            oncomplete: function(data) {
+                var addr = '';
+
+                if (data.userSelectedType === 'R') {
+                    addr = data.roadAddress;
+                } else {
+                    addr = data.jibunAddress;
+                }
+
+                // 부모창의 주소칸에 받아온 주소를 넣는다.
+               document.getElementById("deliveryAddress").value = addr;
+               document.getElementById("detailAddress").focus();
+            }
+        }).open();
+    }
+</script>
+</head>
 <body>
 <div layout:fragment="content">
   <div class="container mt-5">
-    <h2>회원가입</h2>
-    <form th:action="@{/users/signup}" method="post" th:object="${signUpDto}">
-      <div class="mb-3">
-        <label for="username" class="form-label">아이디</label>
-        <input type="text" class="form-control" id="username" th:field="*{username}"
-               th:errorclass="error-class">
-        <div class="error-class" th:errors="*{username}"></div>
+    <div class="card" style=" width:600px;  margin: 0 auto;">
+      <div class="card-body" >
+        <h2 class="card-title" style="margin-top: 25px; margin-bottom: 40px; text-align: center;">회원가입</h2>
+        <form th:action="@{/users/signup}" method="post" th:object="${signUpDto}">
+          <div class="mb-3 rounded">
+            <label for="username" class="form-label">아이디</label>
+            <input type="text" class="form-control" id="username" th:field="*{username}" th:errorclass="field-error">
+            <div class="field-error" th:errors="*{username}"></div>
+          </div>
+          <div class="mb-3 rounded">
+            <label for="password" class="form-label">비밀번호</label>
+            <input type="password" class="form-control" id="password" th:field="*{password}" th:errorclass="field-error">
+            <div class="field-error" th:errors="*{password}"></div>
+          </div>
+          <div class="mb-3 rounded">
+            <label for="passwordConfirmation" class="form-label">비밀번호 확인</label>
+            <input type="password" class="form-control" id="passwordConfirmation" th:field="*{passwordConfirmation}" th:errorclass="field-error">
+            <div class="field-error"  th:errors="*{passwordConfirmation}"></div>
+          </div>
+          <div class="mb-3 rounded">
+            <label for="nickname" class="form-label">닉네임</label>
+            <input type="text" class="form-control" id="nickname" th:field="*{nickname}" th:errorclass="field-error">
+            <div class="field-error" th:errors="*{nickname}"></div>
+          </div>
+          <div class="mb-2 rounded">
+            <label for="deliveryAddress" class="form-label">주소</label>
+            <div class="input-group">
+              <input type="text" class="form-control" id="deliveryAddress" th:field="*{deliveryAddress}" th:errorclass="field-error" readonly>
+              <button type="button" class="btn btn-light" id="searchAddressBtn" onclick="findAddr()">주소 검색</button>
+            </div>
+            <div class="field-error" th:errors="*{deliveryAddress}"></div>
+          </div>
+          <div class="mb-3 rounded">
+            <label for="detailAddress" class="form-label">상세 주소</label>
+            <input type="text" class="form-control" id="detailAddress" th:field="*{detailAddress}" th:errorclass="field-error">
+            <div class="field-error" th:errors="*{detailAddress}"></div>
+          </div>
+
+          <button type="submit" class="btn btn-light" style="margin-top: 25px; margin-bottom: 25px;" >가입하기</button>
+        </form>
       </div>
-      <div class="mb-3">
-        <label for="password" class="form-label">비밀번호</label>
-        <input type="password" class="form-control" id="password" th:field="*{password}"
-               th:errorclass="error-class">
-        <div class="error-class" th:errors="*{password}"></div>
-      </div>
-      <div class="mb-3">
-        <label for="passwordConfirmation" class="form-label">비밀번호 확인</label>
-        <input type="password" class="form-control" id="passwordConfirmation" th:field="*{passwordConfirmation}"
-               th:errorclass="error-class">
-        <div class="error-class" th:errors="*{passwordConfirmation}"></div>
-      </div>
-      <div class="mb-3">
-        <label for="nickname" class="form-label">닉네임</label>
-        <input type="text" class="form-control" id="nickname" th:field="*{nickname}"
-               th:errorclass="error-class">
-        <div class="error-class" th:errors="*{nickname}"></div>
-      <button type="submit" class="btn btn-primary">가입하기</button>
-      </div>
-    </form>
+    </div>
   </div>
 </div>
 </body>

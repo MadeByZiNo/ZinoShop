@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
+      layout:decorate="layout/default_layout">
+<head>
+</head>
+<body>
+<div layout:fragment="content">
+  <h1 id="Message">결제 시도중</h1>
+    <p>주문 번호: <span id="orderId"></span></p>
+    <p>결제 키: <span id="paymentKey"></span></p>
+    <p>결제 금액: <span id="amount"></span></p>
+    <p><span id="point"></span></p>
+
+    <script>
+        async function confirmPayment() {
+            const paymentKey = "[[${paymentKey}]]";
+            const orderId = "[[${orderId}]]";
+            const amount = [[${amount}]];
+
+        document.getElementById("orderId").textContent = orderId;
+        document.getElementById("paymentKey").textContent = paymentKey;
+        document.getElementById("amount").textContent = amount;
+
+            try {
+                const response = await fetch("/order/confirm", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        paymentKey: paymentKey,
+                        orderId: orderId,
+                        amount: amount
+                    })
+                });
+                const response = await response.json();
+                if (response.result) {
+                    console.log('성공');
+                    document.getElementById("Message").textContent = "결제가 성공적으로 확정되었습니다.";
+                    document.getElementById("point").textContent = "적립 포인트 : " + response.point;
+                } else {
+                   console.log('결제 확정 실패');
+                   window.location.href = window.location.origin + "/order/fail?orderId=" + orderId;";
+                }
+            } catch (error) {
+                console.error("Error during payment confirmation:", error);
+                window.location.href = window.location.origin + "/order/fail?orderId=" + orderId;";
+            }
+        }
+        document.addEventListener("DOMContentLoaded", confirmPayment);
+    </script>
+</div>
+</body>
+</html>

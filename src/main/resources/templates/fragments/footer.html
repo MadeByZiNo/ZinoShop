@@ -2,10 +2,25 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
 <footer>
-  <p>My Footer</p>
+  <div class="container">
+    <footer class="d-flex flex-wrap justify-content-between align-items-center py-3 my-4 border-top">
+        <div class="col-md-4 d-flex align-items-center">
+          <a  class="mb-3 me-2 mb-md-0 text-body-secondary text-decㄴoration-none lh-1">
+            <img src="/images/mainLogo.png" alt="로고 이미지" width="120" height="70">
+          </a>
+          <span class="mb-3 mb-md-0 text-body-secondary">© 2023 JHSoft, Inc</span>
+        </div>
+        <ul class="nav col-md-4 justify-content-end list-styled d-flex">
+          <li class="ms-3"><a class="text-body-secondary" href="https://blog.naver.com/jh990517"> <img src="/images/naverIcon.png" alt="로고 이미지" width="40" height="40"></a></li>
+          <li class="ms-3"><a class="text-body-secondary" href="https://github.com/MadeByZiNo"> <img src="/images/githubIcon.png" alt="로고 이미지" width="40" height="40"></a></li>
+        </ul>
+    </footer>
+  </div>
 </footer>
 </body>
 </html>

@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
+      layout:decorate="layout/default_layout">
+<head>
+    <script src="https://js.tosspayments.com/v2/standard"></script>
+    <title>상품 리스트</title>
+    <style>
+        .product-list {
+            width: 100%;
+            border-collapse: collapse;
+            border-spacing: 0;
+        }
+
+        .product-list th, .product-list td {
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+            vertical-align: middle;
+             height: 40px; /* 표 셀 전체의 높이를 맞춤 */
+            text-align: left;
+        }
+
+        .product-thumbnail img {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+        }
+
+   .quantity-input {
+       text-align: center; /* 가운데 정렬 */
+   }
+
+   .quantity-button, .quantity-input span {
+       display: inline-block; /* inline-block으로 요소 배치 */
+       vertical-align: middle; /* 중간 정렬 */
+         width: 30px; /* 너비 설정 */
+        height: 30px; /* 높이 설정, 너비와 동일하게 맞춤 */
+      background-color: white; /* 배경 흰색 */
+        border: 2px solid black; /* 검정색 테두리 */
+        color: black; /* 검정색 텍스트 */
+        cursor: pointer; /* 클릭 가능한 포인터 모양 */
+        font-size: 16px; /* 폰트 크기 설정 */
+        border-radius: 5px; /* 모서리를 둥글게 */
+        box-sizing: border-box; /* 패딩과 테두리를 포함한 크기 계산 */
+       line-height: 30px; /* 버튼 내 텍스트의 세로 정렬 맞추기 */
+        text-align: center; /* 텍스트 중앙 정렬 */
+   }
+
+        .quantity-button:hover {
+           background-color: #f0f0f0; /* 호버 시 약간의 배경색 변경 */
+            border-color: black; /* 호버 시 테두리 유지 */
+        }
+
+        .total-price {
+            font-weight: bold;
+            margin-top: 20px;
+        }
+
+        .checkout {
+            margin-top: 20px;
+            text-align: right;
+        }
+
+        .product-actions {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .product-link {
+            color: inherit;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .product-link:hover {
+            color: #007bff;
+        }
+
+        .out-of-stock {
+                    color: red; /* 품절 글씨 색상 */
+                    font-weight: bold; /* 강조 표시 */
+                }
+    </style>
+    <script type="text/javascript" th:inline="javascript">
+
+
+        var decreaseQuantity = function(productId) {
+           const quantityElement = document.getElementById(`quantity-${productId}`);
+           const totalPriceElement = document.getElementById(`total-price-${productId}`);
+           const productPriceElement = document.getElementById(`product-price-${productId}`);
+           const priceElement  = document.getElementById(`price`);
+
+            let quantity = parseInt(quantityElement.textContent, 10);
+            let productPrice = parseInt(productPriceElement.textContent, 10);
+            let price = parseInt(priceElement.textContent, 10);
+            if (quantity > 1) {
+                quantity--;
+                quantityElement.textContent = quantity;
+
+
+            const newTotalPrice = productPrice * quantity;
+            totalPriceElement.textContent = newTotalPrice;
+
+            const newPrice = price - productPrice;
+            priceElement.textContent = newPrice;
+                fetch(`/cart/update-quantity`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ productId: productId, quantity: quantity })
+                }).catch(error => console.error('Error:', error));
+            }
+        }
+
+        var increaseQuantity = function(productId) {
+            const quantityElement = document.getElementById(`quantity-${productId}`);
+            const totalPriceElement = document.getElementById(`total-price-${productId}`);
+            const productPriceElement = document.getElementById(`product-price-${productId}`);
+            const priceElement  = document.getElementById(`price`);
+
+            let quantity = parseInt(quantityElement.textContent, 10);
+            let productPrice = parseInt(productPriceElement.textContent, 10);
+            let price = parseInt(priceElement.textContent, 10);
+            if (quantity < 99) {
+                quantity++;
+                quantityElement.textContent = quantity;
+
+                const newTotalPrice = productPrice * quantity;
+                totalPriceElement.textContent = newTotalPrice;
+
+                const newPrice = price + productPrice;
+                priceElement.textContent = newPrice;
+
+                fetch(`/cart/update-quantity`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ productId: productId, quantity: quantity })
+                }).catch(error => console.error('Error:', error));
+            }
+        }
+    </script>
+</head>
+<body>
+<div layout:fragment="content">
+    <h1>상품 리스트</h1>
+
+    <table class="product-list">
+        <thead>
+            <tr>
+                <th>상품 이름</th>
+                <th>상품 이미지</th>
+                <th>개수</th>
+                <th>상품 가격</th>
+                <th>총 가격</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="cartProduct : ${cartProducts}">
+                <td>
+                    <a th:href="@{'/product/detail/' + ${cartProduct.product.id}}" class="product-link" th:text="${cartProduct.product.name}">상품 이름</a>
+                </td>
+                <td class="product-thumbnail">
+                    <a th:href="@{'/product/detail/' + ${cartProduct.product.id}}">
+                        <img th:src="${cartProduct.product.thumbnail}" alt="상품 이미지">
+                    </a>
+                </td>
+                <td class="quantity-input">
+                    <button th:onclick="'decreaseQuantity(' + ${cartProduct.product.id} + ');'" class="quantity-button">-</button>
+                    <span th:id="'quantity-' + ${cartProduct.product.id}" th:text="${cartProduct.quantity}" style="vertical-align: middle;"></span>
+                    <button th:onclick="'increaseQuantity(' + ${cartProduct.product.id} + ');'" class="quantity-button">+</button>
+               </td>
+                <td th:id="'product-price-' + ${cartProduct.product.id}"
+                      th:text="${cartProduct.product.price}">상품 가격</td>
+                <td>
+                    <span th:id="'total-price-' + ${cartProduct.product.id}"
+                          th:text="${cartProduct.product.price} * ${cartProduct.quantity}">총 가격</span>
+                </td>
+                <td>
+                    <form action="/cart/remove" method="post">
+                        <input type="hidden" th:value="${cartProduct.product.id}" name="productId">
+                        <button type="submit" class="btn btn-primary">삭제</button>
+                    </form>
+                </td>
+                <tr th:if="${cartProduct.product.state == '품절'}">
+                    <td colspan="6" class="out-of-stock" style="color: red;">품절</td>
+                </tr>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="total-price">
+        총 상품 가격: <span th:id="'price'" th:text="${totalPrice}"></span>원
+    </div>
+
+    <div class="checkout">
+           <form th:action="@{/order}" method="get">
+               <button type="submit" class="btn btn-primary" th:disabled="${#lists.isEmpty(cartProducts) || cartProduct.product.state == '품절'}">구매하기</button>
+           </form>
+    </div>
+</div>
+
+
+</body>
+</html>

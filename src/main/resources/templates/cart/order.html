@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
+      layout:decorate="layout/default_layout">
+<head>
+    <title>구매하기</title>
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://js.tosspayments.com/v2/standard"></script>
+    <style>
+
+        .order-title {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-control:disabled {
+            background-color: #e9ecef;
+        }
+
+        .total-price, .final-price {
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .discount-btn {
+            margin-top: 10px;
+        }
+
+        .submit-btn {
+            margin-top: 20px;
+            width: 100%;
+        }
+
+             input[type="number"]::-webkit-outer-spin-button,
+        input[type="number"]::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        input[type="number"] {
+            -moz-appearance: textfield;
+        }
+    </style>
+    <script type="text/javascript">
+        function findAddr() {
+            new daum.Postcode({
+                oncomplete: function(data) {
+                    var addr = (data.userSelectedType === 'R') ? data.roadAddress : data.jibunAddress;
+                    document.getElementById("deliveryAddress").value = addr;
+                    document.getElementById("detailAddress").focus();
+                }
+            }).open();
+        }
+
+        function validateDiscount() {
+          const rewardPointsElement = document.getElementById("reward_points");
+          const discountInputElement = document.getElementById("discountInput");
+          const rewardPoints = parseInt(rewardPointsElement.getAttribute('data-value'), 10);
+          const discount = parseInt(discountInputElement.value, 10) || 0;
+
+        if (discount > rewardPoints) {
+            discountInput.value = rewardPoints;
+            alert(`할인 금액은 최대 ${rewardPoints}원까지 가능합니다.`);
+        }
+    }
+
+    function applyDiscount() {
+        const rewardPointsElement = document.getElementById("reward_points");
+        const discountInputElement = document.getElementById("discountInput");
+        const totalPriceElement = document.getElementById("totalPrice");
+        const rewardPoints = parseInt(rewardPointsElement.getAttribute('data-value'), 10);
+        const discount = parseInt(discountInputElement.value, 10) || 0;
+        const totalPrice = parseInt(totalPriceElement.textContent, 10);
+
+        const finalPriceElement = document.getElementById("finalPrice");
+
+        if (discount <= totalPrice) {
+            finalPriceElement.textContent = totalPrice - discount;
+            rewardPointsElement.textContent = rewardPoints - discount;
+            document.getElementById("discountedPrice").value = discount;
+            document.getElementById("discountInfo").value = "적립금 " + discount + "원 사용";
+        } else {
+            alert("할인 금액이 총 가격을 초과할 수 없습니다.");
+        }
+    }
+
+
+
+
+
+
+async function submitForm() {
+
+   const clientKey = "[[${clientKey}]]";
+   const tossPayments = TossPayments(clientKey);
+   const payment = tossPayments.payment({customerKey: TossPayments.ANONYMOUS})
+
+    const form = document.getElementById('orderForm');
+
+    const formData = {
+        recipientName: form.recipientName.value,
+        deliveryAddress: form.deliveryAddress.value,
+        detailAddress: form.detailAddress.value,
+        discountedPrice: form.discountedPrice.value,
+        discountInfo: form.discountInfo.value,
+        memo: form.memo.value
+    };
+
+    try {
+        const response = await fetch('/order/save', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(formData)
+        });
+
+        if (!response.ok) {
+            console.log('주문 저장 실패');
+            window.location.href = window.location.origin + "/order/fail";
+            return;
+        }
+
+        const result = await response.json();
+        console.log('주문이 성공적으로 저장되었습니다:', result);
+
+
+        // 결제 요청
+        await payment.requestPayment({
+        method: "CARD", // 카드 결제
+        amount: {
+            currency: "KRW",
+            value: result.amount,
+        },
+        orderId: result.orderId,
+        orderName: result.orderName,
+        successUrl: window.location.origin + "/order/success",
+        failUrl: window.location.origin + "/order/fail",
+        customerEmail: "customer123@gmail.com",
+        customerName: result.recipient_name,
+        customerMobilePhone: "01012341234",
+        card: {
+            useEscrow: false,
+            flowMode: "DEFAULT",
+            useCardPoint: false,
+            useAppCardOnly: false,
+        },
+    });
+    } catch (error) {
+        console.log('결제 요청 실패' + error);
+    }
+}
+
+
+
+    </script>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="container order-container">
+        <h1 class="order-title">구매하기</h1>
+
+        <form id="orderForm" action="/order/save" method="post" onsubmit="return false;">
+            <div class="form-group" th:with="productName=${orderName}">
+                <label>상품명</label>
+                <span style="font-size: 1.5em; font-weight: bold;" th:text="${productName}"></span>
+            </div>
+
+
+            <div class="form-group">
+                <label>주문자명</label>
+                <input type="text" name="recipientName" class="form-control">
+            </div>
+
+            <div class="form-group">
+                <label>배송지</label>
+                <div class="input-group">
+                    <input type="text" name="deliveryAddress" id="deliveryAddress" class="form-control" th:value="${user.delivery_address}" readonly>
+                    <button type="button" class="btn btn-secondary" onclick="findAddr()">주소 찾기</button>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>상세 주소</label>
+                <input type="text" id="detailAddress" name="detailAddress" class="form-control" th:value="${user.detail_address}" placeholder="상세 주소를 입력하세요">
+            </div>
+
+            <div class="form-group">
+                <label>총 상품 가격</label>
+                <div class="total-price">
+                    <span id="totalPrice" th:id="'totalPrice'" th:text="${totalPrice}"></span> 원
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>할인 적용 (보유 포인트: <span th:id="'reward_points'" th:text="${user.reward_points}"  th:attr="data-value=${user.reward_points}"></span>원)</label>
+                <div class="input-group">
+                    <input
+                        type="number"
+                        id="discountInput"
+                        class="form-control"
+                        placeholder="할인 금액을 입력하세요"
+                        min="0"
+                        th:attr="max=${user.reward_points}"
+                        oninput="validateDiscount()"
+                        style="appearance: textfield;"
+                    >
+                    <button type="button" class="btn btn-primary discount-btn" onclick="applyDiscount()">할인 적용</button>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>최종 결제 금액</label>
+                <div class="final-price">
+                    <span id="finalPrice" th:id="'finalPrice'" th:text="${totalPrice}"></span> 원
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>요청사항 (선택)</label>
+                <textarea name="memo" class="form-control" rows="3" placeholder="요청사항을 입력하세요"></textarea>
+            </div>
+
+            <input type="hidden"  id="discountedPrice" name="discountedPrice">
+            <input type="hidden" id="discountInfo" name="discountInfo">
+
+             <button type="button" class="btn btn-success submit-btn" onclick="submitForm()">결제 요청</button>
+        </form>
+    </div>
+</div>
+</body>
+</html>

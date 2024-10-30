@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
+      layout:decorate="layout/default_layout">
+<head>
+    <style>
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-gap: 20px;
+            justify-items: center;
+            align-items: center;
+        }
+        .grid-item {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .grid-item a {
+            display: block;
+            width: 100%;
+            padding: 20px;
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            background-color: white; /* 흰색 배경 */
+            border: 2px solid #ddd;  /* 연한 회색 테두리 */
+            color: #333;  /* 다크 그레이 텍스트 */
+            border-radius: 8px; /* 둥근 모서리 */
+            text-decoration: none; /* 밑줄 제거 */
+            transition: background-color 0.3s, border-color 0.3s, color 0.3s;
+        }
+        .grid-item a:hover {
+            background-color: transparent; /* 호버 시 투명 배경 */
+            color: #007bff; /* 호버 시 텍스트 파란색 */
+            border-color: #007bff; /* 호버 시 테두리 파란색 */
+        }
+    </style>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="container mt-4">
+        <div class="row mb-4">
+            <div class="col text-center">
+                <h2>닉네임: <span id="nickname" th:text="${user.nickname}">UserNickname</span></h2>
+                <p>포인트: <span id="points" th:text="${user.reward_points}">12345</span></p>
+                <p>등급: <span id="grade" th:text="${user.role}">고객님</span></p>
+            </div>
+        </div>
+
+        <div class="grid-container">
+            <div class="grid-item">
+                <a href="/purchase-history">
+                    <i class="bi bi-list-check"></i> 구매현황
+                </a>
+            </div>
+            <div class="grid-item">
+                <a href="/cart">
+                    <i class="bi bi-cart"></i> 장바구니
+                </a>
+            </div>
+            <div class="grid-item">
+                <a href="/heart">
+                    <i class="bi bi-heart"></i> 찜목록
+                </a>
+            </div>
+            <div class="grid-item">
+                <a href="/reviews">
+                    <i class="bi bi-pencil"></i> 리뷰
+                </a>
+            </div>
+            <div class="grid-item">
+                <a href="/inquiries">
+                    <i class="bi bi-question-circle"></i> 문의
+                </a>
+            </div>
+            <div class="grid-item">
+                <a href="/users/update">
+                    <i class="bi bi-person"></i> 개인정보 수정
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

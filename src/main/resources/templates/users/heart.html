@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
+      layout:decorate="layout/default_layout">
+<head>
+    <style>
+        .heart-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: 40px;
+        }
+
+        .heart-item {
+            width: calc(25% - 20px);
+            margin: 20px;
+            text-align: center;
+        }
+
+        .heart-item a {
+            text-decoration: none; /* 링크 밑줄 제거 */
+            color: inherit; /* 링크 기본 색상 상속 */
+        }
+
+        .heart-item img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        .sale-tag {
+            color: red;
+            font-weight: bold;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+        }
+
+        .page-item {
+            list-style: none;
+            display: inline-block;
+            margin: 0 5px;
+        }
+
+        .page-item a {
+            text-decoration: none;
+            padding: 5px 10px;
+            border: 1px solid #ddd;
+            color: #333;
+        }
+
+        .page-item a.active {
+            font-weight: bold;
+            background-color: #f0f0f0;
+            pointer-events: none;
+        }
+
+        .page-item a:hover {
+            background-color: #ddd;
+        }
+
+         .heart-icon {
+                font-size: 1.5em;
+                margin-left: 6px; /* 왼쪽 마진 추가 */
+                cursor: pointer;
+         }
+    </style>
+
+    <script type="text/javascript" th:inline="javascript">
+         var toggleHeart = function(productId) {
+             const heartIcon = document.getElementById(`heart-icon-${productId}`);
+             if (!heartIcon) {
+                 console.error('해당 제품의 하트 아이콘을 찾을 수 없습니다:', productId);
+                 return;
+             }
+             const isHearted = heartIcon.classList.contains('bi-heart-fill');
+
+             fetch(`/heart`, {
+                 method: 'POST',
+                 headers: {
+                     'Content-Type': 'application/json'
+                 },
+                 body: JSON.stringify({ productId: productId })
+             })
+             .then(response => {
+                 if (response.status === 401) {
+                     window.location.href = '/users/login'; // 로그인 페이지로 이동
+                     return;
+                 }
+                 if (!response.ok) {
+                     console.error('찜 상태 변경 실패');
+                     return; // 오류가 발생하면 처리 후 종료
+                 }
+
+                  window.location.reload();
+
+             })
+             .catch(error => console.error('Error:', error));
+         };
+
+         document.addEventListener("DOMContentLoaded", function() {
+             const heartIcons = document.querySelectorAll('[id^="heart-icon-"]');
+
+             heartIcons.forEach(function(heartIcon) {
+                 const productId = heartIcon.getAttribute('data-product-id');
+
+                 fetch(`/heart/status?productId=${productId}`, {
+                     method: 'GET',
+                     headers: {
+                         'Content-Type': 'application/json'
+                     }
+                 })
+                 .then(response => {
+                     if (response.status === 401) {
+                         return;
+                     }
+
+                     if (!response.ok) {
+                         console.error('하트 상태 조회 실패');
+                         return;
+                     }
+
+                     return response.json(); // JSON 데이터로 변환
+                 })
+                 .then(isHearted => {
+                     if (isHearted) {
+                         heartIcon.classList.add('bi-heart-fill', 'text-danger');
+                         heartIcon.classList.remove('bi-heart', 'text-muted');
+                     } else {
+                         heartIcon.classList.add('bi-heart', 'text-muted');
+                         heartIcon.classList.remove('bi-heart-fill', 'text-danger');
+                     }
+                 });
+             });
+         });
+
+
+     </script>
+</head>
+<body>
+<div layout:fragment="content">
+
+    <div th:if="${hearts.isEmpty()}"  style="text-align: center;">
+        <p>찜된 등록된 상품이 없습니다.</p>
+    </div>
+
+    <div th:unless="${hearts.isEmpty()}">
+        <div class="sort-by">     </div>
+        <div class="heart-container">
+            <div th:each="heart : ${hearts}" class="heart-item">
+                <a th:href="@{'/product/detail/' + ${heart.product.id}}">
+                <img th:src="${heart.product.thumbnail}" alt="heart Image" style="max-width: 100%; height: auto; margin-bottom: 10px;">
+                <h3 th:text="${heart.product.name}" style="font-weight: bold; margin-top: 10px;"></h3>
+                <p th:text="'가격: ' + ${heart.product.price}" style="display: inline-block;"></p>
+                <div>
+                 <p th:if="${heart.product.remain == 0 || heart.product.statusId == 2}" style=" text-align: center; display: inline-block; margin-right: 10px;">
+                     <span th:if="${heart.product.remain == 0}" class="sale-tag">품절</span>
+                     <span th:if="${heart.product.statusId == 2}" class="sale-tag">세일 중</span>
+                 </p>
+                <button id="heart-button" th:onclick="'toggleHeart(' + ${heart.product.id} + ');'" class="btn">
+                       <span th:id="'heart-icon-' + ${heart.product.id}" class="bi bi-heart text-muted" th:data-product-id="${heart.product.id}" style="cursor: pointer;"></span>
+                </button>
+                 </div>
+                </a>
+            </div>
+        </div>
+
+        <!-- 페이지네이션 -->
+        <div class="pagination">
+            <ul>
+                <!-- 이전 페이지 버튼 -->
+                <li th:if="${currentPage > 5}" class="page-item">
+                    <a th:href="@{/heart(page=${startPage - 5})}">이전</a>
+                </li>
+
+                <!-- 페이지 번호 -->
+                <li th:each="pageNum : ${#numbers.sequence(startPage, endPage)}" class="page-item">
+                    <a th:href="@{/heart(page=${pageNum})}"
+                       th:text="${pageNum}"
+                       th:classappend="${currentPage == pageNum} ? 'active' : ''"></a>
+                </li>
+
+                <!-- 다음 페이지 버튼 -->
+                <li th:if="${endPage < totalPages}" class="page-item">
+                    <a th:href="@{/heart(page=${endPage + 1})}">다음</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+</div>
+</body>
+</html>

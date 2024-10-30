@@ -1,0 +1,15 @@
+package com.JH.JhOnlineJudge.order.dto;
+
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
+public class OrderSaveDto {
+    private String recipientName;
+    private String deliveryAddress;
+    private String detailAddress;
+    private int discountedPrice;
+    private String discountInfo;
+    private String memo;
+}

@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
+      layout:decorate="layout/default_layout">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        .product-detail-container {
+            width: 80%;
+            margin: 0 auto;
+            padding-bottom: 100px; /* 버튼 고정 시 컨텐츠가 버튼과 겹치지 않도록 */
+        }
+
+        .product-name {
+            text-align: center;
+            font-size: 2em;
+            font-weight: bold;
+            margin-top: 20px;
+        }
+
+        hr {
+            margin: 40px 0;
+        }
+
+        .product-image {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .product-image img {
+            max-width: 100%;
+            height: auto;
+            margin-bottom: 10px;
+        }
+
+        .product-description {
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .product-reviews {
+            text-align: center;
+            font-weight: bold;
+        }
+
+      .product-action-container {
+          display: flex;
+          justify-content: center; /* 요소들을 수평 중앙 정렬 */
+          align-items: center; /* 요소들을 수직 중앙 정렬 */
+          position: fixed;
+          bottom: 0;
+          left: 0;
+          width: 100%;
+          background-color: white;
+          padding: 15px 20px; /* 상하 패딩을 늘려서 수직 공간 증가 */
+          box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
+      }
+
+       .product-price {
+           font-size: 1.5em;
+           font-weight: bold;
+           margin: 0;
+           line-height: normal;
+           margin-right: 50px;
+       }
+
+        .btn-primary {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 1em;
+            cursor: pointer;
+        }
+
+        .heart-icon {
+                font-size: 1.5em;
+                margin-left: 6px; /* 왼쪽 마진 추가 */
+                cursor: pointer;
+            }
+    </style>
+
+    <script type="text/javascript" th:inline="javascript">
+        var toggleHeart = function(productId) {
+            const heartIcon = document.getElementById(`heart-icon-${productId}`);
+            if (!heartIcon) {
+                console.error('해당 제품의 하트 아이콘을 찾을 수 없습니다:', productId);
+                return;
+            }
+            const isHearted = heartIcon.classList.contains('bi-heart-fill');
+
+            fetch(`/heart`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ productId: productId })
+            })
+            .then(response => {
+                if (response.status === 401) {
+                    window.location.href = '/users/login'; // 로그인 페이지로 이동
+                    return;
+                }
+                if (!response.ok) {
+                    console.error('찜 상태 변경 실패');
+                    return; // 오류가 발생하면 처리 후 종료
+                }
+
+                if (isHearted) {
+                    heartIcon.classList.remove('bi-heart-fill', 'text-danger');
+                    heartIcon.classList.add('bi-heart', 'text-muted');
+                } else {
+                    heartIcon.classList.remove('bi-heart', 'text-muted');
+                    heartIcon.classList.add('bi-heart-fill', 'text-danger');
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        };
+
+        document.addEventListener("DOMContentLoaded", function() {
+            const productId = [[${product.id}]];
+            const heartIcon = document.getElementById(`heart-icon-${productId}`);
+            fetch(`/heart/status?productId=${productId}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => {
+                if (response.status === 401) {
+                    return;
+                }
+
+                if (!response.ok) {
+                    console.error('하트 상태 조회 실패');
+                    return;
+                }
+                return response.json(); // JSON 데이터로 변환
+             })
+             .then(isHearted => {
+                if (isHearted) {
+                    heartIcon.classList.add('bi-heart-fill', 'text-danger');
+                    heartIcon.classList.remove('bi-heart', 'text-muted');
+                } else {
+                    heartIcon.classList.add('bi-heart', 'text-muted');
+                    heartIcon.classList.remove('bi-heart-fill', 'text-danger');
+                }
+            })
+        });
+    </script>
+
+
+</head>
+<body>
+
+<div class="product-detail-container" layout:fragment="content">
+    <!-- 상품 이름 -->
+    <h2 class="product-name" th:text="${product.name}"></h2>
+    <hr>
+
+    <!-- 상품 이미지 -->
+    <div class="product-image">
+        <div th:each="image : ${productImages}">
+            <img th:src="${image.url}" alt="Product Image"/>
+        </div>
+    </div>
+
+    <!-- 상품 설명 -->
+    <div class="product-description" th:if="${product.description}">
+        <p th:text="${product.description}"></p>
+    </div>
+
+    <hr>
+    <!-- 상품 리뷰 -->
+    <div class="product-reviews">
+        <h2>리뷰</h2>
+        <!-- 리뷰 내용 -->
+    </div>
+
+    <!-- 상품 가격 및 장바구니 -->
+    <div class="product-action-container">
+        <p class="product-price" th:text="'가격: ' + ${product.price}"></p>
+        <form action="/cart/add-product" method="post">
+            <input type="hidden" name="productId" th:value="${product.id}"/>
+            <input type="hidden" name="quantity" value="1"/>
+            <button type="submit" class="btn"
+                    th:class="${product.state == '품절'} ? 'btn-secondary' : 'btn-primary'"
+                    th:disabled="${product.state == '품절'}">
+                <span th:text="${product.state == '품절'} ? '품절' : '장바구니에 담기'}"></span>
+            </button>
+        </form>
+        <button id="heart-button" th:onclick="'toggleHeart(' + ${product.id} + ');'" class="btn">
+            <span th:id="'heart-icon-' + ${product.id}" class="bi bi-heart text-muted" style="cursor: pointer;"></span>
+        </button>
+    </div>
+</div>
+</body>
+</html>

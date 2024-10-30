@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
+      layout:decorate="layout/default_layout">
+<head>
+    <style>
+        .product-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: 40px;
+        }
+
+        .product-item {
+            width: calc(25% - 20px);
+            margin: 20px;
+            text-align: center;
+        }
+
+        .product-item a {
+            text-decoration: none; /* 링크 밑줄 제거 */
+            color: inherit; /* 링크 기본 색상 상속 */
+        }
+
+        .product-item img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        .sale-tag {
+            color: red;
+            font-weight: bold;
+        }
+
+        .category-title {
+            text-align: center;
+            margin: 40px 0 20px 0; /* 상단 여백 */
+            font-weight: bold;
+            font-size: 24px; /* 글씨 크기 조정 */
+        }
+
+        .category-list {
+            display: flex;
+            justify-content: center;
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+            margin-bottom: 40px; /* 하단 여백 추가 */
+        }
+
+        .category-item {
+            margin: 0 30px; /* 좌우 여백 조정 */
+            font-size: 20px; /* 글씨 크기 조정 */
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+        }
+
+        .page-item {
+            list-style: none;
+            display: inline-block;
+            margin: 0 5px;
+        }
+
+        .page-item a {
+            text-decoration: none;
+            padding: 5px 10px;
+            border: 1px solid #ddd;
+            color: #333;
+        }
+
+        .page-item a.active {
+            font-weight: bold;
+            background-color: #f0f0f0;
+            pointer-events: none;
+        }
+
+        .page-item a:hover {
+            background-color: #ddd;
+        }
+    </style>
+</head>
+<body>
+<div layout:fragment="content">
+    <h2 th:text="${category.name}" class="category-title"></h2>
+
+    <div style="margin-top: 10px;">
+        <ul th:if="${childCategories != null}" class="category-list">
+            <li th:each="childCategory : ${childCategories}" class="category-item">
+                <a class="nav-link active"
+                   aria-current="page"
+                   th:href="@{/product(category_id=${childCategory.id})}"
+                   th:text="${childCategory.name}">카테고리 이름</a>
+            </li>
+        </ul>
+    </div>
+
+    <div th:if="${products.isEmpty()}"  style="text-align: center;">
+        <p>해당 카테고리에 등록된 상품이 없습니다.</p>
+    </div>
+
+    <div th:unless="${products.isEmpty()}">
+        <div class="sort-by">     </div>
+        <div class="product-container">
+            <div th:each="product : ${products}" class="product-item">
+                <a th:href="@{'/product/detail/' + ${product.id}}">
+                <img th:src="${product.thumbnail}" alt="Product Image" style="max-width: 100%; height: auto; margin-bottom: 10px;">
+                <h3 th:text="${product.name}" style="font-weight: bold; margin-top: 10px;"></h3>
+                <p th:text="'가격: ' + ${product.price}" style="display: inline-block;"></p>
+                <p th:text="'남은 재고: ' + ${product.remain}" style="display: inline-block;"></p>
+                <div>
+                 <p th:if="${product.remain == 0 || product.state == '세일 중'}" style=" text-align: center; display: inline-block; margin-right: 10px;">
+                     <span th:if="${product.remain == 0}" class="sale-tag">품절</span>
+                     <span th:if="${product.state == '세일 중'}" class="sale-tag">세일 중</span>
+                 </p>
+                 </div>
+                </a>
+            </div>
+        </div>
+
+        <!-- 페이지네이션 -->
+        <div class="pagination">
+            <ul>
+                <!-- 이전 페이지 버튼 -->
+                <li th:if="${currentPage > 5}" class="page-item">
+                    <a th:href="@{/product(category_id=${category.id}, page=${startPage - 5})}">이전</a>
+                </li>
+
+                <!-- 페이지 번호 -->
+                <li th:each="pageNum : ${#numbers.sequence(startPage, endPage)}" class="page-item">
+                    <a th:href="@{/product(category_id=${category.id}, page=${pageNum})}"
+                       th:text="${pageNum}"
+                       th:classappend="${currentPage == pageNum} ? 'active' : ''"></a>
+                </li>
+
+                <!-- 다음 페이지 버튼 -->
+                <li th:if="${endPage < totalPages}" class="page-item">
+                    <a th:href="@{/product(category_id=${category.id}, page=${endPage + 1})}">다음</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+</div>
+</body>
+</html>
