@@ -22,21 +22,21 @@ public class JwtUtil {
     @Value("${jwt.refreshExpire}")
     private long REFRESH_EXPIRE;
 
-    private final RedisTemplate<String, String> redisTemplate;
-
-    public String generateAccessToken(String username, String nickname) {
+    public String generateAccessToken(String username, String nickname, UserRole userRole) {
         return Jwts.builder()
                 .setSubject(username)
                 .claim("nickname",nickname)
+                .claim("role",userRole)
                 .setExpiration(new Date(System.currentTimeMillis() + ACCESS_EXPIRE))
                 .signWith(SignatureAlgorithm.HS512, SECRET_KEY)
                 .compact();
     }
 
-    public String generateRefreshToken(String username, String nickname) {
+    public String generateRefreshToken(String username, String nickname, UserRole userRole) {
         return Jwts.builder()
                 .setSubject(username)
                 .claim("nickname",nickname)
+                .claim("role",userRole)
                 .setExpiration(new Date(System.currentTimeMillis() + REFRESH_EXPIRE))
                 .signWith(SignatureAlgorithm.HS512, SECRET_KEY)
                 .compact();
@@ -63,4 +63,8 @@ public class JwtUtil {
         return (String) Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(token).getBody().get("nickname");
     }
 
+    // 토큰에서 역할 추출
+     public UserRole getRole(String token) {
+         return  UserRole.valueOf((String) Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(token).getBody().get("role"));
+     }
 }

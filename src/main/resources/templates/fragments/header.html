@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link href="/css/bootstrap.min.css" rel="stylesheet">
-
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 <body>
 
@@ -21,16 +21,16 @@
                     <div class="collapse navbar-collapse ml-4" id="navbarText">
                         <ul class="navbar-nav me-auto mb-lg-0" style="white-space: nowrap;">
                             <li class="nav-item">
-                                <a class="nav-link active mx-5" aria-current="page" th:href="@{/product(category_id='1')}">상의</a>
+                                <a class="nav-link active mx-5" aria-current="page" th:href="@{/product/list(category_id='1')}">상의</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link active mx-5" aria-current="page" th:href="@{/product(category_id='4')}">하의</a>
+                                <a class="nav-link active mx-5" aria-current="page" th:href="@{/product/list(category_id='4')}">하의</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link active mx-5" aria-current="page" th:href="@{/product(category_id='7')}">아우터</a>
+                                <a class="nav-link active mx-5" aria-current="page" th:href="@{/product/list(category_id='7')}">아우터</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link active mx-5" aria-current="page" th:href="@{/product(category_id='10')}">기타</a>
+                                <a class="nav-link active mx-5" aria-current="page" th:href="@{/product/list(category_id='10')}">기타</a>
                             </li>
                         </ul>
                         <div th:if="${userStatus eq 'NOT_LOGIN'}">
@@ -40,27 +40,150 @@
                                 </form>
                             </span>
                         </div>
-                        <div th:unless="${userStatus eq 'NOT_LOGIN'}">
-                            <nav class="user-nav">
-                                <p th:text="${nickname} + '님 안녕하세요'" class="welcome-text" style="display: flex; justify-content: center;"></p>
-                                <div style="display: flex; justify-content: center; gap: 15px; white-space: nowrap;">
+                        <div th:if="${userStatus == '고객님' || userStatus == 'VIP고객님'}">
+                            <nav class="user-nav" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px;">
+                                <p th:text="${nickname} + '님 안녕하세요'" class="welcome-text" style="font-size: 18px; font-weight: bold; text-align: center;"></p>
+                                <div style="display: flex; gap: 20px; white-space: nowrap; align-items: center;">
+                                    <!-- 로그아웃, 장바구니, 마이페이지 버튼들 -->
                                     <form action="/users/logout" method="post" class="form-inline">
                                         <button type="submit" class="btn user-btn">로그아웃</button>
                                     </form>
-                                    <form action="/cart" method="get" class="form-inline">
+                                    <form action="/cart/page" method="get" class="form-inline">
                                         <button type="submit" class="btn user-btn">장바구니</button>
                                     </form>
                                     <form action="/users/mypage" method="get" class="form-inline">
                                         <button type="submit" class="btn user-btn">마이페이지</button>
                                     </form>
+
+                                    <!-- 알람 아이콘과 알림 팝업 -->
+                                    <div style="position: relative;">
+                                        <div class="notification-icon" style="cursor: pointer;" id="notificationIcon" onclick="toggleNotifications()">
+                                            <i class="bi bi-bell" style="font-size: 24px;"></i>
+                                            <span id="notificationCount" class="badge" style="position: absolute; top: -5px; right: -5px; background-color: red; color: white; font-size: 12px;"></span>
+                                        </div>
+
+                                        <!-- 알림 내용 표시 팝업 -->
+                                        <div id="notificationPopup" class="notification-popup" style="display: none; position: absolute; background-color: white; border: 1px solid gray; padding: 20px; width: 300px; top: 40px; right: 0; box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);">
+                                            <!-- 알림 내용이 동적으로 추가될 예정 -->
+                                        </div>
+                                    </div>
                                 </div>
                             </nav>
                         </div>
+                        <div th:if="${userStatus == '관리자'}">
+                           <nav class="user-nav">
+                               <p th:text="'관리자님 안녕하세요'" class="welcome-text" style="display: flex; justify-content: center;"></p>
+                               <div style="display: flex; justify-content: center; gap: 15px; white-space: nowrap;">
+                                   <form action="/users/logout" method="post" class="form-inline">
+                                       <button type="submit" class="btn user-btn">로그아웃</button>
+                                   </form>
+                                   <form action="/admin" method="get" class="form-inline">
+                                       <button type="submit" class="btn user-btn">관리자페이지</button>
+                                   </form>
+                               </div>
+                           </nav>
+                       </div>
                     </div>
                 </div>
             </div>
         </div>
     </nav>
+    <script type="text/javascript" th:inline="javascript">
+           async function loadNotificationStatus() {
+               const userStatus = /*[[${userStatus}]]*/ 'NOT_LOGIN'; // Thymeleaf 변수로 userStatus 값을 가져오기
+
+               if (userStatus === 'NOT_LOGIN') {
+                   return;  // 로그인하지 않은 경우 함수 종료
+               }
+
+               $.get('/notification/status', function(status) {
+                   const notificationCount = $('#notificationCount');
+                   if (status.exists) {
+                       notificationCount.text(status.count).show();
+                   } else {
+                       notificationCount.hide();
+                   }
+               });
+           }
+
+           // 알림 클릭 시 팝업 토글
+           function toggleNotifications() {
+               const popup = $('#notificationPopup');
+
+               if (popup.is(':hidden')) {
+                   $.get('/notification', function(notifications) {
+                       // 알림 내용 표시
+                      const content = notifications.map(notification => {
+                          console.log(notification.read);
+                          const notificationClass = notification.read ? 'read' : 'unread';
+                          return `
+                              <div class="${notificationClass}">
+                                  <p class="notification-message">${notification.message}</p>
+                                  <small class="notification-time">${new Date(notification.createdAt).toLocaleString()}</small>
+                              </div>
+                          `;
+                      }).join('');
+                      popup.html(content).show();
+                      setRead();
+                   });
+               } else {
+                   popup.hide();
+               }
+           }
+
+           // 알림 읽음 처리
+           function setRead() {
+               $.post('/notification/read');
+           }
+
+           $(document).ready(loadNotificationStatus);
+       </script>
+    <style>
+           .notification-popup {
+        display: none;
+        position: absolute;
+        background-color: white;
+        border: 1px solid gray;
+        padding: 20px;
+        width: 300px;
+        top: 40px;
+        right: 0;
+        box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+
+        max-height: 400px;
+        overflow-y: auto;
+    }
+
+          .notification-popup .unread {
+              font-weight: bold;
+              color: black;
+          }
+
+          .notification-popup .read {
+              color: gray;
+          }
+
+          .notification-popup .notification-message {
+              margin-bottom: 8px;
+          }
+
+          .notification-popup .notification-time {
+              font-size: 0.85em;
+              color: gray;
+              display: block;
+              margin-top: 5px;
+          }
+
+          .notification-popup div:not(:last-child)  {
+              margin-bottom: 12px;
+              border-bottom: 1px solid gray;
+              padding-bottom: 8px;
+              margin-bottom: 12px;
+
+          }
+
+
+        </style>
 </header>
 </body>
 </html>

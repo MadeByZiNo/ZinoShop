@@ -33,8 +33,8 @@ public class OrderController {
     @Value("${toss.client-key}")
     private String CLIENT_KEY;
 
-    @GetMapping
-    public String order(@AuthUser Long userId,
+    @GetMapping("/page")
+    public String orderPage(@AuthUser Long userId,
                        Model model) {
         User user = userService.findUserById(userId);
         List<CartProduct> cartProducts = cartService.getCartProductList(userId);
@@ -54,35 +54,34 @@ public class OrderController {
         return "cart/order";
    }
 
-    @PostMapping("/save")
+    @PostMapping
     @ResponseBody
     public ResponseEntity<?> saveOrder(@AuthUser Long userId,
                                       @RequestBody OrderSaveDto orderSaveDto){
         List<CartProduct> cartProducts = cartService.getCartProductList(userId);
         Map<String, Object> map = orderService.createOrder(userId, orderSaveDto, cartProducts);
-        log.info("주문 저장 성공");
         return ResponseEntity.ok(map);
     }
 
     @GetMapping("/success")
-       public String paymentSuccess(@RequestParam String orderId,
+       public String paymentSuccess(@RequestParam(name = "orderId") String externalId,
                                     @RequestParam String paymentKey,
                                     @RequestParam int amount,
                                     Model model) {
           model.addAttribute("paymentKey", paymentKey);
-          model.addAttribute("orderId", orderId);
+          model.addAttribute("externalId", externalId);
           model.addAttribute("amount", amount);
-          log.info("결제성공 : paymentKey: {}",paymentKey);
+          log.info("결제 요청 성공 : paymentKey: {}",paymentKey);
            return "order/success";
        }
 
        @GetMapping("/fail")
        public String paymentFail(@RequestParam(required = false) String code,
                                  @RequestParam(required = false) String message,
-                                 @RequestParam(required = false) String orderId) {
-           Order order = orderService.findByOrderId(orderId);
+                                 @RequestParam(required = false) String externalId) {
+           Order order = orderService.findByExternalId(externalId);
            order.updateCancel();
-           log.info("결제 실패 {} {} ",code,message);
+           log.info("결제 요청 실패 {} {} ",code,message);
            return "order/fail";
        }
 

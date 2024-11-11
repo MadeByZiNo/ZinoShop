@@ -6,7 +6,7 @@
     <style>
         .grid-container {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(2, 2fr);
             grid-gap: 20px;
             justify-items: center;
             align-items: center;
@@ -43,41 +43,29 @@
     <div class="container mt-4">
         <div class="row mb-4">
             <div class="col text-center">
-                <h2>닉네임: <span id="nickname" th:text="${user.nickname}">UserNickname</span></h2>
-                <p>포인트: <span id="points" th:text="${user.rewardPoints}">12345</span></p>
-                <p>등급: <span id="grade" th:text="${user.role}">고객님</span></p>
+                <h1>관리자페이지</h1>
             </div>
         </div>
 
         <div class="grid-container">
             <div class="grid-item">
-                <a href="/purchase-history">
-                    <i class="bi bi-list-check"></i> 주문현황
-                </a>
-            </div>
-            <div class="grid-item">
-                <a href="/cart/page">
-                    <i class="bi bi-cart"></i> 장바구니
-                </a>
-            </div>
-            <div class="grid-item">
-                <a href="/heart/page">
-                    <i class="bi bi-heart"></i> 찜목록
-                </a>
-            </div>
-            <div class="grid-item">
-                <a href="/reviews">
-                    <i class="bi bi-pencil"></i> 리뷰
+                <a href="/inventory-management">
+                    <i class="bi bi-box-seam"></i> 재고관리
                 </a>
             </div>
             <div class="grid-item">
                 <a href="/inquiries">
-                    <i class="bi bi-question-circle"></i> 문의
+                    <i class="bi bi-envelope"></i> 문의관리
                 </a>
             </div>
+          <div class="grid-item">
+                    <a href="/admin/delivery-form">
+                        <i class="bi bi-truck"></i> 배송관리
+                    </a>
+          </div>
             <div class="grid-item">
-                <a href="/users/update">
-                    <i class="bi bi-person"></i> 개인정보 수정
+                <a href="/analysis">
+                    <i class="bi bi-bar-chart"></i> 분석
                 </a>
             </div>
         </div>

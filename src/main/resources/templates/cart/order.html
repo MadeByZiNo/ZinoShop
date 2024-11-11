@@ -59,7 +59,7 @@
         }
 
         function validateDiscount() {
-          const rewardPointsElement = document.getElementById("reward_points");
+          const rewardPointsElement = document.getElementById("rewardPoints");
           const discountInputElement = document.getElementById("discountInput");
           const rewardPoints = parseInt(rewardPointsElement.getAttribute('data-value'), 10);
           const discount = parseInt(discountInputElement.value, 10) || 0;
@@ -71,7 +71,7 @@
     }
 
     function applyDiscount() {
-        const rewardPointsElement = document.getElementById("reward_points");
+        const rewardPointsElement = document.getElementById("rewardPoints");
         const discountInputElement = document.getElementById("discountInput");
         const totalPriceElement = document.getElementById("totalPrice");
         const rewardPoints = parseInt(rewardPointsElement.getAttribute('data-value'), 10);
@@ -113,7 +113,7 @@ async function submitForm() {
     };
 
     try {
-        const response = await fetch('/order/save', {
+        const response = await fetch('/order', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -138,12 +138,12 @@ async function submitForm() {
             currency: "KRW",
             value: result.amount,
         },
-        orderId: result.orderId,
+        orderId: result.externalId,
         orderName: result.orderName,
         successUrl: window.location.origin + "/order/success",
         failUrl: window.location.origin + "/order/fail",
         customerEmail: "customer123@gmail.com",
-        customerName: result.recipient_name,
+        customerName: result.recipientName,
         customerMobilePhone: "01012341234",
         card: {
             useEscrow: false,
@@ -166,7 +166,7 @@ async function submitForm() {
     <div class="container order-container">
         <h1 class="order-title">구매하기</h1>
 
-        <form id="orderForm" action="/order/save" method="post" onsubmit="return false;">
+        <form id="orderForm" action="/order" method="post" onsubmit="return false;">
             <div class="form-group" th:with="productName=${orderName}">
                 <label>상품명</label>
                 <span style="font-size: 1.5em; font-weight: bold;" th:text="${productName}"></span>
@@ -181,14 +181,14 @@ async function submitForm() {
             <div class="form-group">
                 <label>배송지</label>
                 <div class="input-group">
-                    <input type="text" name="deliveryAddress" id="deliveryAddress" class="form-control" th:value="${user.delivery_address}" readonly>
+                    <input type="text" name="deliveryAddress" id="deliveryAddress" class="form-control" th:value="${user.deliveryAddress}" readonly>
                     <button type="button" class="btn btn-secondary" onclick="findAddr()">주소 찾기</button>
                 </div>
             </div>
 
             <div class="form-group">
                 <label>상세 주소</label>
-                <input type="text" id="detailAddress" name="detailAddress" class="form-control" th:value="${user.detail_address}" placeholder="상세 주소를 입력하세요">
+                <input type="text" id="detailAddress" name="detailAddress" class="form-control" th:value="${user.detailAddress}" placeholder="상세 주소를 입력하세요">
             </div>
 
             <div class="form-group">
@@ -199,7 +199,7 @@ async function submitForm() {
             </div>
 
             <div class="form-group">
-                <label>할인 적용 (보유 포인트: <span th:id="'reward_points'" th:text="${user.reward_points}"  th:attr="data-value=${user.reward_points}"></span>원)</label>
+                <label>할인 적용 (보유 포인트: <span th:id="'rewardPoints'" th:text="${user.rewardPoints}"  th:attr="data-value=${user.rewardPoints}"></span>원)</label>
                 <div class="input-group">
                     <input
                         type="number"
@@ -207,7 +207,7 @@ async function submitForm() {
                         class="form-control"
                         placeholder="할인 금액을 입력하세요"
                         min="0"
-                        th:attr="max=${user.reward_points}"
+                        th:attr="max=${user.rewardPoints}"
                         oninput="validateDiscount()"
                         style="appearance: textfield;"
                     >

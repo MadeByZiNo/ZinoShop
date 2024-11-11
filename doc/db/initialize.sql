@@ -25,8 +25,8 @@ CREATE TABLE User (
     username VARCHAR(50) UNIQUE NOT NULL,
     password VARCHAR(255) NOT NULL,
     nickname VARCHAR(50) NOT NULL,
-    delivery_address VARCHAR(255) NOT NULL,
-    reward_points INT NOT NULL,
+    deliveryAddress VARCHAR(255) NOT NULL,
+    rewardPoints INT NOT NULL,
 	role VARCHAR(50) NOT NULL,
     membership_id INT NOT NULL,
     FOREIGN KEY (membership_id) REFERENCES Membership(membership_id)
@@ -74,7 +74,7 @@ CREATE TABLE Order_Status (
 CREATE TABLE Orders (
     order_id INT PRIMARY KEY AUTO_INCREMENT,
     user_id INT NOT NULL,
-    delivery_address VARCHAR(255) NOT NULL,
+    deliveryAddress VARCHAR(255) NOT NULL,
     purchase_price INT NOT NULL,
     order_date DATE NOT NULL,
     delivery_date DATE NULL,

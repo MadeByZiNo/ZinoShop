@@ -5,7 +5,9 @@ import com.JH.JhOnlineJudge.user.interceptor.AuthorityCheckInterceptor;
 import com.JH.JhOnlineJudge.user.interceptor.TokenCheckInterceptor;
 import com.JH.JhOnlineJudge.utils.JwtUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -25,6 +27,11 @@ public class WebMvcConfig implements WebMvcConfigurer {
     public void addArgumentResolvers(final List<HandlerMethodArgumentResolver> resolvers) {
         resolvers.add(authUserResolver);
     }
+
+    @Bean
+      public RestTemplate restTemplate() {
+          return new RestTemplate();
+      }
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {

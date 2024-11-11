@@ -45,7 +45,7 @@ public class ProductController {
     }
 
     // 카테고리에 따른 상품 리스트 페이지 보여주기
-    @GetMapping
+    @GetMapping("/list")
     public String getProductListPage(@RequestParam(value = "category_id", required = true) Long category_id,
                                   @RequestParam(value = "page", required = false, defaultValue = "1") int page,
                                   Model model) {
@@ -84,9 +84,9 @@ public class ProductController {
     }
 
 
-    // 제품 가져오기
+    // 제품 상세 페이지
     @GetMapping("/detail/{product_id}")
-    public String findProduct(@PathVariable(value = "product_id", required = true) Long id, Model model) {
+    public String getProductPage(@PathVariable(value = "product_id", required = true) Long id, Model model) {
 
         Product product = productService.findProductById(id);
         model.addAttribute("product", product);

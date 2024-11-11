@@ -7,7 +7,7 @@
 <body>
 <div layout:fragment="content">
   <h1 id="Message">결제 시도중</h1>
-    <p>주문 번호: <span id="orderId"></span></p>
+    <p>주문 번호: <span id="externalId"></span></p>
     <p>결제 키: <span id="paymentKey"></span></p>
     <p>결제 금액: <span id="amount"></span></p>
     <p><span id="point"></span></p>
@@ -15,10 +15,10 @@
     <script>
         async function confirmPayment() {
             const paymentKey = "[[${paymentKey}]]";
-            const orderId = "[[${orderId}]]";
+            const externalId = "[[${externalId}]]";
             const amount = [[${amount}]];
 
-        document.getElementById("orderId").textContent = orderId;
+        document.getElementById("externalId").textContent = externalId;
         document.getElementById("paymentKey").textContent = paymentKey;
         document.getElementById("amount").textContent = amount;
 
@@ -30,22 +30,22 @@
                     },
                     body: JSON.stringify({
                         paymentKey: paymentKey,
-                        orderId: orderId,
+                        externalId: externalId,
                         amount: amount
                     })
                 });
-                const response = await response.json();
-                if (response.result) {
+                const jsonResponse = await response.json();
+                if (jsonResponse.result) {
                     console.log('성공');
                     document.getElementById("Message").textContent = "결제가 성공적으로 확정되었습니다.";
-                    document.getElementById("point").textContent = "적립 포인트 : " + response.point;
+                    document.getElementById("point").textContent = "적립 포인트 : " + jsonResponse.point;
                 } else {
                    console.log('결제 확정 실패');
-                   window.location.href = window.location.origin + "/order/fail?orderId=" + orderId;";
+                   window.location.href = window.location.origin + "/order/fail?externalId=" + externalId;
                 }
             } catch (error) {
                 console.error("Error during payment confirmation:", error);
-                window.location.href = window.location.origin + "/order/fail?orderId=" + orderId;";
+                window.location.href = window.location.origin + "/order/fail?externalId=" + externalId;
             }
         }
         document.addEventListener("DOMContentLoaded", confirmPayment);

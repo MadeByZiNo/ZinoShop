@@ -32,33 +32,38 @@ public class CartController {
                                    @RequestParam Long productId,
                                    @RequestParam int quantity ){
         cartService.saveProduct(userId, productId, quantity);
-        return "redirect:/cart";
+        return "redirect:/cart/page";
     }
 
-    @GetMapping
+    @PostMapping("/remove-product")
+       public String deleteProduct(@AuthUser Long userId,
+                                   @RequestParam Long productId) {
+           cartService.deleteProduct(userId,productId);
+           return "redirect:/cart/page";
+       }
+
+    @GetMapping("/page")
     public String getCartProducts(@AuthUser Long userId,
                           Model model) {
         List<CartProduct> cartProducts= cartService.getCartProductList(userId);
         int totalPrice = CartProduct.sumPricesFromList(cartProducts);
+        boolean isCartEmpty = cartProducts.isEmpty();
+        boolean isAnyProductOutOfStock = cartProducts.stream().anyMatch(cartProduct -> cartProduct.getProduct().getState().equals("품절"));
 
         model.addAttribute("cartProducts",cartProducts);
         model.addAttribute("totalPrice", totalPrice);
+        model.addAttribute("isCartEmpty", isCartEmpty);
+        model.addAttribute("isAnyProductOutOfStock", isAnyProductOutOfStock);
+
         return "cart/list";
     }
 
-    @PostMapping("/remove")
-    public String deleteProduct(@AuthUser Long userId,
+    @PostMapping("/clear")
+    public String clearProduct(@AuthUser Long userId,
                                 @RequestParam Long productId) {
-        cartService.deleteProduct(userId,productId);
+        cartService.clearProduct(userId,productId);
         return "redirect:/cart";
     }
-
-    @PostMapping("/clear")
-        public String clearProduct(@AuthUser Long userId,
-                                    @RequestParam Long productId) {
-            cartService.clearProduct(userId,productId);
-            return "redirect:/cart";
-        }
 
     @PostMapping("/update-quantity")
     @ResponseBody

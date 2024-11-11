@@ -46,7 +46,6 @@ public class UserController {
         return "users/login";
     }
 
-
     // 로그인
     @PostMapping("/login")
     public String signup(@Valid @ModelAttribute("loginDto") LoginDto loginDto,
@@ -145,7 +144,7 @@ public class UserController {
     public String getUpdateForm(@AuthUser Long userId,
                                 Model model) {
         User user = userService.findUserById(userId);
-        UpdateDto updateDto = UpdateDto.of(user.getUsername(), user.getNickname(),user.getDelivery_address(),user.getDetail_address());
+        UpdateDto updateDto = UpdateDto.of(user.getUsername(), user.getNickname(),user.getDeliveryAddress(),user.getDetailAddress());
         model.addAttribute(user);
         model.addAttribute(updateDto);
         return "users/update";

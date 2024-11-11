@@ -37,6 +37,14 @@ public class ProductService {
         return product;
     }
 
+    @Transactional
+    public Product findProductByIdWithLock(Long id) {
+        Product product =  productRepository.findById(id)
+                .orElseThrow(NotFoundProductException::new);
+        return product;
+    }
+
+
     @Transactional(rollbackFor = Exception.class)
     public Product createProduct(ProductCreateDto request, MultipartFile[] files, Category category) {
 

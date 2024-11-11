@@ -1,5 +1,7 @@
-package com.JH.JhOnlineJudge.user.domain;
+package com.JH.JhOnlineJudge.user.admin.domain;
 
+import com.JH.JhOnlineJudge.user.domain.User;
+import com.JH.JhOnlineJudge.user.exception.AccessDeniedException;
 import com.JH.JhOnlineJudge.user.exception.LoginInvalidException;
 import com.JH.JhOnlineJudge.user.repository.UserRepository;
 import com.JH.JhOnlineJudge.utils.JwtUtil;
@@ -19,14 +21,14 @@ import java.util.Arrays;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class AuthUserResolver implements HandlerMethodArgumentResolver {
+public class AdminResolver implements HandlerMethodArgumentResolver {
 
      private final UserRepository userRepository;
      private final JwtUtil jwtUtil;
 
     @Override
      public boolean supportsParameter(MethodParameter parameter) {
-          return  parameter.hasParameterAnnotation(AuthUser.class) &&
+          return  parameter.hasParameterAnnotation(Admin.class) &&
                   parameter.getParameterType().equals(Long.class);
      }
 
@@ -35,17 +37,24 @@ public class AuthUserResolver implements HandlerMethodArgumentResolver {
                                   ModelAndViewContainer mavContainer,
                                   NativeWebRequest webRequest,
                                   WebDataBinderFactory binderFactory) {
-        HttpServletRequest request = (HttpServletRequest) webRequest.getNativeRequest();
-        String role = (String) request.getAttribute("userStatus");
 
-        if(role.equals("NOT_LOGIN")){
+        Cookie[] cookies = ((HttpServletRequest) webRequest.getNativeRequest()).getCookies();
+        if(cookies == null) {
             throw new LoginInvalidException();
         }
 
-        String username =  (String) request.getAttribute("username");
+        Cookie token = Arrays.stream(cookies).filter(cookie -> cookie.getName().equals("accessToken"))
+                       .findAny()
+                       .orElseThrow(LoginInvalidException::new);
+
+        if(jwtUtil.isInvalidToken(token.getValue())) { throw new LoginInvalidException();}
+        String username = jwtUtil.getUsername(token.getValue());
         User user = userRepository.findByUsername(username)
                 .orElseThrow(LoginInvalidException::new);
-        log.info("authentication userId: {}", user.getId());
+        if(user.getRole().equals("관리자")){
+            throw new AccessDeniedException();
+        }
+        log.info("관리자 계정 로그인: {}", user.getId());
         return user.getId();
 
     }

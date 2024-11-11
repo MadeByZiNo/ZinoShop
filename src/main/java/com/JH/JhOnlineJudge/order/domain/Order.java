@@ -26,18 +26,18 @@ public class Order {
     @Column(name = "order_id")
     private Long id;
 
-    @Column(unique = true, nullable = false)
-    private String orderId;
+    @Column(name="external_id", unique = true, nullable = false)
+    private String externalId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @Column(nullable = false)
-    private LocalDateTime order_at;
+    @Column(name="order_at", nullable = false)
+    private LocalDateTime orderAt;
 
-    @Column(nullable = true)
-    private LocalDateTime delivered_at;
+    @Column(name="delivered_at", nullable = true)
+    private LocalDateTime deliveredAt;
 
     @Column(nullable = false)
     private String name;
@@ -46,53 +46,53 @@ public class Order {
     @Enumerated(EnumType.STRING)
     private OrderStatus status;
 
-    @Column(nullable = true)
+    @Column(name="payment_key", nullable = true)
     private String paymentKey;
 
-    @Column(nullable = false)
-    private int total_price;
+    @Column(name="total_price",nullable = false)
+    private int totalPrice;
 
-    @Column(nullable = false)
-    private int discounted_price;
+    @Column(name="discounted_price",nullable = false)
+    private int discountedPrice;
 
-    @Column(nullable = false)
-    private int final_price;
+    @Column(name="final_price",nullable = false)
+    private int finalPrice;
 
-    @Column(nullable = false, length = 50)
-    private String recipient_name;
+    @Column(name="recipient_name",nullable = false, length = 50)
+    private String recipientName;
 
-    @Column(nullable = false, length = 255)
-    private String recipient_address;
+    @Column(name="recipient_address",nullable = false, length = 255)
+    private String recipientAddress;
 
-    @Column(nullable = true, length = 50)
-    private String payment_method;
+    @Column(name="payment_method",nullable = true, length = 50)
+    private String paymentMethod;
 
     @Column(nullable = true, length = 100)
     private String memo;
 
-    @Column(nullable = false)
-    private String discount_info;
+    @Column(name="discount_info",nullable = false)
+    private String discountInfo;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderProduct> orderProducts = new ArrayList<>();
 
 
     @Builder
-   private Order (User user, OrderSaveDto orderSaveDto, List<CartProduct> cartProducts) {
-        this.orderId = UUID.randomUUID().toString();
+    private Order (User user, OrderSaveDto orderSaveDto, List<CartProduct> cartProducts) {
+        this.externalId = UUID.randomUUID().toString();
         this.user = user;
         this.name = cartProducts.get(0).getProduct().getName();
         if(cartProducts.size()>1) {
             this.name += " 외 " + (cartProducts.size() - 1) + "개";
         }
-        this.order_at = LocalDateTime.now();
+        this.orderAt = LocalDateTime.now();
         this.status = OrderStatus.결제전;
-        this.recipient_name = orderSaveDto.getRecipientName();
-        this.recipient_address = orderSaveDto.getDeliveryAddress() + " " + orderSaveDto.getDetailAddress();
-        this.total_price = CartProduct.sumPricesFromList(cartProducts);
-        this.discounted_price = orderSaveDto.getDiscountedPrice();
-        this.final_price = CartProduct.sumPricesFromList(cartProducts) - orderSaveDto.getDiscountedPrice();
-        this.discount_info = orderSaveDto.getDiscountInfo();
+        this.recipientName = orderSaveDto.getRecipientName();
+        this.recipientAddress = orderSaveDto.getDeliveryAddress() + " " + orderSaveDto.getDetailAddress();
+        this.totalPrice = CartProduct.sumPricesFromList(cartProducts);
+        this.discountedPrice = orderSaveDto.getDiscountedPrice();
+        this.finalPrice = CartProduct.sumPricesFromList(cartProducts) - orderSaveDto.getDiscountedPrice();
+        this.discountInfo = orderSaveDto.getDiscountInfo();
         this.memo = orderSaveDto.getMemo();
 
    }
@@ -105,8 +105,8 @@ public class Order {
                .build();
     }
 
-    public void updateConfirm(String payment_method, String paymentKey) {
-        this.payment_method = payment_method;
+    public void updateConfirm(String paymentMethod, String paymentKey) {
+        this.paymentMethod = paymentMethod;
         this.paymentKey = paymentKey;
         this.status = OrderStatus.결제완료;
     }
@@ -114,5 +114,9 @@ public class Order {
     public void updateCancel() {
         this.status = OrderStatus.취소;
     }
+
+    public void updateStatus(OrderStatus orderStatus) {
+            this.status = orderStatus;
+        }
 
 }

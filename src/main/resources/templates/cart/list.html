@@ -83,64 +83,60 @@
     </style>
     <script type="text/javascript" th:inline="javascript">
 
+  var updateQuantity = function(productId, isIncrease) {
+        const quantityElement = $(`#quantity-${productId}`);
+        const totalPriceElement = $(`#total-price-${productId}`);
+        const productPriceElement = $(`#product-price-${productId}`);
+        const priceElement = $('#price');
 
-        var decreaseQuantity = function(productId) {
-           const quantityElement = document.getElementById(`quantity-${productId}`);
-           const totalPriceElement = document.getElementById(`total-price-${productId}`);
-           const productPriceElement = document.getElementById(`product-price-${productId}`);
-           const priceElement  = document.getElementById(`price`);
+        let quantity = parseInt(quantityElement.text(), 10);
+        const productPrice = parseInt(productPriceElement.text(), 10);
+        let price = parseInt(priceElement.text(), 10);
 
-            let quantity = parseInt(quantityElement.textContent, 10);
-            let productPrice = parseInt(productPriceElement.textContent, 10);
-            let price = parseInt(priceElement.textContent, 10);
-            if (quantity > 1) {
-                quantity--;
-                quantityElement.textContent = quantity;
-
-
-            const newTotalPrice = productPrice * quantity;
-            totalPriceElement.textContent = newTotalPrice;
-
-            const newPrice = price - productPrice;
-            priceElement.textContent = newPrice;
-                fetch(`/cart/update-quantity`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ productId: productId, quantity: quantity })
-                }).catch(error => console.error('Error:', error));
-            }
+        // 수량 업데이트
+        if (isIncrease && quantity < 99) {
+            quantity++;
+        } else if (!isIncrease && quantity > 1) {
+            quantity--;
+        } else {
+            return; // 수량이 1 미만이거나 99 초과하면 아무것도 하지 않음
         }
 
-        var increaseQuantity = function(productId) {
-            const quantityElement = document.getElementById(`quantity-${productId}`);
-            const totalPriceElement = document.getElementById(`total-price-${productId}`);
-            const productPriceElement = document.getElementById(`product-price-${productId}`);
-            const priceElement  = document.getElementById(`price`);
+        quantityElement.text(quantity); // 화면의 수량을 변경된 값으로 업데이트
 
-            let quantity = parseInt(quantityElement.textContent, 10);
-            let productPrice = parseInt(productPriceElement.textContent, 10);
-            let price = parseInt(priceElement.textContent, 10);
-            if (quantity < 99) {
-                quantity++;
-                quantityElement.textContent = quantity;
+        // 총 가격 업데이트
+        const newTotalPrice = productPrice * quantity;
+        totalPriceElement.text(newTotalPrice);
 
-                const newTotalPrice = productPrice * quantity;
-                totalPriceElement.textContent = newTotalPrice;
+        // 전체 가격 업데이트
+        const newPrice = price + (isIncrease ? productPrice : -productPrice);
+        priceElement.text(newPrice);
 
-                const newPrice = price + productPrice;
-                priceElement.textContent = newPrice;
-
-                fetch(`/cart/update-quantity`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ productId: productId, quantity: quantity })
-                }).catch(error => console.error('Error:', error));
+        // 서버에 업데이트된 수량 전송
+        $.ajax({
+            url: '/cart/update-quantity',
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({ productId: productId, quantity: quantity }),
+            success: function(response) {
+                // 서버에서 성공적으로 처리된 후 추가 작업이 필요하면 여기에 작성
+                console.log('Quantity updated successfully');
+            },
+            error: function(error) {
+                console.error('Error updating quantity:', error);
             }
-        }
+        });
+    }
+
+    // 수량 감소
+    var decreaseQuantity = function(productId) {
+        updateQuantity(productId, false);
+    }
+
+    // 수량 증가
+    var increaseQuantity = function(productId) {
+        updateQuantity(productId, true);
+    }
     </script>
 </head>
 <body>
@@ -180,14 +176,14 @@
                           th:text="${cartProduct.product.price} * ${cartProduct.quantity}">총 가격</span>
                 </td>
                 <td>
-                    <form action="/cart/remove" method="post">
+                    <form action="/cart/remove-product" method="post">
                         <input type="hidden" th:value="${cartProduct.product.id}" name="productId">
                         <button type="submit" class="btn btn-primary">삭제</button>
                     </form>
                 </td>
-                <tr th:if="${cartProduct.product.state == '품절'}">
-                    <td colspan="6" class="out-of-stock" style="color: red;">품절</td>
-                </tr>
+                <td th:if="${cartProduct.product.state.toString() == '품절'}" colspan="6" style="color: red; text-align: center;">
+                      품절
+                </td>
             </tr>
         </tbody>
     </table>
@@ -197,9 +193,12 @@
     </div>
 
     <div class="checkout">
-           <form th:action="@{/order}" method="get">
-               <button type="submit" class="btn btn-primary" th:disabled="${#lists.isEmpty(cartProducts) || cartProduct.product.state == '품절'}">구매하기</button>
-           </form>
+        <form th:action="@{/order/page}" method="get">
+            <button type="submit" class="btn btn-primary"
+                    th:disabled="${isCartEmpty || isAnyProductOutOfStock}">
+                구매하기
+            </button>
+        </form>
     </div>
 </div>
 

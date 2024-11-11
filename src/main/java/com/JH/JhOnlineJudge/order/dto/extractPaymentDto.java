@@ -8,7 +8,7 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 public class extractPaymentDto {
-        private String orderId;
+        private String externalId;
         private String paymentKey;
         private String method;
 }

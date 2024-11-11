@@ -67,7 +67,6 @@ public class Product {
         if(remain < 1) {
             this.state = ProductState.품절;
         }
-
         attachCategory(category);
     }
 
@@ -85,6 +84,9 @@ public class Product {
 
     public void updateRemain(int value) {
         this.remain += value;
+        if(remain <= 0) {
+            this.state = ProductState.품절;
+        }
     }
 
     public void attachCategory(Category category) {

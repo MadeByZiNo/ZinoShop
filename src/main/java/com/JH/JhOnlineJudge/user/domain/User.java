@@ -28,14 +28,14 @@ public class User {
     @Column(nullable = false, unique = true)
     private String nickname;
 
-    @Column(nullable = true)
-    private String delivery_address;
+    @Column(name="delivery_address", nullable = true)
+    private String deliveryAddress;
 
-    @Column(nullable = true)
-    private String detail_address;
+    @Column(name="detail_address",nullable = true)
+    private String detailAddress;
 
-    @Column(nullable = false)
-    private int reward_points;
+    @Column(name="reward_points",nullable = false)
+    private int rewardPoints;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -48,47 +48,48 @@ public class User {
     private Cart cart;
 
     @Builder
-    public User(String username, String password, String nickname, String delivery_address, String detail_address, int reward_points, UserRole role) {
+    public User(String username, String password, String nickname, String deliveryAddress, String detailAddress, int rewardPoints, UserRole role) {
         this.username = username;
         this.password = password;
         this.nickname = nickname;
-        this.delivery_address = delivery_address;
-        this.detail_address = detail_address;
-        this.reward_points = reward_points;
+        this.deliveryAddress = deliveryAddress;
+        this.detailAddress = detailAddress;
+        this.rewardPoints = rewardPoints;
         this.role = role;
     }
 
 
-    public static User of(String username, String password, String nickname, String delivery_address, String detail_address, int reward_points, UserRole role) {
+    public static User of(String username, String password, String nickname, String deliveryAddress, String detailAddress, int rewardPoints, UserRole role) {
         return User.builder()
                 .username(username)
                 .password(password)
                 .nickname(nickname)
-                .delivery_address(delivery_address)
-                .detail_address(detail_address)
-                .reward_points(reward_points)
+                .deliveryAddress(deliveryAddress)
+                .detailAddress(detailAddress)
+                .rewardPoints(rewardPoints)
                 .role(role)
                 .build();
     }
 
     public void update(UpdateDto updateDto) {
         this.nickname = updateDto.getNickname();
-        this.delivery_address = updateDto.getDeliveryAddress();
-        this.detail_address = updateDto.getDetailAddress();
+        this.deliveryAddress = updateDto.getDeliveryAddress();
+        this.detailAddress = updateDto.getDetailAddress();
     }
 
     public void updateWithPassword(UpdateDto updateDto) {
           this.nickname = updateDto.getNickname();
-          this.delivery_address = updateDto.getDeliveryAddress();
-          this.detail_address = updateDto.getDetailAddress();
+          this.deliveryAddress = updateDto.getDeliveryAddress();
+          this.detailAddress = updateDto.getDetailAddress();
           this.password = updateDto.getNewPassword();
       }
 
       public int updateRewardPoints(Order order){
-            this.reward_points -= order.getDiscounted_price();
-            this.reward_points += order.getFinal_price() * 0.2;
-            return  (int)(order.getFinal_price() * 0.2);
+            this.rewardPoints -= order.getDiscountedPrice();
+            this.rewardPoints += order.getFinalPrice() * 0.02;
+            return  (int)(order.getFinalPrice() * 0.02);
       }
+
     public void attachCart(Cart cart){
         this.cart = cart;
     }

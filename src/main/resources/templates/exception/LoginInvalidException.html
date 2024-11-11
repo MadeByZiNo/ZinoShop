@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.w3.org/1999/xhtml"
+      layout:decorate="layout/default_layout">
+<head>
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        window.onload = function () {
+            setTimeout(function () {
+                window.location.href = '/users/login';
+            }, 1);
+        };
+        /*]]>*/
+    </script>
+</head>
+<body>
+<div layout:fragment="content">
+</div>
+</body>
+</html>

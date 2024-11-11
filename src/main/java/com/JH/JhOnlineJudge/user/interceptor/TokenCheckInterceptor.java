@@ -44,21 +44,22 @@ public class TokenCheckInterceptor implements HandlerInterceptor {
             // 엑세스만 만료되어있으면 토큰 재발급
             String username = jwtUtil.getUsername(refreshToken);
             String nickname = jwtUtil.getNickname(refreshToken);
-            accessToken = jwtUtil.generateAccessToken(username, nickname);
-            refreshToken = jwtUtil.generateRefreshToken(username, nickname);
+            UserRole role = jwtUtil.getRole(refreshToken);
+            accessToken = jwtUtil.generateAccessToken(username, nickname, role);
+            refreshToken = jwtUtil.generateRefreshToken(username, nickname, role);
 
             addJwtToken(response, accessToken, refreshToken);
         }
 
         request.setAttribute("username", jwtUtil.getUsername(refreshToken));
         request.setAttribute("nickname",jwtUtil.getNickname(refreshToken));
+        request.setAttribute("userStatus", jwtUtil.getRole(refreshToken).name());
         return true;
     }
 
     @Override
     public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler,
             ModelAndView modelAndView) throws Exception {
-
         if (modelAndView != null) {
             String nickname = (String) request.getAttribute("nickname");
             modelAndView.addObject("nickname",nickname);

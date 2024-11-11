@@ -52,13 +52,13 @@
                     </div>
                     <div class="mb-3 rounded">
                         <label for="deliveryAddress" class="form-label">배송 주소</label>
-                        <input type="text" class="form-control" id="deliveryAddress" th:field="*{deliveryAddress}" th:value="${user.delivery_address}" th:errorclass="field-error" readonly>
+                        <input type="text" class="form-control" id="deliveryAddress" th:field="*{deliveryAddress}" th:value="${user.deliveryAddress}" th:errorclass="field-error" readonly>
                         <button type="button" class="btn btn-light" id="searchAddressBtn" onclick="findAddr()">주소 검색</button>
                         <div class="field-error" th:errors="*{deliveryAddress}"></div>
                     </div>
                     <div class="mb-3 rounded">
                         <label for="detailAddress" class="form-label">상세 주소</label>
-                        <input type="text" class="form-control" id="detailAddress" th:field="*{detailAddress}" th:value="${user.detail_address}" th:errorclass="field-error">
+                        <input type="text" class="form-control" id="detailAddress" th:field="*{detailAddress}" th:value="${user.detailAddress}" th:errorclass="field-error">
                         <div class="field-error" th:errors="*{detailAddress}"></div>
                     </div>
                     <div class="mb-3 rounded">

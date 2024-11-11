@@ -3,12 +3,16 @@ package com.JH.JhOnlineJudge.order.service;
 import com.JH.JhOnlineJudge.common.CartProduct.CartProduct;
 import com.JH.JhOnlineJudge.common.OrderProduct.OrderProduct;
 import com.JH.JhOnlineJudge.order.domain.Order;
+import com.JH.JhOnlineJudge.order.domain.OrderStatus;
 import com.JH.JhOnlineJudge.order.dto.OrderConfirmDto;
 import com.JH.JhOnlineJudge.order.dto.OrderSaveDto;
 import com.JH.JhOnlineJudge.order.dto.extractPaymentDto;
+import com.JH.JhOnlineJudge.order.exception.InsufficientRemainException;
 import com.JH.JhOnlineJudge.order.exception.NotFoundOrderException;
 import com.JH.JhOnlineJudge.order.repository.OrderRepository;
 import com.JH.JhOnlineJudge.product.domain.Product;
+import com.JH.JhOnlineJudge.product.service.ProductService;
+import com.JH.JhOnlineJudge.user.admin.dto.DeliverySearchFilterDto;
 import com.JH.JhOnlineJudge.user.domain.User;
 import com.JH.JhOnlineJudge.user.exception.InvalidRewardPointsException;
 import com.JH.JhOnlineJudge.user.service.UserService;
@@ -30,6 +34,7 @@ import java.util.Map;
 public class OrderService {
 
     private final UserService userService;
+    private final ProductService productService;
     private final OrderRepository orderRepository;
     private final RestTemplate restTemplate;
 
@@ -37,10 +42,26 @@ public class OrderService {
      private String SECRET_KEY;
 
     @Transactional
-    public Order findByOrderId(String orderId) {
-        Order order = orderRepository.findByOrderId(orderId)
+    public Order findById(Long id) {
+        Order order = orderRepository.findById(id)
+                        .orElseThrow(NotFoundOrderException::new);
+                return order;
+    }
+
+    @Transactional
+    public Order findByExternalId(String externalId) {
+        Order order = orderRepository.findByExternalId(externalId)
                 .orElseThrow(NotFoundOrderException::new);
         return order;
+    }
+
+
+    @Transactional
+    public List<Order> findByStatusAndSearchText(DeliverySearchFilterDto deliverySearchFilterDto) {
+        List<Order> searchOrders = orderRepository.findByStatusAndSearchText(
+              deliverySearchFilterDto.getStatus().equals("") ? null : OrderStatus.valueOf(deliverySearchFilterDto.getStatus()),
+              deliverySearchFilterDto.getSearch());
+        return searchOrders;
     }
 
     @Transactional
@@ -50,16 +71,25 @@ public class OrderService {
 
         User user = userService.findUserById(userId);
 
-        if(orderSaveDto.getDiscountedPrice() > user.getReward_points() || orderSaveDto.getDiscountedPrice() < 0) {
+        if(orderSaveDto.getDiscountedPrice() > user.getRewardPoints() || orderSaveDto.getDiscountedPrice() < 0) {
             throw new InvalidRewardPointsException();
         }
 
         Order order = Order.of(user, orderSaveDto, cartProducts);
 
        for (CartProduct cartProduct : cartProducts) {
-           Product product = cartProduct.getProduct();
+           Product product = productService.findProductByIdWithLock(cartProduct.getProduct().getId());
            int quantity = cartProduct.getQuantity();
            int price = product.getPrice();
+
+          if (product.getRemain() <= 0 || product.getState().equals("품절")) {
+              throw new InsufficientRemainException("품절 된 상품입니다."); // 재고 부족 예외 발생
+          }
+
+          // 주문 수량이 재고 수량보다 많을 경우 예외 처리
+          if (product.getRemain() < quantity) {
+              throw new InsufficientRemainException("재고 수량보다 많은 구매 요청을 하셨습니다."); // 재고 부족 예외 발생
+          }
 
            OrderProduct orderProduct = OrderProduct.of(order,product,quantity,price);
            orderProduct.attachOrder(order);
@@ -67,29 +97,44 @@ public class OrderService {
        orderRepository.save(order);
 
        Map<String ,Object> map = new HashMap<>();
-       map.put("orderId", order.getOrderId());
-       map.put("amount", order.getFinal_price());
+       map.put("externalId", order.getExternalId());
+       map.put("amount", order.getFinalPrice());
        map.put("orderName",order.getName());
-       map.put("recipient_name",order.getRecipient_name());
+       map.put("recipientName",order.getRecipientName());
        return map;
     }
 
+    @Transactional(rollbackFor = Exception.class)
     public Map<String, Object> confirmPaymentAndUpdate(Long userId, OrderConfirmDto orderConfirmDto) {
 
-         ResponseEntity<String> response = requestPaymentConfirmation(orderConfirmDto);
+        //재고 확인
+         Order order = findByExternalId(orderConfirmDto.getExternalId());
+          for (OrderProduct orderProduct : order.getOrderProducts()) {
+              Product product = productService.findProductByIdWithLock(orderProduct.getProduct().getId());
 
+              if (product.getRemain() <= 0 || product.getState().equals("품절")) {
+                         throw new InsufficientRemainException("품절 된 상품입니다."); // 재고 부족 예외 발생
+              }
+
+              if (product.getRemain() < orderProduct.getQuantity()) {
+                  throw new InsufficientRemainException("재고 수량보다 많은 구매 요청을 하셨습니다."); // 재고 부족 예외 발생
+              }
+          }
+
+          // 결제 확정 요청 후 정보 추출
+         ResponseEntity<String> response = requestPaymentConfirmation(orderConfirmDto);
          extractPaymentDto paymentInfo = extractPaymentInfo(response.getBody());
 
-         Order order = findByOrderId(paymentInfo.getOrderId());
+         // 결제 확정 처리
          order.updateConfirm(paymentInfo.getPaymentKey(), paymentInfo.getMethod());
          updateProductRemain(order);
 
+         // 포인트 업데이트
          int point = userService.updateRewardPoints(userId, order);
 
          Map<String, Object> responseData = new HashMap<>();
          responseData.put("result", response.getStatusCode() == HttpStatus.OK);
          responseData.put("point", point);
-
          return responseData;
      }
 
@@ -112,7 +157,7 @@ public class OrderService {
 
           Map<String, Object> requestBody = Map.of(
               "paymentKey", orderConfirmDto.getPaymentKey(),
-              "orderId", orderConfirmDto.getOrderId(),
+              "orderId", orderConfirmDto.getExternalId(),
               "amount", orderConfirmDto.getAmount()
           );
 
@@ -129,13 +174,15 @@ public class OrderService {
     private extractPaymentDto extractPaymentInfo(String responseBody) {
           try {
               JsonNode jsonResponse = new ObjectMapper().readTree(responseBody);
-              String orderId = jsonResponse.get("orderId").asText();
+              String externalId = jsonResponse.get("orderId").asText();
               String paymentKey = jsonResponse.get("paymentKey").asText();
               String method = jsonResponse.get("method").asText();
 
-              return new extractPaymentDto(orderId, paymentKey, method);
+              return new extractPaymentDto(externalId, paymentKey, method);
           } catch (Exception e) {
               throw new RuntimeException("결제 정보 추출 실패", e);
           }
       }
+
+
 }

@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
+      layout:decorate="layout/default_layout">
+<head>
+    <style>
+        .container {
+            margin-top: 30px;
+        }
+        .filter-container, .table-container, .summary-container {
+            margin-bottom: 50px; /* 각 섹션 간격 조정 */
+        }
+        .summary-container {
+            font-weight: bold;
+        }
+        .btn-success {
+            margin-top: 10px;
+        }
+    </style>
+
+    <script>
+        $(document).ready(function() {
+            $('#filterForm').submit(function(event) {
+                event.preventDefault(); // 기본 폼 제출 막기
+
+                const filterData = {
+                    status: $('#status').val(),
+                    search: $('#search').val()
+                };
+                $.ajax({
+                    url: '/admin/deliveries',
+                    type: 'GET',
+                    data: filterData,
+                    success: function(deliveries) {
+                        const tableBody = $('#deliveryTableBody');
+                        tableBody.empty();
+                        let totalPrice = 0;
+
+                        deliveries.forEach(delivery => {
+                            const row = `
+                                <tr>
+                                    <td><input type="checkbox" class="rowCheckbox" value=${delivery.orderId}></td>
+                                    <td>${delivery.name}</td>
+                                    <td>${delivery.username}</td>
+                                    <td>${delivery.price.toLocaleString()}</td>
+                                    <td>${delivery.status}</td>
+                                    <td>${delivery.recipientName}</td>
+                                    <td>${delivery.recipientAddress}</td>
+                                    <td>${delivery.memo}</td>
+                                    <td>${delivery.orderAt}</td>
+                                </tr>
+                            `;
+                            tableBody.append(row);
+                            totalPrice += delivery.price;
+                        });
+                        $('.summary-container span').text(totalPrice.toLocaleString());
+                    }
+                });
+            });
+        });
+
+        $(document).ready(function() {
+            $('#selectAll').change(function() {
+                $('.rowCheckbox').prop('checked', $(this).prop('checked'));
+            });
+
+            $('#applyButton').click(function() {
+                const selectedStatus = $('#statusSelect').val();
+                if (!selectedStatus) {
+                    alert("변경할 상태를 선택하세요.");
+                    return;
+                }
+
+            const selectedDeliveries = [];
+            $('.rowCheckbox:checked').each(function() {
+                selectedDeliveries.push($(this).val());
+            });
+
+            if (selectedDeliveries.length === 0) {
+                alert("변경할 항목을 선택하세요.");
+                return;
+            }
+
+            $.ajax({
+                url: '/admin/deliveries',
+                type: 'PUT',
+                contentType: 'application/json',
+                data: JSON.stringify({
+                    deliveryIds: selectedDeliveries,
+                    status: selectedStatus
+                }),
+                success: function(response) {
+                    alert("상태가 성공적으로 변경되었습니다.");
+                    location.reload(); // 성공 후 페이지 새로고침
+                },
+                error: function() {
+                    alert("상태 변경에 실패했습니다.");
+                }
+            });
+        });
+    });
+    </script>
+
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="container">
+        <div class="container">
+            <h2 class="text-center">배달 관리</h2>
+
+                <div class="filter-container">
+                    <form id="filterForm" method="get">
+                        <div class="d-flex">
+                            <div class="col-md-4 px-1">
+                                <label for="status">카테고리</label>
+                                <select id="status" class="form-control" name="status">
+                                    <option value="">전체</option>
+                                    <option value="결제전">결제전</option>
+                                    <option value="결제완료">결제완료</option>
+                                    <option value="배송중">배송중</option>
+                                    <option value="배송완료">배송완료</option>
+                                    <option value="취소">취소</option>
+                                    <option value="환불">환불</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4 px-1">
+                                <label for="search">상품 검색</label>
+                                <input type="text" id="search" class="form-control" name="search" placeholder="수취자명, 주문id, 주소 등 입력">
+                            </div>
+                            <div class="col-md-4 d-flex align-items-end px-1">
+                                <button type="submit" class="btn btn-primary w-100">검색</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+            <!-- 표 섹션 -->
+            <div class="table-container">
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th><input type="checkbox" id="selectAll"></th>
+                            <th>주문 이름</th>
+                            <th>사용자 이름</th>
+                            <th>가격</th>
+                            <th>배송 상태</th>
+                            <th>받는 사람 이름</th>
+                            <th>받는 사람 주소</th>
+                            <th>메모</th>
+                            <th>주문 일자</th>
+                        </tr>
+                    </thead>
+                    <tbody id="deliveryTableBody">
+                    </tbody>
+                </table>
+            </div>
+
+
+            <div class="summary-container">
+                총 가격: <span>0</span> 원
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-end align-items-center mt-3">
+            <select id="statusSelect" class="form-select me-2" style="width: 200px; max-width: 100%; font-size: 0.9rem;">
+                <option value="">상태 선택</option>
+                <option value="결제전">결제전</option>
+                <option value="결제완료">결제완료</option>
+                <option value="배송중">배송중</option>
+                <option value="배송완료">배송완료</option>
+                <option value="취소">취소</option>
+                <option value="환불">환불</option>
+            </select>
+            <button id="applyButton" class="btn btn-success" style="font-size: 0.9rem; padding: 8px 16px;">적용</button>
+        </div>
+    </div>
+</div>
+</body>
+</html>

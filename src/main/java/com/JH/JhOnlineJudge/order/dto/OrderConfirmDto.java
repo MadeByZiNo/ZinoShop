@@ -7,6 +7,6 @@ import lombok.Setter;
 @Setter
 public class OrderConfirmDto {
     private String paymentKey;
-    private String orderId;
+    private String externalId;
     private int amount;
 }
