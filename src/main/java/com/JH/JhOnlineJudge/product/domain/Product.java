@@ -1,11 +1,10 @@
 package com.JH.JhOnlineJudge.product.domain;
 
-import com.JH.JhOnlineJudge.category.CategoryService;
 import com.JH.JhOnlineJudge.category.domain.Category;
 import com.JH.JhOnlineJudge.common.CartProduct.CartProduct;
+import com.JH.JhOnlineJudge.common.Image.ProductImage.ProductImage;
 import com.JH.JhOnlineJudge.heart.Heart;
 import com.JH.JhOnlineJudge.product.dto.ProductCreateDto;
-import com.JH.JhOnlineJudge.user.domain.UserRole;
 import jakarta.persistence.*;
 import lombok.*;
 

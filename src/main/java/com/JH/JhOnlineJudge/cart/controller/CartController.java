@@ -40,7 +40,7 @@ public class CartController {
                                    @RequestParam Long productId) {
            cartService.deleteProduct(userId,productId);
            return "redirect:/cart/page";
-       }
+    }
 
     @GetMapping("/page")
     public String getCartProducts(@AuthUser Long userId,

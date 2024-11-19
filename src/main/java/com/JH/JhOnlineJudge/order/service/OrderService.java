@@ -4,15 +4,14 @@ import com.JH.JhOnlineJudge.common.CartProduct.CartProduct;
 import com.JH.JhOnlineJudge.common.OrderProduct.OrderProduct;
 import com.JH.JhOnlineJudge.order.domain.Order;
 import com.JH.JhOnlineJudge.order.domain.OrderStatus;
-import com.JH.JhOnlineJudge.order.dto.OrderConfirmDto;
-import com.JH.JhOnlineJudge.order.dto.OrderSaveDto;
-import com.JH.JhOnlineJudge.order.dto.extractPaymentDto;
+import com.JH.JhOnlineJudge.order.dto.*;
 import com.JH.JhOnlineJudge.order.exception.InsufficientRemainException;
 import com.JH.JhOnlineJudge.order.exception.NotFoundOrderException;
 import com.JH.JhOnlineJudge.order.repository.OrderRepository;
 import com.JH.JhOnlineJudge.product.domain.Product;
 import com.JH.JhOnlineJudge.product.service.ProductService;
 import com.JH.JhOnlineJudge.user.admin.dto.DeliverySearchFilterDto;
+import com.JH.JhOnlineJudge.user.domain.AuthUser;
 import com.JH.JhOnlineJudge.user.domain.User;
 import com.JH.JhOnlineJudge.user.exception.InvalidRewardPointsException;
 import com.JH.JhOnlineJudge.user.service.UserService;
@@ -23,11 +22,13 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -149,7 +150,21 @@ public class OrderService {
             });
     }
 
+    @Transactional
+    public List<Order> findOrdersByUserId(Long userId) {
+        return orderRepository.findByUserId(userId);
+    }
 
+    @Transactional
+    public List<MyOrdersDto> getMyOrderDtoList(Long userId) {
+        List<Order> orders = findOrdersByUserId(userId);
+        List<MyOrdersDto> dtoList = orders.stream()
+                .map(order -> MyOrdersDto.of(order.getExternalId(), order.getOrderAt(), order.getName(), order.getStatus(), order.getRecipientName(),
+                        order.getRecipientAddress(), order.getTotalPrice()))
+                .collect(Collectors.toList());
+        return dtoList;
+    }
+    @Transactional
     private ResponseEntity<String> requestPaymentConfirmation(OrderConfirmDto orderConfirmDto) {
           HttpHeaders headers = new HttpHeaders();
           headers.setBasicAuth(SECRET_KEY, "");
@@ -170,6 +185,23 @@ public class OrderService {
               String.class
           );
       }
+
+
+      @Transactional
+      public OrderDetailRequestDto getOrderDetailRequestDto(Long orderId) {
+          Order order = findById(orderId);
+          List<OrderProductDetailDto> products = order.getOrderProducts()
+              .stream()
+              .map(orderProduct -> new OrderProductDetailDto(
+                  orderProduct.getProduct().getName(),
+                  orderProduct.getQuantity(),
+                  orderProduct.getProduct().getPrice()))
+              .collect(Collectors.toList());
+
+         OrderDetailRequestDto dto=  OrderDetailRequestDto.of(order,products);
+         return dto;
+      }
+
 
     private extractPaymentDto extractPaymentInfo(String responseBody) {
           try {

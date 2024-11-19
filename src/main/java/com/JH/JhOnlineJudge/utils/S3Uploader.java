@@ -1,7 +1,6 @@
-package com.JH.JhOnlineJudge.product.service;
+package com.JH.JhOnlineJudge.utils;
 
-import com.JH.JhOnlineJudge.product.exception.S3FileUploadException;
-import com.amazonaws.services.s3.AmazonS3;
+import com.JH.JhOnlineJudge.exception.S3FileUploadException;
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.PutObjectRequest;
@@ -13,9 +12,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.net.URL;
-import java.net.URLDecoder;
 import java.util.UUID;
 
 @Slf4j

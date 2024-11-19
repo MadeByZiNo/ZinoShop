@@ -33,7 +33,7 @@ public class Order {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @Column(name="order_at", nullable = false)
+    @Column(name="order_at", nullable = false, updatable = false)
     private LocalDateTime orderAt;
 
     @Column(name="delivered_at", nullable = true)

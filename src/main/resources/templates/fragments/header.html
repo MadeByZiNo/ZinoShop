@@ -5,6 +5,37 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link href="/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        /* 링크 hover 효과 */
+        a.nav-link:hover {
+            color: #007bff; /* 부드러운 파란색 */
+            text-decoration: underline;
+        }
+
+        /* 버튼 hover 효과 */
+        .btn:hover {
+            background-color: #007bff; /* 파란색 배경 */
+            color: white; /* 흰색 텍스트 */
+            border-color: #0056b3; /* 어두운 파란색 테두리 */
+        }
+
+        /* 알림 아이콘 hover 효과 */
+        .notification-icon:hover {
+            color: #007bff; /* 파란색으로 강조 */
+            transform: scale(1.1); /* 살짝 확대 */
+        }
+
+        /* 알림 메시지 hover 효과 */
+        .notification-popup .unread:hover,
+        .notification-popup .read:hover {
+            background-color: #f1f1f1; /* 연한 회색 배경 */
+        }
+
+        /* 문의 링크 hover 효과 */
+        a:hover {
+            color: #0056b3; /* 어두운 파란색 */
+        }
+    </style>
 </head>
 <body>
 
@@ -21,22 +52,22 @@
                     <div class="collapse navbar-collapse ml-4" id="navbarText">
                         <ul class="navbar-nav me-auto mb-lg-0" style="white-space: nowrap;">
                             <li class="nav-item">
-                                <a class="nav-link active mx-5" aria-current="page" th:href="@{/product/list(category_id='1')}">상의</a>
+                                <a class="nav-link mx-5" aria-current="page" th:href="@{/product/list(category_id='1')}">상의</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link active mx-5" aria-current="page" th:href="@{/product/list(category_id='4')}">하의</a>
+                                <a class="nav-link mx-5" aria-current="page" th:href="@{/product/list(category_id='4')}">하의</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link active mx-5" aria-current="page" th:href="@{/product/list(category_id='7')}">아우터</a>
+                                <a class="nav-link mx-5" aria-current="page" th:href="@{/product/list(category_id='7')}">아우터</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link active mx-5" aria-current="page" th:href="@{/product/list(category_id='10')}">기타</a>
+                                <a class="nav-link mx-5" aria-current="page" th:href="@{/product/list(category_id='10')}">기타</a>
                             </li>
                         </ul>
                         <div th:if="${userStatus eq 'NOT_LOGIN'}">
                             <span class="navbar-text">
                                 <form action="/users/login" method="get" class="form-inline">
-                                    <button type="submit" class="btn login-btn">로그인</button>
+                                    <button type="submit" class="btn login-btn" style="white-space: nowrap;">로그인</button>
                                 </form>
                             </span>
                         </div>
@@ -44,7 +75,6 @@
                             <nav class="user-nav" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px;">
                                 <p th:text="${nickname} + '님 안녕하세요'" class="welcome-text" style="font-size: 18px; font-weight: bold; text-align: center;"></p>
                                 <div style="display: flex; gap: 20px; white-space: nowrap; align-items: center;">
-                                    <!-- 로그아웃, 장바구니, 마이페이지 버튼들 -->
                                     <form action="/users/logout" method="post" class="form-inline">
                                         <button type="submit" class="btn user-btn">로그아웃</button>
                                     </form>
@@ -54,35 +84,31 @@
                                     <form action="/users/mypage" method="get" class="form-inline">
                                         <button type="submit" class="btn user-btn">마이페이지</button>
                                     </form>
-
-                                    <!-- 알람 아이콘과 알림 팝업 -->
                                     <div style="position: relative;">
                                         <div class="notification-icon" style="cursor: pointer;" id="notificationIcon" onclick="toggleNotifications()">
                                             <i class="bi bi-bell" style="font-size: 24px;"></i>
                                             <span id="notificationCount" class="badge" style="position: absolute; top: -5px; right: -5px; background-color: red; color: white; font-size: 12px;"></span>
                                         </div>
-
-                                        <!-- 알림 내용 표시 팝업 -->
-                                        <div id="notificationPopup" class="notification-popup" style="display: none; position: absolute; background-color: white; border: 1px solid gray; padding: 20px; width: 300px; top: 40px; right: 0; box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);">
-                                            <!-- 알림 내용이 동적으로 추가될 예정 -->
+                                        <div id="notificationPopup" class="notification-popup">
+                                            <!-- 알림 내용 -->
                                         </div>
                                     </div>
                                 </div>
                             </nav>
                         </div>
                         <div th:if="${userStatus == '관리자'}">
-                           <nav class="user-nav">
-                               <p th:text="'관리자님 안녕하세요'" class="welcome-text" style="display: flex; justify-content: center;"></p>
-                               <div style="display: flex; justify-content: center; gap: 15px; white-space: nowrap;">
-                                   <form action="/users/logout" method="post" class="form-inline">
-                                       <button type="submit" class="btn user-btn">로그아웃</button>
-                                   </form>
-                                   <form action="/admin" method="get" class="form-inline">
-                                       <button type="submit" class="btn user-btn">관리자페이지</button>
-                                   </form>
-                               </div>
-                           </nav>
-                       </div>
+                            <nav class="user-nav">
+                                <p th:text="'관리자님 안녕하세요'" class="welcome-text" style="display: flex; justify-content: center;"></p>
+                                <div style="display: flex; justify-content: center; gap: 15px; white-space: nowrap;">
+                                    <form action="/users/logout" method="post" class="form-inline">
+                                        <button type="submit" class="btn user-btn">로그아웃</button>
+                                    </form>
+                                    <form action="/admin" method="get" class="form-inline">
+                                        <button type="submit" class="btn user-btn">관리자페이지</button>
+                                    </form>
+                                </div>
+                            </nav>
+                        </div>
                     </div>
                 </div>
             </div>

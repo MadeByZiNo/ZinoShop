@@ -34,13 +34,12 @@ public class HeartController {
         return ResponseEntity.ok(Collections.singletonMap("isFavorite", isHearted));
     }
 
-    // 카테고리에 따른 상품 리스트 페이지 보여주기
      @GetMapping("/page")
      public String getHeartListPage(@AuthUser Long userId,
                                    @RequestParam(value = "page", required = false, defaultValue = "1") int page,
                                    Model model) {
 
-         Page<Heart> hearts = heartService.getProductsPageByCategoryIds(userId, page);
+         Page<Heart> hearts = heartService.getHeartsPageByUserId(userId, page);
          model.addAttribute("hearts", hearts);
 
          int totalPages = hearts.getTotalPages();

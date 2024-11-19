@@ -1,0 +1,426 @@
+    <!DOCTYPE html>
+    <html xmlns:th="http://www.thymeleaf.org"
+          xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
+          layout:decorate="layout/default_layout">
+
+    <head>
+        <title>전체 리뷰 보기</title>
+        <style>
+
+       .review-item {
+          margin-bottom: 20px;
+          padding: 15px;
+          border: 1px solid #ddd;
+          border-radius: 5px;
+          background-color: #f9f9f9;
+      }
+
+      .review-author {
+          font-weight: bold;
+          font-size: 16px;
+      }
+
+      .review-content {
+          margin-top: 10px;
+          font-size: 14px;
+          color: #555;
+      }
+
+      .review-date {
+          margin-top: 5px;
+          font-size: 12px;
+          color: #888;
+      }
+
+         .review-item img {
+         max-width: 130px;
+         height: auto;
+         margin-top: 10px;
+         cursor: pointer;
+     }
+
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .page-item {
+            list-style: none;
+            display: inline-block;
+            margin: 0 5px;
+        }
+
+        .page-item a {
+            text-decoration: none;
+            padding: 5px 10px;
+            border: 1px solid #ddd;
+            color: #333;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .page-item a.active {
+            font-weight: bold;
+            background-color: #f0f0f0;
+            pointer-events: none;
+        }
+
+        .page-item a:hover {
+            background-color: #ddd;
+        }
+
+        .modal-nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            transform: translateY(-50%);
+        }
+
+        .modal-nav-buttons .btn {
+            background-color: rgba(0, 0, 0, 0.3);
+            color: white;
+            border: none;
+            margin: 8px 10px;
+            font-size: 1.5em;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-nav-buttons .btn:hover {
+            background-color: rgba(0, 0, 0, 0.6);
+        }
+
+        .modal-nav-buttons .btn.disabled {
+            visibility: hidden;
+        }
+
+        #review-list {
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+            justify-content: flex-start;
+            text-align: center;
+            padding: 20px;
+        }
+
+        #review-pagination {
+            display: flex;
+            justify-content: center; /* 중앙 정렬 */
+            margin-top: 20px;
+        }
+
+        #page-buttons {
+            display: flex;
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+           #modalImages img {
+           max-width: 50%;
+           margin-bottom: 10px;
+           display: block;
+           border-radius: 5px;
+       }
+
+       #imageModal {
+           position: fixed;
+           top: 0;
+           left: 0;
+           right: 0;
+           bottom: 0;
+           background-color: rgba(0, 0, 0, 0.8);
+           display: none;
+           justify-content: center;
+           align-items: center;
+           z-index: 9999;
+           overflow: hidden;
+       }
+
+       #modalContent {
+           background-color: white;
+           padding: 20px;
+           border-radius: 10px;
+           max-width: 80%;
+           max-height: 80%;
+           overflow-y: auto;
+           position: relative;
+       }
+
+       #closeModal {
+           position: absolute;
+           top: 9px;
+           right: 9px;
+           font-size: 10px;
+           cursor: pointer;
+           background-color: #6c757d; /* 부드러운 회색 */
+           border: none;
+           border-radius: 50%;
+           width: 18px;
+           height: 18px;
+           display: flex;
+           justify-content: center;
+           align-items: center;
+           color: white;
+       }
+
+       #closeModal:hover {
+           background-color: #5a6268; /* 클릭 시 어두운 회색 */
+       }
+
+       .modal-nav-buttons {
+           display: flex;
+           justify-content: space-between;
+           position: absolute;
+           top: 50%;
+           left: 0;
+           right: 0;
+           transform: translateY(-50%);
+       }
+
+       .modal-nav-buttons .btn {
+           background-color: rgba(0, 0, 0, 0.3); /* 반투명 배경 */
+           color: white;
+           border: none;
+           margin: 8px 10px;
+           font-size: 1.5em;
+           border-radius: 50%; /* 둥근 버튼 */
+           cursor: pointer;
+           transition: background-color 0.3s ease;
+           width: 30px;
+           height: 30px;
+           display: flex;
+           justify-content: center;
+           align-items: center;
+       }
+
+       .modal-nav-buttons .btn:hover {
+           background-color: rgba(0, 0, 0, 0.6);
+       }
+
+       .modal-nav-buttons .btn.disabled {
+           visibility: hidden;
+       }
+    </style>
+
+
+        <script>
+            let currentPage = 0;
+            let totalPages = 0;
+
+            const productId = [[${product.id}]];
+
+            function loadReviews(page) {
+                currentPage = page;
+                fetch(`/review/custom?productId=${productId}&page=${page}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        totalPages = data.totalPages;
+                        renderReviews(data.content);
+                        renderPagination();
+                    })
+                    .catch(error => console.error('Error loading reviews:', error));
+            }
+
+            function renderReviews(reviews) {
+                const reviewListContainer = document.getElementById('review-list');
+                reviewListContainer.innerHTML = '';
+
+                if (reviews.length === 0) {
+                        // 리뷰가 없을 때 메시지 표시
+                        const emptyMessage = document.createElement('div');
+                        emptyMessage.textContent = "작성된 리뷰가 없습니다.";
+                        emptyMessage.style.textAlign = "center";
+                        emptyMessage.style.color = "gray";
+                        emptyMessage.style.position = "absolute";
+                        emptyMessage.style.top = "50%";
+                        emptyMessage.style.left = "50%";
+                        emptyMessage.style.transform = "translate(-50%, -50%)";
+                        reviewListContainer.appendChild(emptyMessage);
+                        return;
+                    }
+
+                reviews.forEach(review => {
+                    const reviewDiv = document.createElement('div');
+                    reviewDiv.classList.add('review-item');
+                    const createdAt = new Date(review.createdAt);
+                    const formattedDate = createdAt.toISOString().slice(0, 16).replace('T', ' ');
+
+                    let reviewContent =`
+                        <div class="review-author">${review.nickname}</div>
+                        <div class="review-date">${formattedDate}</div>
+                        <div class="review-content">${review.content}</div>
+                    `;
+
+                    if (review.imageUrl) {
+                        reviewContent += `<img src="${review.imageUrl}" alt="Review Image" onclick="openImageModal('${review.id}')">`;
+                    }
+
+                    reviewDiv.innerHTML = reviewContent;
+                    reviewListContainer.appendChild(reviewDiv);
+                });
+            }
+
+          function renderPagination() {
+              const pageButtonsContainer = document.getElementById('page-buttons');
+              pageButtonsContainer.innerHTML = '';
+
+              const startPage = Math.floor(currentPage / 5) * 5;
+              const endPage = Math.min(startPage + 4, totalPages - 1);
+
+              // 이전 페이지 구간 버튼
+              if (startPage > 0) {
+                  const prevButton = document.createElement('li');
+                  prevButton.classList.add('page-item');
+                  const prevLink = document.createElement('a');
+                  prevLink.innerText = '이전';
+                  prevLink.href = "#";
+                  prevLink.onclick = function() { loadReviews(startPage - 5); };
+                  prevButton.appendChild(prevLink);
+                  pageButtonsContainer.prepend(prevButton);
+              }
+
+              // 페이지 버튼 생성
+              for (let i = startPage; i <= endPage; i++) {
+                  const pageButton = document.createElement('li');
+                  pageButton.classList.add('page-item');
+                  const pageLink = document.createElement('a');
+                  pageLink.innerText = i + 1;
+                  pageLink.href = "#";
+                  pageLink.onclick = function() { loadReviews(i); };
+                  if (i === currentPage) {
+                      pageLink.classList.add('active');
+                  }
+                  pageButton.appendChild(pageLink);
+                  pageButtonsContainer.appendChild(pageButton);
+              }
+
+              // 다음 페이지 구간 버튼
+              if (endPage < totalPages - 1) {
+                  const nextButton = document.createElement('li');
+                  nextButton.classList.add('page-item');
+                  const nextLink = document.createElement('a');
+                  nextLink.innerText = '다음';
+                  nextLink.href = "#";
+                  nextLink.onclick = function() { loadReviews(endPage + 1); };
+                  nextButton.appendChild(nextLink);
+                  pageButtonsContainer.appendChild(nextButton);
+              }
+          }
+
+
+            // 이미지 모달 관련 코드
+
+            let currentImageIndex = 0;
+            let imageUrls = [];
+
+            function openImageModal(reviewId) {
+              const modal = document.getElementById('imageModal');
+              const modalImages = document.getElementById('modalImages');
+
+              modal.style.display = 'flex';
+              document.body.style.overflow = 'hidden'; // 페이지 스크롤 비활성화
+
+              fetch(`/review/images?reviewId=${reviewId}`)
+                  .then(response => response.json())
+                  .then(data => {
+                      imageUrls = data;
+                      currentImageIndex = 0; // 초기화
+                      updateModalImage();
+                  })
+                  .catch(error => console.error('Error loading images:', error));
+              }
+
+            function closeImageModal() {
+                const modal = document.getElementById('imageModal');
+                modal.style.display = 'none';
+                document.body.style.overflow = 'auto'; // 페이지 스크롤 복구
+
+                // 모달을 닫을 때 버튼 상태를 초기화
+                currentImageIndex = 0;
+                updateModalImage();
+            }
+
+
+          function updateModalImage() {
+              const modalImages = document.getElementById('modalImages');
+              modalImages.innerHTML = ''; // 기존 이미지 내용 제거
+
+              if (imageUrls.length > 0) {
+                  const imgElement = document.createElement('img');
+                  imgElement.src = imageUrls[currentImageIndex];
+                  imgElement.alt = 'Review Image';
+                  modalImages.appendChild(imgElement);
+
+                  // 이전/다음 버튼 상태 업데이트
+                  document.getElementById('prevButton').classList.toggle('disabled', currentImageIndex === 0);
+                  document.getElementById('nextButton').classList.toggle('disabled', currentImageIndex === imageUrls.length - 1);
+
+                  // 비활성화 처리 (보이지 않게)
+                  document.getElementById('prevButton').style.visibility = currentImageIndex === 0 ? 'hidden' : 'visible';
+                  document.getElementById('nextButton').style.visibility = currentImageIndex === imageUrls.length - 1 ? 'hidden' : 'visible';
+              }
+          }
+
+
+          function changeImage(direction) {
+              currentImageIndex += direction;
+
+              // 인덱스가 유효한 범위 내에 있는지 확인
+              if (currentImageIndex < 0) {
+                  currentImageIndex = 0;
+              } else if (currentImageIndex >= imageUrls.length) {
+                  currentImageIndex = imageUrls.length - 1;
+              }
+
+              updateModalImage();
+          }
+
+            loadReviews(currentPage); // 초기 로딩 시 첫 번째 페이지 데이터 불러오기
+
+        </script>
+    </head>
+
+    <body>
+    <div layout:fragment="content">
+        <div class="text-center mb-3">
+            <a th:href="@{/review/write-page(productId=${product.id})}" class="btn btn-primary btn-lg w-75 mx-auto">리뷰 작성하기</a>
+        </div>
+        <div id="review-list">
+            <!-- 리뷰 항목들이 여기에 동적으로 추가됨 -->
+        </div>
+
+        <!-- 모달 창 -->
+        <div id="imageModal" style="display:none;">
+            <div id="modalContent">
+                <button id="closeModal" class="btn btn-close" onclick="closeImageModal()"></button>
+                <div class="modal-nav-buttons">
+                    <button id="prevButton" class="btn btn-light" onclick="changeImage(-1)">&#10094;</button>
+                    <button id="nextButton" class="btn btn-light" onclick="changeImage(1)">&#10095;</button>
+                </div>
+                <div id="modalImages" style="display: flex; justify-content: center; align-items: center;">
+                    <!-- 이미지가 동적으로 여기에 들어감 -->
+                </div>
+            </div>
+        </div>
+
+        <div id="review-pagination">
+            <ul id="page-buttons">
+                <!-- 페이지 번호 버튼들이 여기에 동적으로 추가됨 -->
+            </ul>
+        </div>
+
+    </div>
+    </body>
+    </html>

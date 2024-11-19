@@ -1,6 +1,5 @@
-package com.JH.JhOnlineJudge.product.repository;
+package com.JH.JhOnlineJudge.common.Image.ProductImage;
 
-import com.JH.JhOnlineJudge.product.domain.ProductImage;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface ProductImageJpaRepository extends JpaRepository<ProductImage, Long> {

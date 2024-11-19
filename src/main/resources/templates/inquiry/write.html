@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
+      layout:decorate="layout/default_layout">
+<head>
+    <title>문의 작성</title>
+    <link href="/css/bootstrap.min.css" rel="stylesheet"> <!-- 부트스트랩 CSS 링크 -->
+<style>
+    .form-container {
+        max-width: 800px;
+        margin: 20px auto;
+        padding: 20px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
+    .form-group {
+        margin-bottom: 15px;
+    }
+
+    .form-group label {
+        font-weight: bold;
+        display: block;
+        margin-bottom: 5px;
+    }
+
+    .form-group input, .form-group textarea, .form-group select {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+    }
+
+    .orders-list {
+        margin-top: 10px;
+        max-height: 200px;
+        overflow-y: auto;
+        border: 1px solid #ddd;
+        padding: 10px;
+    }
+
+    .orders-list ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .orders-list li {
+        padding: 5px 0;
+        cursor: pointer;
+        border-bottom: 1px solid #eee;
+    }
+
+    .orders-list li:hover {
+        background-color: #f8f9fa;
+    }
+</style>
+<script>
+   let isOrderListVisible = false;  // 주문 목록의 표시 상태를 추적하는 변수
+
+    function toggleOrderList() {
+        const ordersList = document.getElementById('ordersList');
+        const button = document.getElementById('toggleOrderListBtn');
+
+        if (isOrderListVisible) {
+            ordersList.style.display = 'none';
+            button.textContent = '주문 목록 보기';
+        } else {
+            ordersList.style.display = 'block';
+            button.textContent = '주문 목록 닫기';
+            loadOrders();
+        }
+
+        isOrderListVisible = !isOrderListVisible;  // 표시 상태를 반전
+    }
+
+    function loadOrders() {
+        fetch('/order/api/my-order')  // 서버에서 주문 목록 가져오는 API
+            .then(response => response.json())
+            .then(data => {
+                const ordersList = document.getElementById('ordersList');
+                ordersList.innerHTML = '';
+                data.forEach(order => {
+                    const li = document.createElement('li');
+
+                    const orderDate = new Date(order.orderAt);
+                    const formattedDate = orderDate.toLocaleString();
+
+                    li.textContent = `주문번호: ${order.externalId} - ${order.name} - ${formattedDate} - ${order.status} - ${order.recipientName}`;
+                    li.onclick = () => selectOrder(order.externalId);
+                    ordersList.appendChild(li);
+                });
+            })
+            .catch(error => console.error('주문 목록을 가져오는 중 오류 발생:', error));
+    }
+
+    // 선택한 주문 설정
+    function selectOrder(externalId) {
+        const orderInput = document.getElementById('selectedOrder');
+        orderInput.value = externalId;
+    }
+</script>
+</head>
+<body>
+<div layout:fragment="content">
+  <div class="form-container">
+      <form method="POST" action="/inquiry" enctype="multipart/form-data">
+          <!-- 제목 -->
+          <div class="form-group">
+              <label for="title">제목</label>
+              <input type="text" id="title" name="title" required>
+          </div>
+
+          <!-- 내용 -->
+          <div class="form-group">
+              <label for="content">내용</label>
+              <textarea id="content" name="content" rows="5" required></textarea>
+          </div>
+
+          <!-- 사진 첨부 -->
+          <div class="form-group">
+              <label for="files">사진 첨부</label>
+              <input type="file" id="files" name="files"  accept="image/*" multiple="multiple">
+          </div>
+
+          <!-- 주문 선택 -->
+          <div class="form-group">
+              <label for="order">주문 선택 (선택 사항)</label>
+              <input type="text" id="selectedOrder" name="orderId" placeholder="선택한 주문" readonly>
+              <button type="button" id="toggleOrderListBtn" class="btn btn-outline-secondary" onclick="toggleOrderList()" style="margin-top : 15px;">주문 목록 보기</button>
+              <div id="ordersList" class="orders-list" style="display: none;"></div>
+          </div>
+
+          <!-- 제출 -->
+          <div class="form-group">
+              <button type="submit" class="btn btn-primary">작성 완료</button>
+          </div>
+      </form>
+  </div>
+</div>
+</body>
+</html>

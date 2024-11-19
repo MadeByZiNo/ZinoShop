@@ -1,4 +1,4 @@
-package com.JH.JhOnlineJudge.product.exception;
+package com.JH.JhOnlineJudge.exception;
 
 public class S3FileUploadException  extends RuntimeException{
     public S3FileUploadException(String e) {

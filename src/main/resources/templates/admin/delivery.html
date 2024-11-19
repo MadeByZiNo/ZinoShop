@@ -37,6 +37,8 @@
                         let totalPrice = 0;
 
                         deliveries.forEach(delivery => {
+                         const orderDate = new Date(delivery.orderAt);
+                        const formattedDate = orderDate.toLocaleString();
                             const row = `
                                 <tr>
                                     <td><input type="checkbox" class="rowCheckbox" value=${delivery.orderId}></td>
@@ -47,7 +49,7 @@
                                     <td>${delivery.recipientName}</td>
                                     <td>${delivery.recipientAddress}</td>
                                     <td>${delivery.memo}</td>
-                                    <td>${delivery.orderAt}</td>
+                                    <td>${formattedDate}</td>
                                 </tr>
                             `;
                             tableBody.append(row);

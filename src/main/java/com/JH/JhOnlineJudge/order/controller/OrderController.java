@@ -3,7 +3,9 @@ package com.JH.JhOnlineJudge.order.controller;
 import com.JH.JhOnlineJudge.cart.service.CartService;
 import com.JH.JhOnlineJudge.common.CartProduct.CartProduct;
 import com.JH.JhOnlineJudge.order.domain.Order;
+import com.JH.JhOnlineJudge.order.dto.MyOrdersDto;
 import com.JH.JhOnlineJudge.order.dto.OrderConfirmDto;
+import com.JH.JhOnlineJudge.order.dto.OrderDetailRequestDto;
 import com.JH.JhOnlineJudge.order.dto.OrderSaveDto;
 import com.JH.JhOnlineJudge.order.service.OrderService;
 import com.JH.JhOnlineJudge.user.domain.AuthUser;
@@ -88,9 +90,31 @@ public class OrderController {
     @PostMapping("/confirm")
      public ResponseEntity<Map<String, Object>> confirmPayment(@AuthUser Long userId,
                                                                @RequestBody OrderConfirmDto orderConfirmDto) {
-         Map<String, Object> responseData = orderService.confirmPaymentAndUpdate(userId, orderConfirmDto);
-         return ResponseEntity.ok(responseData);
+         Map<String, Object> response = orderService.confirmPaymentAndUpdate(userId, orderConfirmDto);
+         return ResponseEntity.ok(response);
      }
 
+    @GetMapping("/my-order")
+    public String getOrderListPage(@AuthUser Long userId,
+                                   Model model) {
+        List<Order> orders = orderService.findOrdersByUserId(userId);
+        model.addAttribute("orders",orders);
+        return "users/orders";
+    }
 
+    @GetMapping("/api/my-order")
+    @ResponseBody
+     public ResponseEntity<List<MyOrdersDto>> getOrderList(@AuthUser Long userId,
+                                                           Model model) {
+        List<MyOrdersDto> response = orderService.getMyOrderDtoList(userId);
+         return ResponseEntity.ok(response);
+     }
+
+    @GetMapping("/{orderId}")
+    @ResponseBody
+    public ResponseEntity<OrderDetailRequestDto> getOrderDetail(@AuthUser Long userId,
+                                              @PathVariable Long orderId) {
+        OrderDetailRequestDto response = orderService.getOrderDetailRequestDto(orderId);
+        return ResponseEntity.ok(response);
+    }
 }

@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout" layout:decorate="layout/default_layout">
+<head>
+    <title>Orders</title>
+    <style>
+        /* 커스텀 CSS */
+        body {
+            background-color: #f8f9fa; /* 밝은 배경 */
+        }
+        .table {
+            background-color: #ffffff;
+        }
+        .table th, .table td {
+            vertical-align: middle;
+            text-align: center;
+        }
+        .table-hover tbody tr:hover {
+            background-color: #f1f1f1;
+        }
+      .modal-dialog {
+          margin: 5% auto; /* 상단에 여백을 추가하고, 자동으로 중앙 정렬 */
+          max-width: 50%;
+      }
+
+
+
+        .modal-body {
+            line-height: 1.8;
+        }
+        .modal-header {
+            background-color: #343a40;
+            color: white;
+        }
+        .product-list li {
+            padding: 5px 0;
+        }
+        .product-list li:nth-child(odd) {
+            background-color: #f9f9f9;
+        }
+    </style>
+    <script>
+
+        document.addEventListener("DOMContentLoaded", () => {
+            const closeButton = document.querySelector('.btn-secondary');
+            closeButton.addEventListener('click', () => {
+                const modal = document.getElementById('orderModal');
+                modal.style.display = 'none';
+                modal.setAttribute('aria-hidden', 'true');
+                modal.setAttribute('aria-modal', 'false');
+            });
+        });
+
+
+        document.addEventListener("DOMContentLoaded", () => {
+            const buttons = document.querySelectorAll('button[data-bs-target="#orderModal"]');
+            const closeButton = document.querySelector('.btn-secondary'); // 닫기 버튼
+
+            buttons.forEach(button => {
+                button.addEventListener('click', (event) => {
+                    const orderId = button.getAttribute('data-id');
+                    fetch(`/order/${orderId}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            // 데이터 업데이트
+                            document.getElementById('totalPrice').textContent = data.totalPrice;
+                            document.getElementById('discountedPrice').textContent = data.discountedPrice;
+                            document.getElementById('finalPrice').textContent = data.finalPrice;
+                            document.getElementById('recipientName').textContent = data.recipientName;
+                            document.getElementById('recipientAddress').textContent = data.recipientAddress;
+                            document.getElementById('paymentMethod').textContent = data.paymentMethod || 'Not Specified';
+                            document.getElementById('memo').textContent = data.memo || 'None';
+                            document.getElementById('discountInfo').textContent = data.discountInfo;
+
+                            // 제품 목록 추가
+                            const productList = document.getElementById('productList');
+                            productList.innerHTML = ''; // Clear old products
+                            data.products.forEach(product => {
+                                const li = document.createElement('li');
+                                li.textContent = `${product.name} (${product.quantity}개) - ${product.price}`;
+                                productList.appendChild(li);
+                            });
+
+                            const modal = document.getElementById('orderModal');
+                            modal.classList.add('show');
+                            modal.style.display = 'block';
+                            modal.setAttribute('aria-hidden', 'false');
+                            modal.setAttribute('aria-modal', 'true');
+                        })
+                        .catch(error => {
+                            console.error('Error fetching order details:', error);
+                        });
+                });
+            });
+        });
+
+    </script>
+</head>
+<body>
+<div layout:fragment="content" class="container mt-4">
+    <h1 class="text-center mb-4">주문 내역</h1>
+    <table class="table table-bordered table-hover shadow-sm">
+        <thead class="table-dark">
+        <tr>
+            <th>주문 번호</th>
+            <th>주문 날짜</th>
+            <th>주문 이름</th>
+            <th>주문 상태</th>
+            <th>도착 날짜</th>
+            <th>상세보기</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="order : ${orders}">
+            <td th:text="${order.externalId}"></td>
+            <td th:text="${#temporals.format(order.orderAt, 'yyyy-MM-dd HH:mm')}"></td>
+            <td th:text="${order.name}"></td>
+            <td th:text="${order.status}"></td>
+            <td th:text="${order.deliveredAt != null ? #temporals.format(order.deliveredAt, 'yyyy-MM-dd HH:mm') : ''}"></td>
+            <td>
+                <button type="button" class="btn btn-outline-dark btn-sm"
+                        data-bs-toggle="modal" data-bs-target="#orderModal"
+                        th:attr="data-id=${order.id}">상세보기
+                </button>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+    <div class="modal fade" id="orderModal" tabindex="-1" aria-labelledby="orderModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="orderModalLabel">주문 내역</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="orderDetails">
+                        <p><strong>총 가격:</strong> <span id="totalPrice" class="text-muted"></span></p>
+                        <p><strong>할인 가격:</strong> <span id="discountedPrice" class="text-muted"></span></p>
+                        <p><strong>최종 가격:</strong> <span id="finalPrice" class="text-success"></span></p>
+                        <p><strong>배송자 이름:</strong> <span id="recipientName" class="text-muted"></span></p>
+                        <p><strong>배송 주소:</strong> <span id="recipientAddress" class="text-muted"></span></p>
+                        <p><strong>결제 방법:</strong> <span id="paymentMethod" class="text-muted"></span></p>
+                        <p><strong>요청사항:</strong> <span id="memo" class="text-muted"></span></p>
+                        <p><strong>할인 정보:</strong> <span id="discountInfo" class="text-muted"></span></p>
+                    </div>
+                    <h5 class="mt-4">상품목록</h5>
+                    <ul id="productList" class="product-list list-unstyled"></ul>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+</body>
+</html>

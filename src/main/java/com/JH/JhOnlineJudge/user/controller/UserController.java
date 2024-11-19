@@ -140,6 +140,7 @@ public class UserController {
         return "users/mypage";
     }
 
+
     @GetMapping("/update")
     public String getUpdateForm(@AuthUser Long userId,
                                 Model model) {

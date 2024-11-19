@@ -1,6 +1,5 @@
-package com.JH.JhOnlineJudge.product.repository;
+package com.JH.JhOnlineJudge.common.Image.ProductImage;
 
-import com.JH.JhOnlineJudge.product.domain.ProductImage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 

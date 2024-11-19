@@ -46,7 +46,7 @@ public class HeartService {
 
     }
 
-    public Page<Heart> getProductsPageByCategoryIds(Long userId, int offset) {
+    public Page<Heart> getHeartsPageByUserId(Long userId, int offset) {
 
         User user =  userService.findUserById(userId);
         Pageable pageable = PageRequest.of(offset -1, 6, Sort.by(Sort.Direction.DESC, "id"));

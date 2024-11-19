@@ -3,19 +3,19 @@ package com.JH.JhOnlineJudge.product.controller;
 import com.JH.JhOnlineJudge.category.CategoryService;
 import com.JH.JhOnlineJudge.category.domain.Category;
 import com.JH.JhOnlineJudge.product.domain.Product;
-import com.JH.JhOnlineJudge.product.domain.ProductImage;
+import com.JH.JhOnlineJudge.common.Image.ProductImage.ProductImage;
 import com.JH.JhOnlineJudge.product.dto.ProductCreateDto;
 import com.JH.JhOnlineJudge.product.service.ProductService;
+import com.JH.JhOnlineJudge.review.dto.ReviewListDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.hibernate.query.sqm.function.JdbcEscapeFunctionDescriptor;
 import org.springframework.data.domain.Page;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -69,8 +69,8 @@ public class ProductController {
         model.addAttribute("childCategories", firstChildCategories);
         model.addAttribute("products", products);
 
-        int totalPages = products.getTotalPages();
-      int currentPage = products.getNumber() + 1;  //
+        int totalPages = products.getTotalPages() == 0 ? 1 : products.getTotalPages();
+      int currentPage = products.getNumber() + 1;
       int pageGroup = (currentPage - 1) / 5;
       int startPage = pageGroup * 5 + 1;
       int endPage = Math.min(startPage + 4, totalPages); // 5개의 페이지 또는 총 페이지까지 표시
@@ -96,5 +96,12 @@ public class ProductController {
 
         return "product/detail";
     }
+
+    @GetMapping("/review/{product_id}")
+    public String getReviewsPage(@PathVariable(value = "product_id", required = true) Long id, Model model) {
+        Product product = productService.findProductById(id);
+        model.addAttribute("product", product);
+           return "product/review";
+       }
 
 }

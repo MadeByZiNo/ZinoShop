@@ -52,10 +52,8 @@ public class NotificationService {
                 notification.setRead(true);                                                  // 뽑았던 알림들 read처리
                 redisTemplate.opsForList().rightPush(key,notification);                         // 뽑았던 알림들 재삽입
             });
-
             redisTemplate.expire(key, Duration.ofDays(7));
         });
-
     }
 
 

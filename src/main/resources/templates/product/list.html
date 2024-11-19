@@ -91,7 +91,7 @@
             <li th:each="childCategory : ${childCategories}" class="category-item">
                 <a class="nav-link active"
                    aria-current="page"
-                   th:href="@{/product(category_id=${childCategory.id})}"
+                   th:href="@{/product/list(category_id=${childCategory.id})}"
                    th:text="${childCategory.name}">카테고리 이름</a>
             </li>
         </ul>
@@ -125,19 +125,19 @@
             <ul>
                 <!-- 이전 페이지 버튼 -->
                 <li th:if="${currentPage > 5}" class="page-item">
-                    <a th:href="@{/product(category_id=${category.id}, page=${startPage - 5})}">이전</a>
+                    <a th:href="@{/product/list(category_id=${category.id}, page=${startPage - 5})}">이전</a>
                 </li>
 
                 <!-- 페이지 번호 -->
                 <li th:each="pageNum : ${#numbers.sequence(startPage, endPage)}" class="page-item">
-                    <a th:href="@{/product(category_id=${category.id}, page=${pageNum})}"
+                    <a th:href="@{/product/list(category_id=${category.id}, page=${pageNum})}"
                        th:text="${pageNum}"
                        th:classappend="${currentPage == pageNum} ? 'active' : ''"></a>
                 </li>
 
                 <!-- 다음 페이지 버튼 -->
                 <li th:if="${endPage < totalPages}" class="page-item">
-                    <a th:href="@{/product(category_id=${category.id}, page=${endPage + 1})}">다음</a>
+                    <a th:href="@{/product/list(category_id=${category.id}, page=${endPage + 1})}">다음</a>
                 </li>
             </ul>
         </div>

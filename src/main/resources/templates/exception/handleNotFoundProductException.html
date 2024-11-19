@@ -6,8 +6,11 @@
     </style>
 </head>
 <body>
-<div layout:fragment="content">
-    <h2>이 페이지가 보이면 없는 상품데이터를 요청한 것 입니다.</h2>
+<div layout:fragment="content" style="display: flex; flex-direction: column; justify-content: flex-start; align-items: center; height: 100vh; font-family: Arial, sans-serif;">
+    <div style="margin-top: 15%; text-align: center;"> <!-- 위에서 15% 만큼 떨어지도록 설정 -->
+        <img src="https://png.pngtree.com/png-vector/20190917/ourlarge/pngtree-error-file-icon-vectors-png-image_1737858.jpg" alt="Sample Image" style="max-width: 200px; max-height: 200px; margin-bottom: 20px;" />
+        <h2 style="font-weight: bold; font-size: 24px; color: #333;">잘못된 상품 요청입니다.</h2>
+    </div>
 </div>
 </body>
 </html>

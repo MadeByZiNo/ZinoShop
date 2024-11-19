@@ -2,11 +2,12 @@ package com.JH.JhOnlineJudge.product.service;
 
 import com.JH.JhOnlineJudge.category.domain.Category;
 import com.JH.JhOnlineJudge.product.domain.Product;
-import com.JH.JhOnlineJudge.product.domain.ProductImage;
+import com.JH.JhOnlineJudge.common.Image.ProductImage.ProductImage;
 import com.JH.JhOnlineJudge.product.dto.ProductCreateDto;
 import com.JH.JhOnlineJudge.product.exception.NotFoundProductException;
-import com.JH.JhOnlineJudge.product.repository.ProductImageRepository;
+import com.JH.JhOnlineJudge.common.Image.ProductImage.ProductImageRepository;
 import com.JH.JhOnlineJudge.product.repository.ProductRepository;
+import com.JH.JhOnlineJudge.utils.S3Uploader;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -24,7 +25,7 @@ import java.util.List;
 @Slf4j
 public class ProductService {
 
-    private String dirName = "Product";
+    private final String DIR_NAME = "Product";
 
     private final ProductRepository productRepository;
     private final ProductImageRepository productImageRepository;
@@ -55,7 +56,7 @@ public class ProductService {
         List<ProductImage> imageList = new ArrayList<>();
         if (files != null && files.length > 0){
             for (MultipartFile file : files) {
-                      String uploadUrl = s3Uploader.upload(file, dirName);
+                      String uploadUrl = s3Uploader.upload(file, DIR_NAME);
 
                       ProductImage productImage = ProductImage.builder()
                               .url(uploadUrl)

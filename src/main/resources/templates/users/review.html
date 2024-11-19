@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
+      layout:decorate="layout/default_layout">
+<head>
+    <style>
+
+      #review-list {
+          display: flex;
+          flex-direction: column;
+          align-items: stretch;
+          justify-content: flex-start;
+          text-align: center;
+          padding: 20px;
+      }
+
+         .review-item {
+          margin-bottom: 20px;
+          padding: 15px;
+          border: 1px solid #ddd;
+          border-radius: 5px;
+          background-color: #f9f9f9;
+      }
+
+      .review-author {
+          font-weight: bold;
+          font-size: 16px;
+      }
+
+      .review-content {
+          margin-top: 10px;
+          font-size: 14px;
+          color: #555;
+      }
+
+      .review-date {
+          margin-top: 5px;
+          font-size: 12px;
+          color: #888;
+      }
+
+     .review-item img {
+         max-width: 130px;
+         height: auto;
+         margin-top: 10px;
+         cursor: pointer;
+     }
+
+
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .page-item {
+            list-style: none;
+            display: inline-block;
+            margin: 0 5px;
+        }
+
+        .page-item a {
+            text-decoration: none;
+            padding: 5px 10px;
+            border: 1px solid #ddd;
+            color: #333;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .page-item a.active {
+            font-weight: bold;
+            background-color: #f0f0f0;
+            pointer-events: none;
+        }
+
+        .page-item a:hover {
+            background-color: #ddd;
+        }
+
+        .modal-nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            transform: translateY(-50%);
+        }
+
+        .modal-nav-buttons .btn {
+            background-color: rgba(0, 0, 0, 0.3);
+            color: white;
+            border: none;
+            margin: 8px 10px;
+            font-size: 1.5em;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-nav-buttons .btn:hover {
+            background-color: rgba(0, 0, 0, 0.6);
+        }
+
+        .modal-nav-buttons .btn.disabled {
+            visibility: hidden;
+        }
+
+        #review-pagination {
+            display: flex;
+            justify-content: center; /* 중앙 정렬 */
+            margin-top: 20px;
+        }
+
+        #page-buttons {
+            display: flex;
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+           #modalImages img {
+           max-width: 50%;
+           margin-bottom: 10px;
+           display: block;
+           border-radius: 5px;
+       }
+
+       #imageModal {
+           position: fixed;
+           top: 0;
+           left: 0;
+           right: 0;
+           bottom: 0;
+           background-color: rgba(0, 0, 0, 0.8);
+           display: none;
+           justify-content: center;
+           align-items: center;
+           z-index: 9999;
+           overflow: hidden;
+       }
+
+       #modalContent {
+           background-color: white;
+           padding: 20px;
+           border-radius: 10px;
+           max-width: 80%;
+           max-height: 80%;
+           overflow-y: auto;
+           position: relative;
+       }
+
+       #closeModal {
+           position: absolute;
+           top: 9px;
+           right: 9px;
+           font-size: 10px;
+           cursor: pointer;
+           background-color: #6c757d; /* 부드러운 회색 */
+           border: none;
+           border-radius: 50%;
+           width: 18px;
+           height: 18px;
+           display: flex;
+           justify-content: center;
+           align-items: center;
+           color: white;
+       }
+
+       #closeModal:hover {
+           background-color: #5a6268; /* 클릭 시 어두운 회색 */
+       }
+
+       .modal-nav-buttons {
+           display: flex;
+           justify-content: space-between;
+           position: absolute;
+           top: 50%;
+           left: 0;
+           right: 0;
+           transform: translateY(-50%);
+       }
+
+       .modal-nav-buttons .btn {
+           background-color: rgba(0, 0, 0, 0.3); /* 반투명 배경 */
+           color: white;
+           border: none;
+           margin: 8px 10px;
+           font-size: 1.5em;
+           border-radius: 50%; /* 둥근 버튼 */
+           cursor: pointer;
+           transition: background-color 0.3s ease;
+           width: 30px;
+           height: 30px;
+           display: flex;
+           justify-content: center;
+           align-items: center;
+       }
+
+       .modal-nav-buttons .btn:hover {
+           background-color: rgba(0, 0, 0, 0.6);
+       }
+
+       .modal-nav-buttons .btn.disabled {
+           visibility: hidden;
+       }
+    </style>
+    <script>
+          let currentImageIndex = 0;
+          let imageUrls = [];
+
+      function openImageModal(reviewId) {
+              const modal = document.getElementById('imageModal');
+              const modalImages = document.getElementById('modalImages');
+
+              modal.style.display = 'flex';
+              document.body.style.overflow = 'hidden'; // 페이지 스크롤 비활성화
+
+              fetch(`/review/images?reviewId=${reviewId}`)
+                  .then(response => response.json())
+                  .then(data => {
+                      imageUrls = data;
+                      currentImageIndex = 0; // 초기화
+                      updateModalImage();
+                  })
+                  .catch(error => console.error('Error loading images:', error));
+          }
+
+        function closeImageModal() {
+            const modal = document.getElementById('imageModal');
+            modal.style.display = 'none';
+            document.body.style.overflow = 'auto'; // 페이지 스크롤 복구
+
+            // 모달을 닫을 때 버튼 상태를 초기화
+            currentImageIndex = 0;
+            updateModalImage();
+        }
+
+
+      function updateModalImage() {
+          const modalImages = document.getElementById('modalImages');
+          modalImages.innerHTML = ''; // 기존 이미지 내용 제거
+
+          if (imageUrls.length > 0) {
+              const imgElement = document.createElement('img');
+              imgElement.src = imageUrls[currentImageIndex];
+              imgElement.alt = 'Review Image';
+              modalImages.appendChild(imgElement);
+
+              // 이전/다음 버튼 상태 업데이트
+              document.getElementById('prevButton').classList.toggle('disabled', currentImageIndex === 0);
+              document.getElementById('nextButton').classList.toggle('disabled', currentImageIndex === imageUrls.length - 1);
+
+              // 비활성화 처리 (보이지 않게)
+              document.getElementById('prevButton').style.visibility = currentImageIndex === 0 ? 'hidden' : 'visible';
+              document.getElementById('nextButton').style.visibility = currentImageIndex === imageUrls.length - 1 ? 'hidden' : 'visible';
+          }
+      }
+
+      function changeImage(direction) {
+          currentImageIndex += direction;
+
+          // 인덱스가 유효한 범위 내에 있는지 확인
+          if (currentImageIndex < 0) {
+              currentImageIndex = 0;
+          } else if (currentImageIndex >= imageUrls.length) {
+              currentImageIndex = imageUrls.length - 1;
+          }
+
+          updateModalImage();
+      }
+
+  function formatDate(dateString) {
+        var dateObj = new Date(dateString);
+        return dateObj.toISOString().slice(0, 16).replace('T', ' '); // "yyyy-MM-dd HH:mm" 형식으로 변환
+    }
+
+  document.addEventListener('DOMContentLoaded', function() {
+      const deleteButtons = document.querySelectorAll('.delete-review-btn');
+
+      deleteButtons.forEach(button => {
+          button.addEventListener('click', function() {
+              const reviewId = this.getAttribute('data-review-id');
+
+              // 삭제 확인 창
+              const confirmDelete = window.confirm('정말로 이 리뷰를 삭제하시겠습니까?');
+
+              if (confirmDelete) {
+                  // 삭제 요청을 서버로 보내기
+                  fetch(`/review`, {
+                      method: 'DELETE',
+                      headers: {
+                          'Content-Type': 'application/json'
+                      },
+                      body: JSON.stringify({ reviewId: reviewId })
+                  })
+                  .then(response => {
+                      if (response.ok) {
+                          // 성공 시 해당 리뷰 항목 삭제 (DOM에서 제거)
+                          const reviewItem = this.closest('.review-item');
+                          reviewItem.remove();
+                          location.reload(); // 페이지 새로고침
+                      } else {
+                          alert('리뷰 삭제에 실패했습니다.');
+                      }
+                  })
+                  .catch(error => {
+                      console.error('삭제 중 오류 발생:', error);
+                  });
+              } else {
+                  // 삭제를 취소한 경우
+                  console.log('삭제 취소');
+              }
+          });
+      });
+  });
+
+
+
+    </script>
+</head>
+<body>
+<div layout:fragment="content">
+
+    <div th:if="${reviews.content.isEmpty()}"  style="text-align: center;">
+        <p>등록된 리뷰가 없습니다.</p>
+    </div>
+
+    <div th:unless="${reviews.content.isEmpty()}">
+        <div id="review-list">
+
+            <!-- 리뷰 항목을 반복하여 출력 -->
+            <div th:each="review : ${reviews.content}"  class="review-item position-relative">
+                <button type="button" class="delete-review-btn btn btn-outline-danger position-absolute top-0 end-0 m-2" th:data-review-id="${review.id}">
+                           삭제
+               </button>
+                <div class="review-author" th:text="${review.nickname}"></div>
+                <div class="review-date" th:text="${#temporals.format(review.createdAt, 'yyyy-MM-dd HH:mm')}"></div>
+                <div class="review-content" th:text="${review.content}"></div>
+                <!-- 리뷰 이미지가 있을 경우 표시 -->
+                <div th:if="${review.imageUrl}">
+                    <img th:src="@{${review.imageUrl}}" alt="Review Image" th:onclick="'openImageModal(' + ${review.id} + ')'" />
+                </div>
+            </div>
+        </div>
+
+
+        <!-- 페이지네이션 -->
+         <div class="pagination">
+             <ul>
+                 <!-- 이전 페이지 버튼 -->
+                 <li th:if="${currentPage > 5}" class="page-item">
+                     <a th:href="@{/review(page=${startPage - 5})}">이전</a>
+                 </li>
+
+                 <!-- 페이지 번호 -->
+                 <li th:each="pageNum : ${#numbers.sequence(startPage, endPage)}" class="page-item">
+                     <a th:href="@{/review(page=${pageNum})}"
+                        th:text="${pageNum}"
+                        th:classappend="${currentPage == pageNum} ? 'active' : ''"></a>
+                 </li>
+
+                 <!-- 다음 페이지 버튼 -->
+                 <li th:if="${endPage < totalPages}" class="page-item">
+                     <a th:href="@{/review(page=${endPage + 1})}">다음</a>
+                 </li>
+             </ul>
+         </div>
+     </div>
+    <!-- 모달 창 -->
+       <div id="imageModal" style="display:none;">
+           <div id="modalContent">
+               <!-- 닫기 버튼 -->
+               <button id="closeModal" class="btn btn-close" onclick="closeImageModal()"></button>
+
+               <!-- 이미지 내비게이션 버튼 -->
+               <div class="modal-nav-buttons">
+                   <button id="prevButton" class="btn btn-light" onclick="changeImage(-1)">&#10094;</button>
+                   <button id="nextButton" class="btn btn-light" onclick="changeImage(1)">&#10095;</button>
+               </div>
+
+               <!-- 이미지 영역 -->
+               <div id="modalImages" style="display: flex; justify-content: center; align-items: center; text-align: center;">
+                   <!-- 이미지가 동적으로 여기에 들어감 -->
+               </div>
+           </div>
+       </div>
+    </div>
+</div>
+</body>
+</html>
