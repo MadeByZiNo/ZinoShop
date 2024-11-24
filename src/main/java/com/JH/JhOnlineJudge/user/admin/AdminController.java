@@ -1,6 +1,10 @@
 package com.JH.JhOnlineJudge.user.admin;
 
+import com.JH.JhOnlineJudge.category.CategoryService;
+import com.JH.JhOnlineJudge.category.domain.Category;
 import com.JH.JhOnlineJudge.order.domain.OrderStatus;
+import com.JH.JhOnlineJudge.product.domain.Product;
+import com.JH.JhOnlineJudge.product.service.ProductService;
 import com.JH.JhOnlineJudge.user.admin.domain.Admin;
 import com.JH.JhOnlineJudge.user.admin.dto.DeliverySearchFilterDto;
 import com.JH.JhOnlineJudge.user.admin.dto.DeliverySearchResponseDto;
@@ -21,17 +25,30 @@ import java.util.List;
 public class AdminController {
 
     private final AdminService adminService;
-
+    private final ProductService productService;
+    private final CategoryService categoryService;
     @GetMapping
-    public String getAdminPageForm(@Admin Long userId,
+    public String getAdminForm(@Admin Long userId,
                                 Model model) {
         return "admin/main";
     }
+
     @GetMapping("/delivery-form")
-      public String getAdminDeliveryPageForm(@Admin Long userId,
+      public String getAdminDeliveryForm(@Admin Long userId,
                                   Model model) {
           return "admin/delivery";
       }
+
+    @GetMapping("/product-form")
+       public String getAdminProductForm(@Admin Long userId,
+                                   Model model) {
+        List<Product> products = productService.findAll();
+        List<Category> categories = categoryService.findAll();
+        model.addAttribute("products",products);
+        model.addAttribute("categories",categories);
+
+        return "admin/product";
+    }
 
     @GetMapping("/deliveries")
     @ResponseBody

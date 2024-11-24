@@ -106,14 +106,13 @@
         <div class="product-container">
             <div th:each="product : ${products}" class="product-item">
                 <a th:href="@{'/product/detail/' + ${product.id}}">
-                <img th:src="${product.thumbnail}" alt="Product Image" style="max-width: 100%; height: auto; margin-bottom: 10px;">
+                <img th:src="${product.images[0].url}" alt="Product Image" style="max-width: 100%; height: auto; margin-bottom: 10px;">
                 <h3 th:text="${product.name}" style="font-weight: bold; margin-top: 10px;"></h3>
                 <p th:text="'가격: ' + ${product.price}" style="display: inline-block;"></p>
                 <p th:text="'남은 재고: ' + ${product.remain}" style="display: inline-block;"></p>
                 <div>
-                 <p th:if="${product.remain == 0 || product.state == '세일 중'}" style=" text-align: center; display: inline-block; margin-right: 10px;">
+                 <p th:if="${product.remain == 0}" style=" text-align: center; display: inline-block; margin-right: 10px;">
                      <span th:if="${product.remain == 0}" class="sale-tag">품절</span>
-                     <span th:if="${product.state == '세일 중'}" class="sale-tag">세일 중</span>
                  </p>
                  </div>
                 </a>

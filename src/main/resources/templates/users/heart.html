@@ -150,14 +150,13 @@
         <div class="heart-container">
             <div th:each="heart : ${hearts}" class="heart-item">
                 <a th:href="@{'/product/detail/' + ${heart.product.id}}">
-                <img th:src="${heart.product.thumbnail}" alt="heart Image" style="max-width: 100%; height: auto; margin-bottom: 10px;">
+                <img th:src="${heart.product.images[0].url}" alt="heart Image" style="max-width: 100%; height: auto; margin-bottom: 10px;">
                 <h3 th:text="${heart.product.name}" style="font-weight: bold; margin-top: 10px;"></h3>
                 <p th:text="'가격: ' + ${heart.product.price}" style="display: inline-block;"></p>
                 <div>
                     <p th:if="${heart.product.remain == 0 or heart.product.state eq '품절'}" style="text-align: center; display: inline-block; margin-right: 10px;">
                         <span class="sale-tag">품절</span>
                     </p>
-                    <span th:if="${heart.product.state eq '세일중'}" class="sale-tag">세일중</span>
 
                 <button id="heart-button" th:onclick="'toggleHeart(' + ${heart.product.id} + ');'" class="btn">
                        <span th:id="'heart-icon-' + ${heart.product.id}" class="bi bi-heart text-muted" th:data-product-id="${heart.product.id}" style="cursor: pointer;"></span>

@@ -127,11 +127,6 @@ INSERT INTO Membership (membership_name, min_amount, discount_rate) VALUES
 ('골드', 100000, 5),
 ('플래티넘', 300000, 10);
 
--- Product_Status 테이블 데이터 추가
-INSERT INTO Product_Status (status_name) VALUES
-('정상'),
-('세일'),
-('품절');
 
 -- Category 테이블 데이터 추가
 INSERT INTO Category (category_name, parent_category_id) VALUES

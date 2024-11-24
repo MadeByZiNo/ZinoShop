@@ -7,4 +7,5 @@ public interface ProductImageRepository {
 
     List<ProductImage> saveAll(List<ProductImage> imageList);
 
+    void delete(ProductImage productImage);
 }

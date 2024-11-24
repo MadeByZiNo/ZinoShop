@@ -70,21 +70,20 @@
         }
     }
 
-    function applyDiscount() {
+    function applyRewardPointsDiscount() {
         const rewardPointsElement = document.getElementById("rewardPoints");
         const discountInputElement = document.getElementById("discountInput");
-        const totalPriceElement = document.getElementById("totalPrice");
         const rewardPoints = parseInt(rewardPointsElement.getAttribute('data-value'), 10);
         const discount = parseInt(discountInputElement.value, 10) || 0;
-        const totalPrice = parseInt(totalPriceElement.textContent, 10);
 
         const finalPriceElement = document.getElementById("finalPrice");
+        const finalPrice =  parseInt(finalPriceElement.textContent, 10);
 
         if (discount <= totalPrice) {
-            finalPriceElement.textContent = totalPrice - discount;
+            finalPriceElement.textContent = finalPrice - discount;
             rewardPointsElement.textContent = rewardPoints - discount;
-            document.getElementById("discountedPrice").value = discount;
-            document.getElementById("discountInfo").value = "적립금 " + discount + "원 사용";
+            document.getElementById("discountedPrice").value += discount;
+            document.getElementById("discountInfo").value += "적립금 " + discount + "원 사용";
         } else {
             alert("할인 금액이 총 가격을 초과할 수 없습니다.");
         }
@@ -92,68 +91,121 @@
 
 
 
+    function applyCouponDiscount() {
+        const couponSelect = document.getElementById("couponSelect");
+        const selectedCouponId = couponSelect.value;
 
-
-
-async function submitForm() {
-
-   const clientKey = "[[${clientKey}]]";
-   const tossPayments = TossPayments(clientKey);
-   const payment = tossPayments.payment({customerKey: TossPayments.ANONYMOUS})
-
-    const form = document.getElementById('orderForm');
-
-    const formData = {
-        recipientName: form.recipientName.value,
-        deliveryAddress: form.deliveryAddress.value,
-        detailAddress: form.detailAddress.value,
-        discountedPrice: form.discountedPrice.value,
-        discountInfo: form.discountInfo.value,
-        memo: form.memo.value
-    };
-
-    try {
-        const response = await fetch('/order', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(formData)
-        });
-
-        if (!response.ok) {
-            console.log('주문 저장 실패');
-            window.location.href = window.location.origin + "/order/fail";
+        // 선택한 쿠폰이 없다면 함수 종료
+        if (!selectedCouponId) {
+            alert("쿠폰을 선택해주세요.");
             return;
         }
 
-        const result = await response.json();
-        console.log('주문이 성공적으로 저장되었습니다:', result);
+        couponSelect.disabled = true;  // select 비활성화
+        couponButton.disabled = true;  // 쿠폰 적용 버튼 비활성화
+
+        const totalPriceElement = document.getElementById("totalPrice");
+        const totalPrice = parseInt(totalPriceElement.textContent, 10);
+
+        // 선택한 쿠폰 정보 가져오기 (쿠폰의 할인 방식에 따라 다르게 처리)
+        const selectedCoupon = getCouponDetailsById(selectedCouponId);  // 쿠폰 정보를 가져오는 함수
+
+        let discount = 0;
+        let discountInfo = "";
+
+        if (selectedCoupon.type === "DISCOUNT_RATE") { // 할인률 적용
+            discount = Math.floor((totalPrice * selectedCoupon.discountRate) / 100); // 소수점 이하 버림
+            discountInfo = `쿠폰 할인률 ${selectedCoupon.discountRate}% 적용 : {discount}원 할인`;
+        } else if (selectedCoupon.type === "DISCOUNT_AMOUNT") { // 할인금액 적용
+            discount = selectedCoupon.discountAmount
+            discountInfo = `쿠폰 할인금액 ${discount}원 적용`;
+        }
+
+        const finalPriceElement = document.getElementById("finalPrice");
+        const finalPrice =  parseInt(finalPriceElement.textContent, 10);
+
+        if (discount > finalPrice) {
+            finalPrice = 0;
+        } else {
+            finalPrice = finalPrice - discount;
+        }
+        if (discount > 0) {
+
+        finalPriceElement.textContent = finalPrice;
+        document.getElementById("discountedPrice").value += discount;
+        document.getElementById("discountInfo").value += discountInfo;
+    }
+
+    // 쿠폰 ID로 쿠폰 세부사항 가져오기 (여기서는 가상의 함수로 예시)
+    function getCouponDetailsById(couponId) {
+        // 실제로는 서버에서 쿠폰 정보를 받아오는 방식으로 처리해야 함
+        const coupons = [
+            { id: '1', type: 'DISCOUNT_RATE', discountRate: 10 },   // 10% 할인
+            { id: '2', type: 'DISCOUNT_AMOUNT', discountAmount: 5000 }, // 5000원 할인
+        ];
+        return coupons.find(coupon => coupon.id === couponId);
+    }
 
 
-        // 결제 요청
-        await payment.requestPayment({
-        method: "CARD", // 카드 결제
-        amount: {
-            currency: "KRW",
-            value: result.amount,
-        },
-        orderId: result.externalId,
-        orderName: result.orderName,
-        successUrl: window.location.origin + "/order/success",
-        failUrl: window.location.origin + "/order/fail",
-        customerEmail: "customer123@gmail.com",
-        customerName: result.recipientName,
-        customerMobilePhone: "01012341234",
-        card: {
-            useEscrow: false,
-            flowMode: "DEFAULT",
-            useCardPoint: false,
-            useAppCardOnly: false,
-        },
-    });
-    } catch (error) {
-        console.log('결제 요청 실패' + error);
+    async function submitForm() {
+
+       const clientKey = "[[${clientKey}]]";
+       const tossPayments = TossPayments(clientKey);
+       const payment = tossPayments.payment({customerKey: TossPayments.ANONYMOUS})
+
+        const form = document.getElementById('orderForm');
+
+        const formData = {
+            recipientName: form.recipientName.value,
+            deliveryAddress: form.deliveryAddress.value,
+            detailAddress: form.detailAddress.value,
+            discountedPrice: form.discountedPrice.value,
+            discountInfo: form.discountInfo.value,
+            memo: form.memo.value
+        };
+
+        try {
+            const response = await fetch('/order', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(formData)
+            });
+
+            if (!response.ok) {
+                console.log('주문 저장 실패');
+                window.location.href = window.location.origin + "/order/fail";
+                return;
+            }
+
+            const result = await response.json();
+            console.log('주문이 성공적으로 저장되었습니다:', result);
+
+
+            // 결제 요청
+            await payment.requestPayment({
+            method: "CARD", // 카드 결제
+            amount: {
+                currency: "KRW",
+                value: result.amount,
+            },
+            orderId: result.externalId,
+            orderName: result.orderName,
+            successUrl: window.location.origin + "/order/success",
+            failUrl: window.location.origin + "/order/fail",
+            customerEmail: "customer123@gmail.com",
+            customerName: result.recipientName,
+            customerMobilePhone: "01012341234",
+            card: {
+                useEscrow: false,
+                flowMode: "DEFAULT",
+                useCardPoint: false,
+                useAppCardOnly: false,
+            },
+        });
+        } catch (error) {
+            console.log('결제 요청 실패' + error);
     }
 }
 
@@ -199,6 +251,15 @@ async function submitForm() {
             </div>
 
             <div class="form-group">
+                <label>쿠폰 적용</label>
+                <select id="couponSelect" class="form-control">
+                    <option value="">쿠폰을 선택하세요</option>
+                    <option th:each="coupon : ${user.coupons}" th:value="${coupon.id}" th:text="${coupon.name}"></option>
+                </select>
+                <button type="button" class="btn btn-primary discount-btn" onclick="applyCouponDiscount()">쿠폰 적용</button>
+            </div>
+
+            <div class="form-group">
                 <label>할인 적용 (보유 포인트: <span th:id="'rewardPoints'" th:text="${user.rewardPoints}"  th:attr="data-value=${user.rewardPoints}"></span>원)</label>
                 <div class="input-group">
                     <input
@@ -211,7 +272,7 @@ async function submitForm() {
                         oninput="validateDiscount()"
                         style="appearance: textfield;"
                     >
-                    <button type="button" class="btn btn-primary discount-btn" onclick="applyDiscount()">할인 적용</button>
+                    <button type="button" class="btn btn-primary discount-btn" onclick="applyRewardPointsDiscount()">할인 적용</button>
                 </div>
             </div>
 

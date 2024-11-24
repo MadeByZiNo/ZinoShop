@@ -1,6 +1,5 @@
 package com.JH.JhOnlineJudge.review.controller;
 
-import com.JH.JhOnlineJudge.product.dto.ProductCreateDto;
 import com.JH.JhOnlineJudge.review.dto.ReviewCreateDto;
 import com.JH.JhOnlineJudge.review.dto.ReviewListDto;
 import com.JH.JhOnlineJudge.review.exception.ReviewPermissionException;

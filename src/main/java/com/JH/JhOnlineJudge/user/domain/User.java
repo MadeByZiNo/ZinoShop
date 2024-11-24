@@ -1,6 +1,7 @@
 package com.JH.JhOnlineJudge.user.domain;
 
 import com.JH.JhOnlineJudge.cart.domain.Cart;
+import com.JH.JhOnlineJudge.common.coupon.Coupon;
 import com.JH.JhOnlineJudge.heart.Heart;
 import com.JH.JhOnlineJudge.order.domain.Order;
 import com.JH.JhOnlineJudge.user.dto.UpdateDto;
@@ -47,6 +48,9 @@ public class User {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Heart> hearts = new ArrayList<>();
 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Coupon> coupons = new ArrayList<>();
+
     @OneToMany(mappedBy = "user")
     private List<Order> orders = new ArrayList<>();
 
@@ -89,8 +93,10 @@ public class User {
 
       public int updateRewardPoints(Order order){
             this.rewardPoints -= order.getDiscountedPrice();
-            this.rewardPoints += order.getFinalPrice() * 0.02;
-            return  (int)(order.getFinalPrice() * 0.02);
+            double saleRate;
+            saleRate = this.getRole() == UserRole.고객님 ? 0.15 : 0.03;
+            this.rewardPoints += order.getFinalPrice() * saleRate;
+            return  (int)(order.getFinalPrice() * saleRate);
       }
 
     public void attachCart(Cart cart){

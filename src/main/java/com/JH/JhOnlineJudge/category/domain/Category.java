@@ -11,6 +11,7 @@ import org.hibernate.annotations.OnDeleteAction;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Entity
 @Getter
@@ -37,7 +38,9 @@ public class Category {
     @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL)
     private List<Category> child = new ArrayList<>();
 
-
+    public void removeProduct(Product product) {
+        products.remove(product);
+    }
 
    public List<Category> getAllChildCategories() {
        List<Category> allChildren = new ArrayList<>(child);
@@ -46,4 +49,20 @@ public class Category {
        }
        return allChildren;
    }
+
+    // 현재 카테고리와 그 자식 카테고리들의 ID를 포함하는 리스트를 반환
+    public List<Long> getCategoryIdsIncludingChildren(Long categoryId) {
+        List<Category> allChildCategories = this.getAllChildCategories();
+        List<Long> categoryIds = allChildCategories.stream()
+                .map(Category::getId)
+                .collect(Collectors.toList());
+
+        categoryIds.add(categoryId);  // 현재 카테고리 ID도 추가
+        return categoryIds;
+    }
+
+    // 첫번째 자식 카테고리만 반환
+    public List<Category> getFirstLevelChildCategories() {
+          return this.child;
+    }
 }

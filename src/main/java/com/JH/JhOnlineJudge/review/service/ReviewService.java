@@ -92,14 +92,14 @@ public class ReviewService {
         Product product = productService.findProductById(productId);
 
         return user.getOrders().stream()
-                .filter(order -> order.getStatus().name().equals("배송완료"))
+                .filter(order -> order.getStatus().name().equals("구매확정"))
                 .anyMatch(order -> order.getOrderProducts().stream()
                         .anyMatch(orderProduct -> orderProduct.getProduct().getId().equals(product.getId())));
 
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public Review createReview(Long userId, ReviewCreateDto createDto, MultipartFile[] files) {
+    public Review createReview(Long userId, ReviewCreateDto createDto, MultipartFile[] images) {
         User user = userService.findUserById(userId);
         Product product = productService.findProductById(createDto.getProductId());
         Review review = Review.of(user,product,createDto.getContent());
@@ -108,8 +108,8 @@ public class ReviewService {
 
          List<ReviewImage> imageList = new ArrayList<>();
 
-         if (files != null && files.length > 0){
-             for (MultipartFile file : files) {
+         if (images != null && images.length > 0){
+             for (MultipartFile file : images) {
                    String uploadUrl = s3Uploader.upload(file, DIR_NAME);
 
                    ReviewImage reviewImage = ReviewImage.builder()

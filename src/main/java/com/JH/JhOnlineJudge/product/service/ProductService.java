@@ -1,11 +1,12 @@
 package com.JH.JhOnlineJudge.product.service;
 
+import com.JH.JhOnlineJudge.category.CategoryService;
 import com.JH.JhOnlineJudge.category.domain.Category;
-import com.JH.JhOnlineJudge.product.domain.Product;
 import com.JH.JhOnlineJudge.common.Image.ProductImage.ProductImage;
-import com.JH.JhOnlineJudge.product.dto.ProductCreateDto;
-import com.JH.JhOnlineJudge.product.exception.NotFoundProductException;
 import com.JH.JhOnlineJudge.common.Image.ProductImage.ProductImageRepository;
+import com.JH.JhOnlineJudge.product.domain.Product;
+import com.JH.JhOnlineJudge.product.dto.ProductDto;
+import com.JH.JhOnlineJudge.product.exception.NotFoundProductException;
 import com.JH.JhOnlineJudge.product.repository.ProductRepository;
 import com.JH.JhOnlineJudge.utils.S3Uploader;
 import lombok.RequiredArgsConstructor;
@@ -29,6 +30,7 @@ public class ProductService {
 
     private final ProductRepository productRepository;
     private final ProductImageRepository productImageRepository;
+    private final CategoryService categoryService;
     private final S3Uploader s3Uploader;
 
     @Transactional
@@ -45,17 +47,28 @@ public class ProductService {
         return product;
     }
 
+    @Transactional
+    public List<Product> findAll() {
+        return productRepository.findAll();
+    }
 
     @Transactional(rollbackFor = Exception.class)
-    public Product createProduct(ProductCreateDto request, MultipartFile[] files, Category category) {
+    public Product createProduct(ProductDto request, MultipartFile[] images) {
 
-        Product product = Product.of(request,category);
+        // 기본 데이터 생성
+        Product product = Product.of(request);
+
+        // 카테고리 설정
+        Category category = categoryService.findById(request.getCategoryId());
         product.attachCategory(category);
+
+        // 저장
         productRepository.save(product);
 
+        // 이미지 설정
         List<ProductImage> imageList = new ArrayList<>();
-        if (files != null && files.length > 0){
-            for (MultipartFile file : files) {
+        if (images != null){
+            for (MultipartFile file : images) {
                       String uploadUrl = s3Uploader.upload(file, DIR_NAME);
 
                       ProductImage productImage = ProductImage.builder()
@@ -71,25 +84,70 @@ public class ProductService {
     }
 
     @Transactional(rollbackFor = Exception.class)
-       public void deleteProduct(Long id) {
-          Product findProduct = productRepository.findById(id)
-                  .orElseThrow(NotFoundProductException::new);
+    public void updateProduct(ProductDto productDto, MultipartFile[] images) {
+
+        Product product = findProductById(productDto.getId());
+
+        // 기본데이터 수정
+        product.updateProduct(productDto);
+
+        // 카테고리 수정
+        if(product.getCategory().getId() != productDto.getCategoryId()) {
+            product.getCategory().removeProduct(product);
+            Category category = categoryService.findById(productDto.getCategoryId());
+            product.attachCategory(category);
+        }
 
 
-          List<ProductImage> imageList = findProduct.getImages();
+        // 이미지 수정
+        if(images != null) {
+            List<ProductImage> imageList = new ArrayList(product.getImages());
+            imageList.stream().forEach(image -> {
+              s3Uploader.deleteFile(image.getUrl());
+              product.removeImage(image);
+              productImageRepository.delete(image);
+            });
 
-          if (!imageList.isEmpty()) {
-              imageList.stream()
-                      .map(ProductImage::getUrl)
-                      .forEach(s3Uploader::deleteFile);
-            productRepository.delete(findProduct);
-          }
-       }
+            imageList.clear();
+
+             for (MultipartFile file : images) {
+                String uploadUrl = s3Uploader.upload(file, DIR_NAME);
+
+                ProductImage productImage = ProductImage.builder()
+                       .url(uploadUrl)
+                       .product(product)
+                       .build();
+
+                imageList.add(productImage);
+            }
+             productImageRepository.saveAll(imageList);
+        }
+
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public void deleteProduct(Long id) {
+        Product product = productRepository.findById(id)
+              .orElseThrow(NotFoundProductException::new);
+
+        // 이미지 제거
+        List<ProductImage> imageList = new ArrayList(product.getImages());
+        imageList.stream().forEach(image -> s3Uploader.deleteFile(image.getUrl()));
+
+        // 카테고리에서 삭제
+        product.getCategory().removeProduct(product);
+
+        // 상품 삭제
+        productRepository.delete(product);
+
+    }
 
 
+    @Transactional(readOnly = true)
     public Page<Product> getProductsPageByCategoryIds(List<Long> categoryIds, int offset) {
         Pageable pageable = PageRequest.of(offset -1, 6);
-       return productRepository.findProductsByCategoryIds(categoryIds, pageable);
+        return productRepository.findProductsByCategoryIds(categoryIds, pageable);
     }
+
 
 }

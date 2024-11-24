@@ -16,5 +16,6 @@ public class CategoryRepositoryImpl implements CategoryRepository{
     public Optional<Category> findById(Long id) {
         return categoryJpaRepository.findById(id);
     }
+    public List<Category> findAll() {return categoryJpaRepository.findAll(); }
 
 }

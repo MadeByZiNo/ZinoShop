@@ -82,7 +82,7 @@ public class S3Uploader {
       }
 
       public void deleteFile(String url) {
-          String key = extractPathAfterCom(url);
+          String key = extractPath(url);
           log.info("Deleting file from S3: " + key);
           amazonS3.deleteObject(bucket, key);
       }
@@ -95,11 +95,11 @@ public class S3Uploader {
           return upload(newFile, dirName);
       }
 
-    private static String extractPathAfterCom(String urlString) {
+    private static String extractPath(String urlString) {
            try {
                URL url = new URL(urlString);
                String path = url.getPath();
-               return path.substring(path.indexOf("com/") + 4); // "com/"의 길이는 4
+               return path.substring(1);
            } catch (Exception e) {
                e.printStackTrace();
                return null; // 오류가 발생할 경우 null 반환

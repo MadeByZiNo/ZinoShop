@@ -18,6 +18,9 @@ public class ProductRepositoryImpl implements ProductRepository {
     private final ProductJpaRepository productJpaRepository;
 
     @Override
+    public List<Product> findAll(){return productJpaRepository.findAll();}
+
+    @Override
     public Product save(Product product) {
         return productJpaRepository.save(product);
     }

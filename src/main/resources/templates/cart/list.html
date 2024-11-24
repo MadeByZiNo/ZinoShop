@@ -161,7 +161,7 @@
                 </td>
                 <td class="product-thumbnail">
                     <a th:href="@{'/product/detail/' + ${cartProduct.product.id}}">
-                        <img th:src="${cartProduct.product.thumbnail}" alt="상품 이미지">
+                        <img th:src="${cartProduct.product.images[0].url}" alt="상품 이미지">
                     </a>
                 </td>
                 <td class="quantity-input">

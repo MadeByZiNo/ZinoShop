@@ -76,7 +76,7 @@ public class InquiryService {
     }
 
     @Transactional
-    public Inquiry saveInquiry(Long userId, InquirySaveDto request, MultipartFile[] files) {
+    public Inquiry saveInquiry(Long userId, InquirySaveDto request, MultipartFile[] images) {
 
         User user = userService.findUserById(userId);
 
@@ -87,8 +87,8 @@ public class InquiryService {
 
         List<InquiryImage> imageList = new ArrayList<>();
 
-         if (files != null && files.length > 0){
-             for (MultipartFile file : files) {
+         if (images != null && images.length > 0){
+             for (MultipartFile file : images) {
                    String uploadUrl = s3Uploader.upload(file, DIR_NAME);
 
                  InquiryImage inquiryImage = InquiryImage.builder()

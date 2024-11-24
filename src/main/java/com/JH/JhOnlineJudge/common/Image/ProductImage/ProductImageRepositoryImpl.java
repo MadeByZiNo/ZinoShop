@@ -23,4 +23,9 @@ public class ProductImageRepositoryImpl implements ProductImageRepository{
     }
 
 
+    @Override
+    public void delete(ProductImage productImage){
+        productImageJpaRepository.delete(productImage);
+    }
+
 }
