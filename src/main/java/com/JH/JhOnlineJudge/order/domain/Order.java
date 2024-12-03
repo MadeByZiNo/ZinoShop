@@ -2,6 +2,7 @@ package com.JH.JhOnlineJudge.order.domain;
 
 import com.JH.JhOnlineJudge.common.CartProduct.CartProduct;
 import com.JH.JhOnlineJudge.common.OrderProduct.OrderProduct;
+import com.JH.JhOnlineJudge.coupon.Coupon;
 import com.JH.JhOnlineJudge.order.dto.OrderSaveDto;
 import com.JH.JhOnlineJudge.product.domain.Product;
 import com.JH.JhOnlineJudge.user.domain.User;
@@ -73,12 +74,21 @@ public class Order {
     @Column(name="discount_info",nullable = false)
     private String discountInfo;
 
+    @Column(name="coupon_discount_price")
+    private Integer couponDiscountPrice;
+
+    @Column(name="reward_points_discount_price")
+    private Integer rewardPointsDiscountPrice;
+
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderProduct> orderProducts = new ArrayList<>();
 
+    @OneToOne
+    @JoinColumn(name = "coupon_id", nullable = true)
+    private Coupon coupon;
 
     @Builder
-    private Order (User user, OrderSaveDto orderSaveDto, List<CartProduct> cartProducts) {
+    private Order (User user, OrderSaveDto orderSaveDto, List<CartProduct> cartProducts, Coupon coupon) {
         this.externalId = UUID.randomUUID().toString();
         this.user = user;
         this.name = cartProducts.get(0).getProduct().getName();
@@ -94,14 +104,18 @@ public class Order {
         this.finalPrice = CartProduct.sumPricesFromList(cartProducts) - orderSaveDto.getDiscountedPrice();
         this.discountInfo = orderSaveDto.getDiscountInfo();
         this.memo = orderSaveDto.getMemo();
+        this.couponDiscountPrice = orderSaveDto.getCouponDiscountPrice();
+        this.rewardPointsDiscountPrice = orderSaveDto.getRewardPointsDiscountPrice();
+        this.coupon = coupon;
 
    }
 
-    public static Order of(User user, OrderSaveDto orderSaveDto,  List<CartProduct> cartProducts) {
+    public static Order of(User user, OrderSaveDto orderSaveDto,  List<CartProduct> cartProducts, Coupon coupon) {
        return Order.builder()
                .user(user)
                .orderSaveDto(orderSaveDto)
                .cartProducts(cartProducts)
+               .coupon(coupon)
                .build();
     }
 

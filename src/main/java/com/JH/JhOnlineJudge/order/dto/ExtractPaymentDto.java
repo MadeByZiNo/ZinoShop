@@ -7,7 +7,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @AllArgsConstructor
-public class extractPaymentDto {
+public class ExtractPaymentDto {
         private String externalId;
         private String paymentKey;
         private String method;

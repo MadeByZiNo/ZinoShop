@@ -1,4 +1,4 @@
-package com.JH.JhOnlineJudge.common.coupon;
+package com.JH.JhOnlineJudge.coupon;
 
 public enum CouponType {
     할인률,

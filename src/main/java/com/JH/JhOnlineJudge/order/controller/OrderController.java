@@ -2,6 +2,8 @@ package com.JH.JhOnlineJudge.order.controller;
 
 import com.JH.JhOnlineJudge.cart.service.CartService;
 import com.JH.JhOnlineJudge.common.CartProduct.CartProduct;
+import com.JH.JhOnlineJudge.coupon.CouponDto;
+import com.JH.JhOnlineJudge.coupon.CouponService;
 import com.JH.JhOnlineJudge.order.domain.Order;
 import com.JH.JhOnlineJudge.order.dto.MyOrdersDto;
 import com.JH.JhOnlineJudge.order.dto.OrderConfirmDto;
@@ -31,6 +33,7 @@ public class OrderController {
     private final OrderService orderService;
     private final UserService userService;
     private final CartService cartService;
+    private final CouponService couponService;
 
     @Value("${toss.client-key}")
     private String CLIENT_KEY;
@@ -48,11 +51,15 @@ public class OrderController {
             orderName += " 외 " + (cartProducts.size() - 1) + "개";
         }
 
+        List<CouponDto> coupons = couponService.findAvailableCouponsByUserId(userId);
+        coupons.stream().forEach(coupon -> System.out.println(coupon.isUsed()));
         model.addAttribute("user",user);
         model.addAttribute("cartProducts",cartProducts);
         model.addAttribute("totalPrice",totalPrice);
         model.addAttribute("clientKey",CLIENT_KEY);
         model.addAttribute("orderName",orderName);
+        model.addAttribute("coupons",coupons);
+
         return "cart/order";
    }
 

@@ -1,7 +1,7 @@
 package com.JH.JhOnlineJudge.user.domain;
 
 import com.JH.JhOnlineJudge.cart.domain.Cart;
-import com.JH.JhOnlineJudge.common.coupon.Coupon;
+import com.JH.JhOnlineJudge.coupon.Coupon;
 import com.JH.JhOnlineJudge.heart.Heart;
 import com.JH.JhOnlineJudge.order.domain.Order;
 import com.JH.JhOnlineJudge.user.dto.UpdateDto;
@@ -92,13 +92,16 @@ public class User {
       }
 
       public int updateRewardPoints(Order order){
-            this.rewardPoints -= order.getDiscountedPrice();
+            this.rewardPoints -= order.getRewardPointsDiscountPrice();
             double saleRate;
             saleRate = this.getRole() == UserRole.고객님 ? 0.15 : 0.03;
             this.rewardPoints += order.getFinalPrice() * saleRate;
             return  (int)(order.getFinalPrice() * saleRate);
       }
 
+    public void updateRole(UserRole role){
+        this.role = role;
+    }
     public void attachCart(Cart cart){
         this.cart = cart;
     }

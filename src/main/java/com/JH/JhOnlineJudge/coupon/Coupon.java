@@ -1,4 +1,4 @@
-package com.JH.JhOnlineJudge.common.coupon;
+package com.JH.JhOnlineJudge.coupon;
 
 import com.JH.JhOnlineJudge.user.domain.User;
 import jakarta.persistence.*;
@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
+@Entity
 @NoArgsConstructor
 @Getter
 public class Coupon {
@@ -28,10 +29,19 @@ public class Coupon {
     @Column(nullable = false)
     private CouponType type;
 
-    private Double discountRate; // 할인율
-    private int discountAmount; // 고정 금액
+    @Column(name = "discount_rate", nullable = true)
+    private Double discountRate;
+
+    @Column(name = "discount_amount", nullable = true)
+    private Integer discountAmount;
+
+    @Column(name = "min_amount")
+    private int minAmount;
 
     @Column(nullable = false)
     private boolean used = false;
 
+    public void updateUsed() {
+        used = true;
+    }
 }

@@ -60,7 +60,6 @@ public class HeartController {
     @ResponseBody
     public ResponseEntity<Boolean> checkHeartStatus(@AuthUser Long userId, @RequestParam Long productId) {
         boolean isHearted = heartService.existsHeart(userId, productId);
-        log.info("{}{}{}",userId,productId,isHearted);
         return ResponseEntity.ok(isHearted);
     }
 }

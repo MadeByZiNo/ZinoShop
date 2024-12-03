@@ -2,6 +2,8 @@ package com.JH.JhOnlineJudge.order.service;
 
 import com.JH.JhOnlineJudge.common.CartProduct.CartProduct;
 import com.JH.JhOnlineJudge.common.OrderProduct.OrderProduct;
+import com.JH.JhOnlineJudge.coupon.Coupon;
+import com.JH.JhOnlineJudge.coupon.CouponService;
 import com.JH.JhOnlineJudge.order.domain.Order;
 import com.JH.JhOnlineJudge.order.domain.OrderStatus;
 import com.JH.JhOnlineJudge.order.dto.*;
@@ -11,7 +13,6 @@ import com.JH.JhOnlineJudge.order.repository.OrderRepository;
 import com.JH.JhOnlineJudge.product.domain.Product;
 import com.JH.JhOnlineJudge.product.service.ProductService;
 import com.JH.JhOnlineJudge.user.admin.dto.DeliverySearchFilterDto;
-import com.JH.JhOnlineJudge.user.domain.AuthUser;
 import com.JH.JhOnlineJudge.user.domain.User;
 import com.JH.JhOnlineJudge.user.exception.InvalidRewardPointsException;
 import com.JH.JhOnlineJudge.user.service.UserService;
@@ -22,7 +23,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.HashMap;
@@ -36,6 +36,7 @@ public class OrderService {
 
     private final UserService userService;
     private final ProductService productService;
+    private final CouponService couponService;
     private final OrderRepository orderRepository;
     private final RestTemplate restTemplate;
 
@@ -71,30 +72,40 @@ public class OrderService {
                                        List<CartProduct> cartProducts) {
 
         User user = userService.findUserById(userId);
+        Coupon coupon = couponService.findById(orderSaveDto.getCouponId());
+        Order order = Order.of(user, orderSaveDto, cartProducts, coupon);
 
-        if(orderSaveDto.getDiscountedPrice() > user.getRewardPoints() || orderSaveDto.getDiscountedPrice() < 0) {
+        // 포인트 개수 예외처리
+        if(orderSaveDto.getRewardPointsDiscountPrice() > user.getRewardPoints() || orderSaveDto.getDiscountedPrice() < 0) {
             throw new InvalidRewardPointsException();
         }
 
-        Order order = Order.of(user, orderSaveDto, cartProducts);
-
        for (CartProduct cartProduct : cartProducts) {
-           Product product = productService.findProductByIdWithLock(cartProduct.getProduct().getId());
+           Product product = productService.findProductById(cartProduct.getProduct().getId());
+
            int quantity = cartProduct.getQuantity();
            int price = product.getPrice();
 
+           // 품절일 경우 예외 처리
           if (product.getRemain() <= 0 || product.getState().equals("품절")) {
-              throw new InsufficientRemainException("품절 된 상품입니다."); // 재고 부족 예외 발생
+              throw new InsufficientRemainException("품절 된 상품입니다.");
+          }
+
+          // 쿠폰 개수 처리
+          if(couponService.findById(orderSaveDto.getCouponId()).isUsed()) {
+              throw new InsufficientRemainException("이미 사용된 쿠폰입니다.");
           }
 
           // 주문 수량이 재고 수량보다 많을 경우 예외 처리
           if (product.getRemain() < quantity) {
-              throw new InsufficientRemainException("재고 수량보다 많은 구매 요청을 하셨습니다."); // 재고 부족 예외 발생
+              throw new InsufficientRemainException("재고 수량보다 많은 구매 요청을 하셨습니다.");
           }
 
-           OrderProduct orderProduct = OrderProduct.of(order,product,quantity,price);
-           orderProduct.attachOrder(order);
+            OrderProduct orderProduct = OrderProduct.of(order,product,quantity,price);
+            orderProduct.attachOrder(order);
        }
+
+       // 임시 주문서 저장
        orderRepository.save(order);
 
        Map<String ,Object> map = new HashMap<>();
@@ -108,47 +119,34 @@ public class OrderService {
     @Transactional(rollbackFor = Exception.class)
     public Map<String, Object> confirmPaymentAndUpdate(Long userId, OrderConfirmDto orderConfirmDto) {
 
-        //재고 확인
-         Order order = findByExternalId(orderConfirmDto.getExternalId());
-          for (OrderProduct orderProduct : order.getOrderProducts()) {
-              Product product = productService.findProductByIdWithLock(orderProduct.getProduct().getId());
+        Order order = findByExternalId(orderConfirmDto.getExternalId());
 
-              if (product.getRemain() <= 0 || product.getState().equals("품절")) {
-                         throw new InsufficientRemainException("품절 된 상품입니다."); // 재고 부족 예외 발생
-              }
+        // 재고 차감
+        for (OrderProduct orderProduct : order.getOrderProducts()) {
+            Product product = productService.findProductByIdWithLock(orderProduct.getProduct().getId());
+            int quantity = orderProduct.getQuantity();
+            product.updateRemain(-quantity);
+        }
 
-              if (product.getRemain() < orderProduct.getQuantity()) {
-                  throw new InsufficientRemainException("재고 수량보다 많은 구매 요청을 하셨습니다."); // 재고 부족 예외 발생
-              }
-          }
+        // 포인트 업데이트
+        int point = userService.updateRewardPoints(userId, order);
 
-          // 결제 확정 요청 후 정보 추출
-         ResponseEntity<String> response = requestPaymentConfirmation(orderConfirmDto);
-         extractPaymentDto paymentInfo = extractPaymentInfo(response.getBody());
+        // 쿠폰 차감
+        order.getCoupon().updateUsed();
 
-         // 결제 확정 처리
-         order.updateConfirm(paymentInfo.getPaymentKey(), paymentInfo.getMethod());
-         updateProductRemain(order);
+        // 결제 확정 요청 후 정보 추출
+        ResponseEntity<String> response = requestPaymentConfirmation(orderConfirmDto);
+        ExtractPaymentDto paymentInfo = extractPaymentInfo(response.getBody());
 
-         // 포인트 업데이트
-         int point = userService.updateRewardPoints(userId, order);
+        // 결제 확정 처리
+        order.updateConfirm(paymentInfo.getPaymentKey(), paymentInfo.getMethod());
 
-         Map<String, Object> responseData = new HashMap<>();
-         responseData.put("result", response.getStatusCode() == HttpStatus.OK);
-         responseData.put("point", point);
-         return responseData;
-     }
-
-
-    @Transactional
-    public void updateProductRemain(Order order) {
-        order.getOrderProducts().stream()
-            .forEach(orderProduct -> {
-                Product product = orderProduct.getProduct();
-                int quantity = orderProduct.getQuantity();
-                product.updateRemain(-quantity);
-            });
+        Map<String, Object> responseData = new HashMap<>();
+        responseData.put("result", response.getStatusCode() == HttpStatus.OK);
+        responseData.put("point", point);
+        return responseData;
     }
+
 
     @Transactional
     public List<Order> findOrdersByUserId(Long userId) {
@@ -203,14 +201,14 @@ public class OrderService {
       }
 
 
-    private extractPaymentDto extractPaymentInfo(String responseBody) {
+    private ExtractPaymentDto extractPaymentInfo(String responseBody) {
           try {
               JsonNode jsonResponse = new ObjectMapper().readTree(responseBody);
               String externalId = jsonResponse.get("orderId").asText();
               String paymentKey = jsonResponse.get("paymentKey").asText();
               String method = jsonResponse.get("method").asText();
 
-              return new extractPaymentDto(externalId, paymentKey, method);
+              return new ExtractPaymentDto(externalId, paymentKey, method);
           } catch (Exception e) {
               throw new RuntimeException("결제 정보 추출 실패", e);
           }

@@ -11,5 +11,8 @@ public class OrderSaveDto {
     private String detailAddress;
     private int discountedPrice;
     private String discountInfo;
+    private int couponDiscountPrice;
+    private int rewardPointsDiscountPrice;
     private String memo;
+    private Long couponId;
 }
