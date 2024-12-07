@@ -19,7 +19,7 @@ public interface OrderJpaRepository extends JpaRepository<Order, Long> {
     List<Order> findAllByStatus(OrderStatus status);
 
 
-    @Query("SELECT o FROM Order o WHERE o.deliveredAt  BETWEEN :startDate AND :endDate" +
+    @Query("SELECT o FROM Order o WHERE o.deliveredAt BETWEEN :startDate AND :endDate " +
             "AND o.status = :status")
       List<Order> findAllByDeliveredAtAndStatus(@Param("startDate") LocalDateTime startDate,
                                                 @Param("endDate") LocalDateTime endDate,

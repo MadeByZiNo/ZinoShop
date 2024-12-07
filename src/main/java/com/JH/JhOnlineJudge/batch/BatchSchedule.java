@@ -1,10 +1,7 @@
 package com.JH.JhOnlineJudge.batch;
 
-import com.JH.JhOnlineJudge.common.statistic.StatDateRange;
-import com.JH.JhOnlineJudge.common.statistic.StatDateRangeHelper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.batch.core.JobParameters;
-import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.batch.core.configuration.JobRegistry;
 import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.context.annotation.Configuration;

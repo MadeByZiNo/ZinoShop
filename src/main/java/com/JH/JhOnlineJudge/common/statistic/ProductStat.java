@@ -37,4 +37,9 @@ public class ProductStat {
         productStat.totalPrice = 0;
         return productStat;
     }
+
+    public void update(int quantity, int price) {
+        this.quantity = quantity;
+        this.totalPrice = price;
+    }
 }

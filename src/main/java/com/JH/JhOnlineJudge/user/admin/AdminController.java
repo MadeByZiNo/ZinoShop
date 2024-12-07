@@ -2,6 +2,7 @@ package com.JH.JhOnlineJudge.user.admin;
 
 import com.JH.JhOnlineJudge.category.CategoryService;
 import com.JH.JhOnlineJudge.category.domain.Category;
+import com.JH.JhOnlineJudge.common.statistic.ProductSalesStatDto;
 import com.JH.JhOnlineJudge.order.domain.OrderStatus;
 import com.JH.JhOnlineJudge.product.domain.Product;
 import com.JH.JhOnlineJudge.product.service.ProductService;
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
@@ -50,6 +52,13 @@ public class AdminController {
         return "admin/product";
     }
 
+    @GetMapping("/analytics-form")
+       public String getAdminAnalyticsForm(@Admin Long userId,
+                                   Model model) {
+        model.addAttribute("products",productService.findAll());
+        return "admin/analytics";
+    }
+
     @GetMapping("/deliveries")
     @ResponseBody
     public ResponseEntity<List<DeliverySearchResponseDto>> getDeliveryList(@Admin Long userId,
@@ -68,5 +77,25 @@ public class AdminController {
         adminService.updateDeliveryStatus(deliveryIds, OrderStatus.valueOf(status));
 
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/statistic/product")
+    public ResponseEntity<List<ProductSalesStatDto>> getProductSalesStatistic(@Admin Long userId,
+                                                                              @RequestParam String timeFilter,
+                                                                              @RequestParam Long productId,
+                                                                              @RequestParam(required = false) int year,
+                                                                              @RequestParam(required = false) int month) {
+
+        List<ProductSalesStatDto> response = new ArrayList<>();
+
+        if ("daily".equals(timeFilter)) {
+            response = adminService.getDailyProductSalesStatistic(productId, year, month);
+          } else if ("monthly".equals(timeFilter)) {
+            response = adminService. getMonthlyProductSalesStatistic(productId, year);
+          } else if ("yearly".equals(timeFilter)) {
+            response = adminService.getYearlyProductSalesStatistic(productId, year);
+          }
+
+        return ResponseEntity.ok(response);
     }
 }

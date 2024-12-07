@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
+      layout:decorate="layout/default_layout">
+<head>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .chart-container {
+            width: 90%;
+            margin: 20px auto;
+            padding: 20px;
+            background: #f9f9f9;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .chart-title {
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        #chart1, #chart2 {
+            max-height: 400px;
+        }
+
+        .filter-container {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .filter-container select {
+            padding: 5px;
+            font-size: 14px;
+        }
+
+        .tooltip {
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="chart-container">
+        <div class="chart-title">일별, 월별, 년별로 상품 판매량 분석 (꺾은선형 그래프)</div>
+        <div class="filter-container">
+            <select id="time-filter1">
+                <option value="daily">일별</option>
+                <option value="monthly">월별</option>
+                <option value="yearly">년별</option>
+            </select>
+            <th:block th:each="product : ${products}">
+                    <option th:value="${product.id}" th:text="${product.name}"></option>
+            </th:block>
+        </div>
+        <canvas id="chart1"></canvas>
+    </div>
+
+    <div class="chart-container">
+        <div class="chart-title">일별, 월별, 년별로 팔린 상품 순위 분석 (막대그래프)</div>
+        <div class="filter-container">
+            <select id="time-filter2">
+                <option value="daily">일별</option>
+                <option value="monthly">월별</option>
+                <option value="yearly">년별</option>
+            </select>
+            <select id="year-filter" style="display: none;">
+                  <!-- 년도 옵션 동적으로 추가 -->
+              </select>
+              <select id="month-filter" style="display: none;">
+                  <!-- 월 옵션 동적으로 추가 -->
+              </select>
+            <select id="ranking-filter">
+                <option value="quantity">팔린 순</option>
+                <option value="price">가격 순</option>
+            </select>
+        </div>
+        <canvas id="chart2"></canvas>
+    </div>
+</div>
+
+<script>
+    const fetchChartData = async (url, params) => {
+        try {
+            const query = new URLSearchParams(params).toString();
+            const response = await fetch(`${url}?${query}`);
+            if (!response.ok) throw new Error("데이터를 불러오지 못했습니다.");
+            return await response.json();
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
+    const createLineChart = (ctx, labels, data) => {
+        return new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: '판매량',
+                    data: data.quantity,
+                    borderColor: '#4CAF50',
+                    backgroundColor: 'rgba(76, 175, 80, 0.2)',
+                    fill: true,
+                }, {
+                    label: '가격',
+                    data: data.price,
+                    borderColor: '#2196F3',
+                    backgroundColor: 'rgba(33, 150, 243, 0.2)',
+                    fill: true,
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return `${context.dataset.label}: ${context.raw}`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: { title: { display: true, text: '날짜' } },
+                    y: { title: { display: true, text: '값' } }
+                }
+            }
+        });
+    };
+
+    const createBarChart = (ctx, labels, data) => {
+        return new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: '팔린 개수',
+                    data: data.quantity,
+                    backgroundColor: '#FFC107',
+                }, {
+                    label: '총 가격',
+                    data: data.price,
+                    backgroundColor: '#03A9F4',
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return `${context.dataset.label}: ${context.raw}`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: { title: { display: true, text: '상품 이름' } },
+                    y: { title: { display: true, text: '값' } }
+                }
+            }
+        });
+    };
+
+    document.addEventListener('DOMContentLoaded', async () => {
+        const chart1Ctx = document.getElementById('chart1').getContext('2d');
+        const timeFilter1 = document.getElementById('time-filter1');
+        const yearFilter = document.getElementById('year-filter');
+        const monthFilter = document.getElementById('month-filter');
+        const productFilter = document.getElementById('product-filter');
+
+        // 년도 옵션 추가 (2022년부터 올해까지)
+        const currentYear = new Date().getFullYear();
+        for (let year = 2022; year <= currentYear; year++) {
+            const option = document.createElement('option');
+            option.value = year;
+            option.textContent = `${year}년`;
+            yearFilter.appendChild(option);
+        }
+
+        // 월 옵션 추가 (1월부터 12월까지)
+        for (let month = 1; month <= 12; month++) {
+            const option = document.createElement('option');
+            option.value = month.toString().padStart(2, '0');
+            option.textContent = `${month}월`;
+            monthFilter.appendChild(option);
+        }
+
+        timeFilter1.addEventListener('change', () => {
+            const selected = timeFilter1.value;
+            if (selected === 'daily') {
+                yearFilter.style.display = 'inline-block';
+                monthFilter.style.display = 'inline-block';
+            } else if (selected === 'monthly') {
+                yearFilter.style.display = 'inline-block';
+                monthFilter.style.display = 'none';
+            } else {
+                yearFilter.style.display = 'none';
+                monthFilter.style.display = 'none';
+            }
+        });
+
+        const loadChart1 = async () => {
+            const params = {
+                timeFilter: timeFilter1.value,
+                productId: productFilter.value
+             };
+
+            if (timeFilter1.value === 'daily') {
+                params.year = yearFilter.value;
+                params.month = monthFilter.value;
+            } else if (timeFilter1.value === 'monthly') {
+                params.year = yearFilter.value;
+            }
+
+            const data = await fetchChartData('/admin/statistic/product', params);
+            const labels = data.map(d => d.date);
+            const chartData = {
+                quantity: data.map(d => d.quantity),
+                price: data.map(d => d.price)
+            };
+            createLineChart(chart1Ctx, labels, chartData);
+        };
+
+        const chart2Ctx = document.getElementById('chart2').getContext('2d');
+        const timeFilter2 = document.getElementById('time-filter2');
+        const rankingFilter = document.getElementById('ranking-filter');
+
+        const loadChart2 = async () => {
+            const data = await fetchChartData('/api/product-ranking', {
+                time: timeFilter2.value,
+                ranking: rankingFilter.value
+            });
+            const labels = data.map(d => d.productName);
+            const chartData = {
+                quantity: data.map(d => d.quantity),
+                price: data.map(d => d.price)
+            };
+            createBarChart(chart2Ctx, labels, chartData);
+        };
+
+        timeFilter1.addEventListener('change', loadChart1);
+        productFilter.addEventListener('change', loadChart1);
+         yearFilter.addEventListener('change', loadChart1);
+        monthFilter.addEventListener('change', loadChart1);
+
+        timeFilter2.addEventListener('change', loadChart2);
+        rankingFilter.addEventListener('change', loadChart2);
+
+        await loadChart1();
+        await loadChart2();
+    });
+</script>
+</body>
+</html>
