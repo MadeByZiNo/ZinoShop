@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.w3.org/1999/xhtml"
+      layout:decorate="layout/default_layout">
+<head>
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        window.onload = function () {
+            setTimeout(function () {
+                window.location.href = '/'; // 리다이렉트할 경로
+            }, 3000); // 3초 동안 메시지를 표시
+        };
+        /*]]>*/
+    </script>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="container mt-5">
+        <div class="alert alert-success" role="alert">
+            <h4 class="alert-heading" th:text="'정보 수정 완료!,'"></h4>
+            <p> 3초후 홈으로 이동합니다.</p>
+        </div>
+    </div>
+</div>
+</body>
+</html>
