@@ -245,7 +245,7 @@
         document.addEventListener("DOMContentLoaded", function() {
             const productId = [[${product.id}]];
             const heartIcon = document.getElementById(`heart-icon-${productId}`);
-            fetch(`/heart/status?productId=${productId}`, {
+            fetch(`/heart/${productId}/status`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json'
@@ -406,7 +406,7 @@
 
     <div class="product-reviews">
         <div class="text-center mb-3">
-            <a th:href="@{/review/write-page(productId=${product.id})}" class="btn btn-primary btn-lg w-75 mx-auto">리뷰 작성하기</a>
+            <a th:href="@{/review/write(productId=${product.id})}" class="btn btn-primary btn-lg w-75 mx-auto">리뷰 작성하기</a>
         </div>
         <div id="latest-review-list">
             <!-- 최신 리뷰 3개가 표시되는 곳 -->
@@ -442,7 +442,7 @@
     <!-- 상품 가격 및 장바구니 -->
     <div class="product-action-container">
         <p class="product-price" th:text="'가격: ' + ${product.price}"></p>
-        <form action="/cart/add-product" method="post">
+        <form action="/cart/product" method="post">
             <input type="hidden" name="productId" th:value="${product.id}"/>
             <input type="hidden" name="quantity" value="1"/>
             <button type="submit" class="btn"

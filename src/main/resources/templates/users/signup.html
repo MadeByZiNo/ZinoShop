@@ -40,7 +40,7 @@
     <div class="card" style=" width:600px;  margin: 0 auto;">
       <div class="card-body" >
         <h2 class="card-title" style="margin-top: 25px; margin-bottom: 40px; text-align: center;">회원가입</h2>
-        <form th:action="@{/users/signup}" method="post" th:object="${signUpDto}">
+        <form th:action="@{/users/signup}" method="post" th:object="${signUpRequest}">
           <div class="mb-3 rounded">
             <label for="username" class="form-label">아이디</label>
             <input type="text" class="form-control" id="username" th:field="*{username}" th:errorclass="field-error">

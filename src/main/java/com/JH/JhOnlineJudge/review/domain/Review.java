@@ -1,15 +1,13 @@
 package com.JH.JhOnlineJudge.review.domain;
 
-import com.JH.JhOnlineJudge.common.Image.ReviewImage.ReviewImage;
+import com.JH.JhOnlineJudge.Image.ReviewImage.ReviewImage;
 import com.JH.JhOnlineJudge.product.domain.Product;
-import com.JH.JhOnlineJudge.review.dto.ReviewCreateDto;
 import com.JH.JhOnlineJudge.user.domain.User;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;

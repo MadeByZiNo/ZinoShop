@@ -105,7 +105,7 @@
              heartIcons.forEach(function(heartIcon) {
                  const productId = heartIcon.getAttribute('data-product-id');
 
-                 fetch(`/heart/status?productId=${productId}`, {
+                 fetch(`/heart/${productId}/status`, {
                      method: 'GET',
                      headers: {
                          'Content-Type': 'application/json'

@@ -36,9 +36,6 @@ public class ProductRepositoryImpl implements ProductRepository {
     }
 
     @Override
-    public Optional<Product> findByIdWithLock(Long id) {return productJpaRepository.findByIdWithLock(id);}
-
-    @Override
     public Page<Product> findProductsByCategoryIds(List<Long> categoryIds, Pageable pageable) {
         return productJpaRepository.findProductsByCategoryIds(categoryIds,pageable);
     }

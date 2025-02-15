@@ -3,8 +3,8 @@ package com.JH.JhOnlineJudge.cart.service;
 import com.JH.JhOnlineJudge.cart.domain.Cart;
 import com.JH.JhOnlineJudge.cart.exception.InvalidQuantityException;
 import com.JH.JhOnlineJudge.cart.exception.NotFoundCartException;
-import com.JH.JhOnlineJudge.common.CartProduct.CartProduct;
-import com.JH.JhOnlineJudge.common.CartProduct.CartProductRepository;
+import com.JH.JhOnlineJudge.cart.CartProduct.CartProduct;
+import com.JH.JhOnlineJudge.cart.CartProduct.CartProductRepository;
 import com.JH.JhOnlineJudge.product.domain.Product;
 import com.JH.JhOnlineJudge.product.service.ProductService;
 import com.JH.JhOnlineJudge.user.domain.User;
@@ -25,27 +25,27 @@ public class CartService {
     private final ProductService productService;
     private final CartProductRepository cartProductRepository;
 
-        @Transactional
-        public Cart saveProduct(Long userId, Long productId, int quantity) {
+    @Transactional
+    public Cart addProductToCart(Long userId, Long productId, int quantity) {
 
-            User user = userService.findUserById(userId);
-            Product product = productService.findProductById(productId);
+        User user = userService.findUserById(userId);
+        Product product = productService.getProductById(productId);
 
-            Cart cart = user.getCart();
+        Cart cart = user.getCart();
 
-           if(cartProductRepository.existsByCartIdAndProductId(cart.getId(), productId)){
-               return null; //이미 존재할시 아무 반응하지않음
-           }
+       if(cartProductRepository.existsByCartIdAndProductId(cart.getId(), productId)){
+           return null; //이미 존재할시 아무 반응하지않음
+       }
 
-            CartProduct cartProduct = new CartProduct(cart, product, quantity);
-            cart.getCartProducts().add(cartProduct);
-            cartProductRepository.save(cartProduct);
+        CartProduct cartProduct = new CartProduct(cart, product, quantity);
+        cart.getCartProducts().add(cartProduct);
+        cartProductRepository.save(cartProduct);
 
-            return cart;
+        return cart;
     }
 
-    @Transactional
-    public List<CartProduct> getCartProductList(Long userId) {
+    @Transactional(readOnly = true)
+    public List<CartProduct> getProductsInCart(Long userId) {
         User user = userService.findUserById(userId);
 
         Cart cart = user.getCart();
@@ -53,29 +53,29 @@ public class CartService {
     }
 
     @Transactional
-    public Cart deleteProduct(Long userId,
-                              Long productId) {
+    public Cart removeProductFromCart(Long userId,
+                                      Long productId) {
         User user = userService.findUserById(userId);
 
         Cart cart = user.getCart();
         if (!cartProductRepository.existsByCartIdAndProductId(cart.getId(), productId)) {
                return null;
         }
-      cart.getCartProducts().removeIf(cartProduct -> cartProduct.getProduct().getId().equals(productId));
-      return cart;
+        cart.getCartProducts().removeIf(cartProduct -> cartProduct.getProduct().getId().equals(productId));
+        return cart;
 
     }
 
     @Transactional
-     public void clearProduct(Long userId,
-                               Long productId) {
+     public void clearCart(Long userId,
+                           Long productId) {
          User user = userService.findUserById(userId);
          Cart cart = user.getCart();
          cart.clear();
      }
 
     @Transactional
-    public void updateQuantity(Long userId,Long productId,int quantity) {
+    public void updateProductQuantityInCart(Long userId, Long productId, int quantity) {
 
         if (quantity < 1 || quantity > 99) {
               throw new InvalidQuantityException();

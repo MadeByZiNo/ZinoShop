@@ -1,18 +1,15 @@
 package com.JH.JhOnlineJudge.user.interceptor;
 
-import com.JH.JhOnlineJudge.utils.JwtUtil;
-import jakarta.servlet.http.Cookie;
+import com.JH.JhOnlineJudge.common.utils.JwtUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.util.WebUtils;
 
 import java.io.IOException;
-import java.util.Arrays;
 
 @Component
 @RequiredArgsConstructor

@@ -114,7 +114,7 @@
 
         // 서버에 업데이트된 수량 전송
         $.ajax({
-            url: '/cart/update-quantity',
+            url: '/cart/product/quantity',
             method: 'POST',
             contentType: 'application/json',
             data: JSON.stringify({ productId: productId, quantity: quantity }),
@@ -177,6 +177,7 @@
                 </td>
                 <td>
                     <form action="/cart/remove-product" method="post">
+                        <input type="hidden" name="_method" value="DELETE">
                         <input type="hidden" th:value="${cartProduct.product.id}" name="productId">
                         <button type="submit" class="btn btn-primary">삭제</button>
                     </form>

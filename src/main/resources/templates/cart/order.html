@@ -49,9 +49,9 @@
     </style>
     <script th:inline="javascript">
 
-    let couponDiscountPrice;
+    let couponDiscountPrice = 0;
     let couponDiscountInfo;
-    let rewardPointsDiscountPrice;
+    let rewardPointsDiscountPrice = 0;
     let rewardPointsDiscountInfo;
 
     function findAddr() {
@@ -311,7 +311,7 @@
 
 
             <div class="form-group">
-                <label>주문자명</label>
+                <label>받는사람 이름</label>
                 <input type="text" name="recipientName" class="form-control">
             </div>
 
@@ -382,7 +382,7 @@
             </div>
 
             <input type="hidden"  id="discountedPrice" name="discountedPrice">
-            <input type="text" id="discountInfo" name="discountInfo"  style="width: 300px; height: 40px; font-size: 18px;">
+            <input type="hidden" id="discountInfo" name="discountInfo"  style="width: 300px; height: 40px; font-size: 18px;">
 
              <button type="button" class="btn btn-success submit-btn" onclick="submitForm()">결제 요청</button>
         </form>

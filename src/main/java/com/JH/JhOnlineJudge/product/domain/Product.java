@@ -1,10 +1,10 @@
 package com.JH.JhOnlineJudge.product.domain;
 
 import com.JH.JhOnlineJudge.category.domain.Category;
-import com.JH.JhOnlineJudge.common.CartProduct.CartProduct;
-import com.JH.JhOnlineJudge.common.Image.ProductImage.ProductImage;
-import com.JH.JhOnlineJudge.common.OrderProduct.OrderProduct;
-import com.JH.JhOnlineJudge.heart.Heart;
+import com.JH.JhOnlineJudge.cart.CartProduct.CartProduct;
+import com.JH.JhOnlineJudge.Image.ProductImage.ProductImage;
+import com.JH.JhOnlineJudge.order.OrderProduct.OrderProduct;
+import com.JH.JhOnlineJudge.heart.domain.Heart;
 import com.JH.JhOnlineJudge.product.dto.ProductDto;
 import jakarta.persistence.*;
 import lombok.*;
@@ -53,6 +53,9 @@ public class Product {
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderProduct> orderProducts = new ArrayList<>();
+
+    @Version
+    private Long version;
 
     @Builder
     public Product(Long id, String name, int price, String description, int remain, ProductState state) {

@@ -1,14 +1,12 @@
 package com.JH.JhOnlineJudge.notification;
 
 
-import org.assertj.core.api.Assertions;
+import com.JH.JhOnlineJudge.notification.domain.NotificationFrom;
+import com.JH.JhOnlineJudge.notification.service.NotificationService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.redis.core.RedisTemplate;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @SpringBootTest
 class NotificationServiceTest {
@@ -41,7 +39,7 @@ class NotificationServiceTest {
     @Test
     public void NotificationMessageTest() {
         Long id = 1L;
-        notificationService.sendNotificationMessage(id,"test4",NotificationFrom.배송);
+        notificationService.sendNotificationMessage(id,"test4", NotificationFrom.배송);
         notificationService.sendNotificationMessage(id,"test5",NotificationFrom.배송);
         notificationService.sendNotificationMessage(id,"test6",NotificationFrom.문의);
 

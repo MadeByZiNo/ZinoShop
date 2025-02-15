@@ -1,8 +1,8 @@
 package com.JH.JhOnlineJudge.config;
 
-import com.JH.JhOnlineJudge.common.statistic.OrderProductStatDto;
-import com.JH.JhOnlineJudge.common.statistic.ProductStat;
-import com.JH.JhOnlineJudge.common.statistic.ProductStatJpaRepository;
+import com.JH.JhOnlineJudge.user.admin.statistic.OrderProductStatDto;
+import com.JH.JhOnlineJudge.user.admin.statistic.ProductStat;
+import com.JH.JhOnlineJudge.user.admin.statistic.ProductStatJpaRepository;
 import com.JH.JhOnlineJudge.order.domain.Order;
 import com.JH.JhOnlineJudge.order.domain.OrderStatus;
 import com.JH.JhOnlineJudge.order.repository.OrderJpaRepository;
@@ -166,7 +166,6 @@ public class StatBatchConfig {
      *  2. 주문들에 담긴 모든 orderProduct들을 순회한다.
      *  3. 순회하는 과정에서 해당 product.id를 key로 hashmap을 통해 해당 orderProduct를 넣어준다.
      *  4. 이제 processor에서는 해당 product의 id를 이용해 findAll로 개수와 가격들을 받아주면 된다.
-     * @return
      */
     @Bean
     public JobExecutionListener jobExecutionListener() {

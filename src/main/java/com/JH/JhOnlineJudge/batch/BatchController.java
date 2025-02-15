@@ -8,6 +8,7 @@ import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDate;
@@ -22,22 +23,23 @@ public class BatchController {
 
     @GetMapping("/vip")
     public ResponseEntity<String> vipBatch() throws Exception {
-
         jobLauncher.run(jobRegistry.getJob("updateVipJob"), new JobParameters());
 
         return ResponseEntity.ok().build();
     }
 
     @GetMapping("/stat")
-    public ResponseEntity<String> statBatch() throws Exception {
+    public ResponseEntity<String> statBatch(@RequestParam LocalDate date) throws Exception {
         JobParametersBuilder jobParametersBuilder = new JobParametersBuilder();
-        jobParametersBuilder.addLocalDate("date",LocalDate.now()).toJobParameters();
-
+        jobParametersBuilder.addLocalDate("date",date).toJobParameters();
         jobLauncher.run(jobRegistry.getJob("updateStatJob"), jobParametersBuilder.toJobParameters());
 
-        jobParametersBuilder.addLocalDate("date",LocalDate.now().plusDays(1)).toJobParameters();
+        return ResponseEntity.ok().build();
+    }
 
-        jobLauncher.run(jobRegistry.getJob("updateStatJob"), jobParametersBuilder.toJobParameters());
+    @GetMapping("/refund")
+    public ResponseEntity<String> refundBatch() throws Exception {
+        jobLauncher.run(jobRegistry.getJob("refundRequestStep"), new JobParameters());
 
         return ResponseEntity.ok().build();
     }

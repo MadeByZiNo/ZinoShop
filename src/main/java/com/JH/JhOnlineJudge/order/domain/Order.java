@@ -1,10 +1,9 @@
 package com.JH.JhOnlineJudge.order.domain;
 
-import com.JH.JhOnlineJudge.common.CartProduct.CartProduct;
-import com.JH.JhOnlineJudge.common.OrderProduct.OrderProduct;
-import com.JH.JhOnlineJudge.coupon.Coupon;
-import com.JH.JhOnlineJudge.order.dto.OrderSaveDto;
-import com.JH.JhOnlineJudge.product.domain.Product;
+import com.JH.JhOnlineJudge.cart.CartProduct.CartProduct;
+import com.JH.JhOnlineJudge.order.OrderProduct.OrderProduct;
+import com.JH.JhOnlineJudge.coupon.domain.Coupon;
+import com.JH.JhOnlineJudge.order.dto.OrderSaveRequest;
 import com.JH.JhOnlineJudge.user.domain.User;
 import jakarta.persistence.*;
 import lombok.Builder;
@@ -83,12 +82,12 @@ public class Order {
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderProduct> orderProducts = new ArrayList<>();
 
-    @OneToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "coupon_id", nullable = true)
     private Coupon coupon;
 
     @Builder
-    private Order (User user, OrderSaveDto orderSaveDto, List<CartProduct> cartProducts, Coupon coupon) {
+    private Order (User user, OrderSaveRequest orderSaveRequest, List<CartProduct> cartProducts, Coupon coupon) {
         this.externalId = UUID.randomUUID().toString();
         this.user = user;
         this.name = cartProducts.get(0).getProduct().getName();
@@ -97,23 +96,23 @@ public class Order {
         }
         this.orderAt = LocalDateTime.now();
         this.status = OrderStatus.결제전;
-        this.recipientName = orderSaveDto.getRecipientName();
-        this.recipientAddress = orderSaveDto.getDeliveryAddress() + " " + orderSaveDto.getDetailAddress();
+        this.recipientName = orderSaveRequest.getRecipientName();
+        this.recipientAddress = orderSaveRequest.getDeliveryAddress() + " " + orderSaveRequest.getDetailAddress();
         this.totalPrice = CartProduct.sumPricesFromList(cartProducts);
-        this.discountedPrice = orderSaveDto.getDiscountedPrice();
-        this.finalPrice = CartProduct.sumPricesFromList(cartProducts) - orderSaveDto.getDiscountedPrice();
-        this.discountInfo = orderSaveDto.getDiscountInfo();
-        this.memo = orderSaveDto.getMemo();
-        this.couponDiscountPrice = orderSaveDto.getCouponDiscountPrice();
-        this.rewardPointsDiscountPrice = orderSaveDto.getRewardPointsDiscountPrice();
+        this.discountedPrice = orderSaveRequest.getDiscountedPrice();
+        this.finalPrice = CartProduct.sumPricesFromList(cartProducts) - orderSaveRequest.getDiscountedPrice();
+        this.discountInfo = orderSaveRequest.getDiscountInfo();
+        this.memo = orderSaveRequest.getMemo();
+        this.couponDiscountPrice = orderSaveRequest.getCouponDiscountPrice();
+        this.rewardPointsDiscountPrice = orderSaveRequest.getRewardPointsDiscountPrice();
         this.coupon = coupon;
 
    }
 
-    public static Order of(User user, OrderSaveDto orderSaveDto,  List<CartProduct> cartProducts, Coupon coupon) {
+    public static Order of(User user, OrderSaveRequest orderSaveRequest, List<CartProduct> cartProducts, Coupon coupon) {
        return Order.builder()
                .user(user)
-               .orderSaveDto(orderSaveDto)
+               .orderSaveRequest(orderSaveRequest)
                .cartProducts(cartProducts)
                .coupon(coupon)
                .build();

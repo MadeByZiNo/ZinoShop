@@ -4,7 +4,7 @@ import com.JH.JhOnlineJudge.user.domain.User;
 import com.JH.JhOnlineJudge.user.exception.AccessDeniedException;
 import com.JH.JhOnlineJudge.user.exception.LoginInvalidException;
 import com.JH.JhOnlineJudge.user.repository.UserRepository;
-import com.JH.JhOnlineJudge.utils.JwtUtil;
+import com.JH.JhOnlineJudge.common.utils.JwtUtil;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;

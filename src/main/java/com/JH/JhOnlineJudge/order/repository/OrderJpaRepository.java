@@ -2,10 +2,14 @@ package com.JH.JhOnlineJudge.order.repository;
 
 import com.JH.JhOnlineJudge.order.domain.Order;
 import com.JH.JhOnlineJudge.order.domain.OrderStatus;
+import com.JH.JhOnlineJudge.user.admin.statistic.ProductStat;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -18,6 +22,7 @@ public interface OrderJpaRepository extends JpaRepository<Order, Long> {
 
     List<Order> findAllByStatus(OrderStatus status);
 
+    Page<Order> findAllByStatus(OrderStatus status, Pageable pageable);
 
     @Query("SELECT o FROM Order o WHERE o.deliveredAt BETWEEN :startDate AND :endDate " +
             "AND o.status = :status")

@@ -1,7 +1,6 @@
 package com.JH.JhOnlineJudge.cart.domain;
 
-import com.JH.JhOnlineJudge.common.CartProduct.CartProduct;
-import com.JH.JhOnlineJudge.product.domain.Product;
+import com.JH.JhOnlineJudge.cart.CartProduct.CartProduct;
 import com.JH.JhOnlineJudge.user.domain.User;
 import jakarta.persistence.*;
 import lombok.Getter;

@@ -1,6 +1,6 @@
 package com.JH.JhOnlineJudge.inquiry.domain;
 
-import com.JH.JhOnlineJudge.common.Image.InquiryImage.InquiryImage;
+import com.JH.JhOnlineJudge.Image.InquiryImage.InquiryImage;
 import com.JH.JhOnlineJudge.order.domain.Order;
 import com.JH.JhOnlineJudge.user.domain.User;
 import jakarta.persistence.*;

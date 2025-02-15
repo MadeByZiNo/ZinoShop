@@ -2,25 +2,21 @@ package com.JH.JhOnlineJudge.user.service;
 
 import com.JH.JhOnlineJudge.cart.domain.Cart;
 import com.JH.JhOnlineJudge.cart.repository.CartRepository;
-import com.JH.JhOnlineJudge.common.CartProduct.CartProductRepository;
-import com.JH.JhOnlineJudge.order.domain.Order;
 import com.JH.JhOnlineJudge.user.domain.UserRole;
-import com.JH.JhOnlineJudge.user.dto.UpdateDto;
+import com.JH.JhOnlineJudge.user.dto.UpdateRequest;
 import com.JH.JhOnlineJudge.user.exception.DuplicateNicknameException;
 import com.JH.JhOnlineJudge.user.exception.DuplicateUsernameException;
 import com.JH.JhOnlineJudge.user.exception.LoginFailedException;
 import com.JH.JhOnlineJudge.user.domain.User;
-import com.JH.JhOnlineJudge.user.dto.LoginDto;
-import com.JH.JhOnlineJudge.user.dto.SignUpDto;
+import com.JH.JhOnlineJudge.user.dto.LoginRequest;
+import com.JH.JhOnlineJudge.user.dto.SignUpRequest;
 import com.JH.JhOnlineJudge.user.exception.NotFoundUserException;
 import com.JH.JhOnlineJudge.user.repository.UserRepository;
-import com.JH.JhOnlineJudge.utils.JwtUtil;
-import jakarta.persistence.RollbackException;
+import com.JH.JhOnlineJudge.common.utils.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.concurrent.ConcurrentHashMap;
@@ -35,7 +31,6 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
 
-    @Transactional
     public User findUserById(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(NotFoundUserException::new);
@@ -43,7 +38,7 @@ public class UserService {
     }
 
     @Transactional
-    public User signup(SignUpDto signUpDto){
+    public User signup(SignUpRequest signUpDto){
 
         if (userRepository.existsByUsername(signUpDto.getUsername())) {
             throw new DuplicateUsernameException();
@@ -58,7 +53,7 @@ public class UserService {
 
 
     @Transactional
-    public ConcurrentHashMap login(LoginDto loginDto) {
+    public ConcurrentHashMap login(LoginRequest loginDto) {
         User user = userRepository.findByUsername(loginDto.getUsername())
                 .orElseThrow(() -> new LoginFailedException());
 
@@ -67,7 +62,7 @@ public class UserService {
         }*/
 
         if (!loginDto.getPassword().equals(user.getPassword())) {
-                       throw new LoginFailedException();
+            throw new LoginFailedException();
         }
 
         User loginUser = userRepository.findByUsername(loginDto.getUsername()).get();
@@ -82,7 +77,7 @@ public class UserService {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public ConcurrentHashMap update(User user, UpdateDto updateDto) {
+    public ConcurrentHashMap update(User user, UpdateRequest updateDto) {
 
         if (!user.getNickname().equals(updateDto.getNickname()) && userRepository.existsByNickname(updateDto.getNickname())) {
                    throw new DuplicateNicknameException();
@@ -113,14 +108,9 @@ public class UserService {
         return tokenMap;
     }
 
-    @Transactional
-    public int updateRewardPoints(Long userId, Order order) {
-        User userById = findUserById(userId);
-        return userById.updateRewardPoints(order);
-    }
 
     @Transactional
-    public User registerUser(SignUpDto signUpDto) {
+    public User registerUser(SignUpRequest signUpDto) {
         String username = signUpDto.getUsername();
         String password = signUpDto.getPassword();
         String nickname = signUpDto.getNickname();

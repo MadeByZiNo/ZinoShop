@@ -1,21 +1,15 @@
 package com.JH.JhOnlineJudge.cart.controller;
 
-import com.JH.JhOnlineJudge.cart.domain.Cart;
 import com.JH.JhOnlineJudge.cart.dto.UpdateQuantityRequest;
 import com.JH.JhOnlineJudge.cart.service.CartService;
-import com.JH.JhOnlineJudge.common.CartProduct.CartProduct;
-import com.JH.JhOnlineJudge.common.CartProduct.CartProductRepository;
-import com.JH.JhOnlineJudge.product.domain.Product;
-import com.JH.JhOnlineJudge.product.service.ProductService;
+import com.JH.JhOnlineJudge.cart.CartProduct.CartProduct;
 import com.JH.JhOnlineJudge.user.domain.AuthUser;
-import com.JH.JhOnlineJudge.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
 
@@ -27,25 +21,25 @@ public class CartController {
 
     private final CartService cartService;
 
-    @PostMapping("/add-product")
+    @PostMapping("/product")
     public String addProductToCart(@AuthUser Long userId,
                                    @RequestParam Long productId,
                                    @RequestParam int quantity ){
-        cartService.saveProduct(userId, productId, quantity);
-        return "redirect:/cart/page";
+        cartService.addProductToCart(userId, productId, quantity);
+        return "redirect:/cart";
     }
 
-    @PostMapping("/remove-product")
-       public String deleteProduct(@AuthUser Long userId,
-                                   @RequestParam Long productId) {
-           cartService.deleteProduct(userId,productId);
-           return "redirect:/cart/page";
+    @DeleteMapping("/product")
+       public String deleteProductFromCart (@AuthUser Long userId,
+                                            @RequestParam Long productId) {
+           cartService.removeProductFromCart(userId,productId);
+           return "redirect:/cart";
     }
 
-    @GetMapping("/page")
-    public String getCartProducts(@AuthUser Long userId,
+    @GetMapping
+    public String viewCart(@AuthUser Long userId,
                           Model model) {
-        List<CartProduct> cartProducts= cartService.getCartProductList(userId);
+        List<CartProduct> cartProducts= cartService.getProductsInCart(userId);
         int totalPrice = CartProduct.sumPricesFromList(cartProducts);
         boolean isCartEmpty = cartProducts.isEmpty();
         boolean isAnyProductOutOfStock = cartProducts.stream().anyMatch(cartProduct -> cartProduct.getProduct().getState().equals("품절"));
@@ -60,19 +54,19 @@ public class CartController {
 
     @PostMapping("/clear")
     public String clearProduct(@AuthUser Long userId,
-                                @RequestParam Long productId) {
-        cartService.clearProduct(userId,productId);
+                               @RequestParam Long productId) {
+        cartService.clearCart(userId,productId);
         return "redirect:/cart";
     }
 
-    @PostMapping("/update-quantity")
+    @PostMapping("/product/quantity")
     @ResponseBody
-    public ResponseEntity<Void> updateQuantity(@AuthUser Long userId,
-            @RequestBody UpdateQuantityRequest request) {
+    public ResponseEntity<Void> updateProductQuantityInCart(@AuthUser Long userId,
+                                                            @RequestBody UpdateQuantityRequest request) {
         Long productId = request.getProductId();
         int quantity = request.getQuantity();
 
-        cartService.updateQuantity(userId, productId, quantity);
+        cartService.updateProductQuantityInCart(userId, productId, quantity);
         return ResponseEntity.ok().build();
     }
 }

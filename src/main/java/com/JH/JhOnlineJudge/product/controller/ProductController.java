@@ -1,7 +1,7 @@
 package com.JH.JhOnlineJudge.product.controller;
 
 import com.JH.JhOnlineJudge.category.CategoryService;
-import com.JH.JhOnlineJudge.common.Image.ProductImage.ProductImage;
+import com.JH.JhOnlineJudge.Image.ProductImage.ProductImage;
 import com.JH.JhOnlineJudge.product.domain.Product;
 import com.JH.JhOnlineJudge.product.dto.ProductDto;
 import com.JH.JhOnlineJudge.product.service.ProductService;
@@ -27,25 +27,27 @@ public class ProductController {
     private final ProductService productService;
     private final CategoryService categoryService;
 
+    // 제품 조회
     @GetMapping("/{productId}")
     @ResponseBody
     public ResponseEntity<ProductDto> getProduct(@PathVariable Long productId) {
-        ProductDto response = ProductDto.from(productService.findProductById(productId));
+        ProductDto response = ProductDto.from(productService.getProductById(productId));
         return ResponseEntity.ok(response);
     }
 
     // 제품 등록
-      @PostMapping
-      @ResponseBody
-      public  ResponseEntity<Map<String,String>> createProduct(@Admin Long userId,
-                                                               @ModelAttribute ProductDto request,
-                                  @RequestParam(required = false) MultipartFile[] images) {
-         productService.createProduct(request,images);
-          Map<String, String> response = new HashMap<>();
+    @PostMapping
+    @ResponseBody
+    public  ResponseEntity<Map<String,String>> createProduct(@Admin Long userId,
+                                                            @ModelAttribute ProductDto request,
+                                                            @RequestParam(required = false) MultipartFile[] images) {
+        productService.createProduct(request,images);
+        Map<String, String> response = new HashMap<>();
         response.put("message", "상품이 성공적으로 저장되었습니다.");
         return ResponseEntity.ok(response);
-      }
+    }
 
+    // 제품 업데이트
     @PutMapping
     @ResponseBody
     public ResponseEntity<Map<String,String>> updateProduct(@Admin Long userId,
@@ -58,13 +60,15 @@ public class ProductController {
     }
 
 
+    // 제품 삭제
     @DeleteMapping
     @ResponseBody
-    public ResponseEntity<Map<String,String>> deleteProduct(@Admin Long userId, @RequestParam(name = "productId") Long id) {
+    public ResponseEntity<Map<String,String>> deleteProduct(@Admin Long userId,
+                                                            @RequestParam(name = "productId") Long id) {
         productService.deleteProduct(id);
         Map<String, String> response = new HashMap<>();
-       response.put("message", "상품이 성공적으로 삭제되었습니다.");
-       return ResponseEntity.ok(response);
+        response.put("message", "상품이 성공적으로 삭제되었습니다.");
+        return ResponseEntity.ok(response);
     }
 
     // 카테고리에 따른 상품 리스트 페이지 보여주기
@@ -79,8 +83,7 @@ public class ProductController {
         // 상품 목록 페이지 가져오기
         Page<Product> products = productService.getProductsPageByCategoryIds(categoryIds,page);
 
-
-        model.addAttribute("category", categoryService.findById(categoryId));
+        model.addAttribute("category", categoryService.getCategoryById(categoryId));
         model.addAttribute("childCategories", categoryService.getFirstLevelChildCategories(categoryId));
         model.addAttribute("products", products);
 
@@ -103,7 +106,7 @@ public class ProductController {
     @GetMapping("/detail/{product_id}")
     public String getProductPage(@PathVariable(value = "product_id", required = true) Long id, Model model) {
 
-        Product product = productService.findProductById(id);
+        Product product = productService.getProductById(id);
         model.addAttribute("product", product);
 
         List<ProductImage> productImages = product.getImages();
@@ -112,11 +115,12 @@ public class ProductController {
         return "product/detail";
     }
 
+    // 제품의 리뷰 페이지
     @GetMapping("/review/{product_id}")
     public String getReviewsPage(@PathVariable(value = "product_id", required = true) Long id, Model model) {
-        Product product = productService.findProductById(id);
+        Product product = productService.getProductById(id);
         model.addAttribute("product", product);
            return "product/review";
-       }
+    }
 
 }

@@ -1,9 +1,9 @@
 package com.JH.JhOnlineJudge.order.service;
 
-import com.JH.JhOnlineJudge.common.CartProduct.CartProduct;
-import com.JH.JhOnlineJudge.common.OrderProduct.OrderProduct;
-import com.JH.JhOnlineJudge.coupon.Coupon;
-import com.JH.JhOnlineJudge.coupon.CouponService;
+import com.JH.JhOnlineJudge.cart.CartProduct.CartProduct;
+import com.JH.JhOnlineJudge.order.OrderProduct.OrderProduct;
+import com.JH.JhOnlineJudge.coupon.domain.Coupon;
+import com.JH.JhOnlineJudge.coupon.service.CouponService;
 import com.JH.JhOnlineJudge.order.domain.Order;
 import com.JH.JhOnlineJudge.order.domain.OrderStatus;
 import com.JH.JhOnlineJudge.order.dto.*;
@@ -18,9 +18,12 @@ import com.JH.JhOnlineJudge.user.exception.InvalidRewardPointsException;
 import com.JH.JhOnlineJudge.user.service.UserService;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.persistence.OptimisticLockException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
@@ -40,26 +43,28 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final RestTemplate restTemplate;
 
+    private static int COUNT = 0;
+
     @Value("${toss.secret-key}")
      private String SECRET_KEY;
 
-    @Transactional
-    public Order findById(Long id) {
+    @Transactional(readOnly = true)
+    public Order getOrderById(Long id) {
         Order order = orderRepository.findById(id)
                         .orElseThrow(NotFoundOrderException::new);
                 return order;
     }
 
-    @Transactional
-    public Order findByExternalId(String externalId) {
+    @Transactional(readOnly = true)
+    public Order getOrderByExternalId(String externalId) {
         Order order = orderRepository.findByExternalId(externalId)
                 .orElseThrow(NotFoundOrderException::new);
         return order;
     }
 
 
-    @Transactional
-    public List<Order> findByStatusAndSearchText(DeliverySearchFilterDto deliverySearchFilterDto) {
+    @Transactional(readOnly = true)
+    public List<Order> searchOrdersByStatusAndText(DeliverySearchFilterDto deliverySearchFilterDto) {
         List<Order> searchOrders = orderRepository.findByStatusAndSearchText(
               deliverySearchFilterDto.getStatus().equals("") ? null : OrderStatus.valueOf(deliverySearchFilterDto.getStatus()),
               deliverySearchFilterDto.getSearch());
@@ -68,37 +73,34 @@ public class OrderService {
 
     @Transactional
     public Map<String,Object> createOrder(Long userId,
-                                       OrderSaveDto orderSaveDto,
+                                       OrderSaveRequest orderSaveRequest,
                                        List<CartProduct> cartProducts) {
 
         User user = userService.findUserById(userId);
-        Coupon coupon = couponService.findById(orderSaveDto.getCouponId());
-        Order order = Order.of(user, orderSaveDto, cartProducts, coupon);
+
+        Coupon coupon = null;
+        if(orderSaveRequest.getCouponId() != null) {
+           coupon  = couponService.getCouponById(orderSaveRequest.getCouponId());
+           if(coupon.isUsed()){ throw new InsufficientRemainException("이미 사용된 쿠폰입니다."); }
+           if(coupon.getMinAmount() > CartProduct.sumPricesFromList(cartProducts)){throw new InsufficientRemainException("최소금액이 충족되지 않았습니다.");}
+        }
+
+        Order order = Order.of(user, orderSaveRequest, cartProducts, coupon);
 
         // 포인트 개수 예외처리
-        if(orderSaveDto.getRewardPointsDiscountPrice() > user.getRewardPoints() || orderSaveDto.getDiscountedPrice() < 0) {
+        if(orderSaveRequest.getRewardPointsDiscountPrice() > user.getRewardPoints() || orderSaveRequest.getDiscountedPrice() < 0) {
             throw new InvalidRewardPointsException();
         }
 
        for (CartProduct cartProduct : cartProducts) {
-           Product product = productService.findProductById(cartProduct.getProduct().getId());
+           Product product = productService.getProductById(cartProduct.getProduct().getId());
 
            int quantity = cartProduct.getQuantity();
            int price = product.getPrice();
 
-           // 품절일 경우 예외 처리
-          if (product.getRemain() <= 0 || product.getState().equals("품절")) {
+           // 수량부족의 경우 예외 처리
+          if (product.getRemain() < quantity  || product.getState().name().equals("품절")) {
               throw new InsufficientRemainException("품절 된 상품입니다.");
-          }
-
-          // 쿠폰 개수 처리
-          if(couponService.findById(orderSaveDto.getCouponId()).isUsed()) {
-              throw new InsufficientRemainException("이미 사용된 쿠폰입니다.");
-          }
-
-          // 주문 수량이 재고 수량보다 많을 경우 예외 처리
-          if (product.getRemain() < quantity) {
-              throw new InsufficientRemainException("재고 수량보다 많은 구매 요청을 하셨습니다.");
           }
 
             OrderProduct orderProduct = OrderProduct.of(order,product,quantity,price);
@@ -116,26 +118,59 @@ public class OrderService {
        return map;
     }
 
+    @Retryable(
+            retryFor = {OptimisticLockException.class},
+            maxAttempts = 3,
+            backoff = @Backoff(delay = 1000)
+    )
     @Transactional(rollbackFor = Exception.class)
-    public Map<String, Object> confirmPaymentAndUpdate(Long userId, OrderConfirmDto orderConfirmDto) {
+    public Map<String, Object> confirmPaymentAndUpdate(OrderConfirmRequest orderConfirmRequest) {
+        System.out.println("tryConfirm");
 
-        Order order = findByExternalId(orderConfirmDto.getExternalId());
+        Order order = getOrderByExternalId(orderConfirmRequest.getExternalId());
+        User user = order.getUser();
+        Coupon coupon = order.getCoupon();
+
+        // 포인트 개수 예외처리
+        if(order.getRewardPointsDiscountPrice() > user.getRewardPoints() || order.getDiscountedPrice() < 0) {
+            throw new InvalidRewardPointsException();
+        }
+        // 포인트 업데이트
+        int point = user.updateRewardPoints(order);
 
         // 재고 차감
         for (OrderProduct orderProduct : order.getOrderProducts()) {
-            Product product = productService.findProductByIdWithLock(orderProduct.getProduct().getId());
+            Product product = orderProduct.getProduct();
             int quantity = orderProduct.getQuantity();
+
+            // 품절일 경우 예외 처리
+            if (product.getRemain() < orderProduct.getQuantity() || product.getState().name().equals("품절")) {
+                throw new InsufficientRemainException(user.getNickname() + "   품절 된 상품입니다.");
+            }
+
+            // 재고 차감
             product.updateRemain(-quantity);
+            System.out.println("QUANTITY : " + product.getRemain());
         }
 
-        // 포인트 업데이트
-        int point = userService.updateRewardPoints(userId, order);
+        // 쿠폰 개수 예외처리
+        if(coupon != null) {
+            if(coupon.isUsed()) {throw new InsufficientRemainException(user.getNickname() +    "이미 사용된 쿠폰입니다.");}
+            // 쿠폰 차감
+            coupon.updateUsed();
+        }
 
-        // 쿠폰 차감
-        order.getCoupon().updateUsed();
+        /*/ 테스트전용(실제 결제한 데이터가 없기에 race condition 체크
+        Map<String, Object> responseData = new HashMap<>();
+        responseData.put("result", true);
+        responseData.put("point", point);
+        System.out.println("COUNT : " + ++COUNT);
+        return responseData;
+*/
+        // 테스트 끝나면 주석풀기
 
         // 결제 확정 요청 후 정보 추출
-        ResponseEntity<String> response = requestPaymentConfirmation(orderConfirmDto);
+        ResponseEntity<String> response = requestPaymentVerification(orderConfirmRequest);
         ExtractPaymentDto paymentInfo = extractPaymentInfo(response.getBody());
 
         // 결제 확정 처리
@@ -145,33 +180,36 @@ public class OrderService {
         responseData.put("result", response.getStatusCode() == HttpStatus.OK);
         responseData.put("point", point);
         return responseData;
+
+
     }
 
 
-    @Transactional
-    public List<Order> findOrdersByUserId(Long userId) {
+    @Transactional(readOnly = true)
+    public List<Order> getOrdersByUserId(Long userId) {
         return orderRepository.findByUserId(userId);
     }
 
     @Transactional
-    public List<MyOrdersDto> getMyOrderDtoList(Long userId) {
-        List<Order> orders = findOrdersByUserId(userId);
-        List<MyOrdersDto> dtoList = orders.stream()
-                .map(order -> MyOrdersDto.of(order.getExternalId(), order.getOrderAt(), order.getName(), order.getStatus(), order.getRecipientName(),
+    public List<MyOrdersResponse> getUserOrders(Long userId) {
+        List<Order> orders = getOrdersByUserId(userId);
+        List<MyOrdersResponse> responses = orders.stream()
+                .map(order -> MyOrdersResponse.of(order.getExternalId(), order.getOrderAt(), order.getName(), order.getStatus(), order.getRecipientName(),
                         order.getRecipientAddress(), order.getTotalPrice()))
                 .collect(Collectors.toList());
-        return dtoList;
+        return responses;
     }
+
     @Transactional
-    private ResponseEntity<String> requestPaymentConfirmation(OrderConfirmDto orderConfirmDto) {
+    private ResponseEntity<String> requestPaymentVerification(OrderConfirmRequest orderConfirmRequest) {
           HttpHeaders headers = new HttpHeaders();
           headers.setBasicAuth(SECRET_KEY, "");
           headers.setContentType(MediaType.APPLICATION_JSON);
 
           Map<String, Object> requestBody = Map.of(
-              "paymentKey", orderConfirmDto.getPaymentKey(),
-              "orderId", orderConfirmDto.getExternalId(),
-              "amount", orderConfirmDto.getAmount()
+              "paymentKey", orderConfirmRequest.getPaymentKey(),
+              "orderId", orderConfirmRequest.getExternalId(),
+              "amount", orderConfirmRequest.getAmount()
           );
 
           HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestBody, headers);
@@ -186,8 +224,8 @@ public class OrderService {
 
 
       @Transactional
-      public OrderDetailRequestDto getOrderDetailRequestDto(Long orderId) {
-          Order order = findById(orderId);
+      public OrderDetailRequest getOrderDetailRequestDto(Long orderId) {
+          Order order = getOrderById(orderId);
           List<OrderProductDetailDto> products = order.getOrderProducts()
               .stream()
               .map(orderProduct -> new OrderProductDetailDto(
@@ -196,8 +234,8 @@ public class OrderService {
                   orderProduct.getProduct().getPrice()))
               .collect(Collectors.toList());
 
-         OrderDetailRequestDto dto=  OrderDetailRequestDto.of(order,products);
-         return dto;
+         OrderDetailRequest request=  OrderDetailRequest.of(order,products);
+         return request;
       }
 
 

@@ -1,10 +1,10 @@
 package com.JH.JhOnlineJudge.user.domain;
 
 import com.JH.JhOnlineJudge.cart.domain.Cart;
-import com.JH.JhOnlineJudge.coupon.Coupon;
-import com.JH.JhOnlineJudge.heart.Heart;
+import com.JH.JhOnlineJudge.coupon.domain.Coupon;
+import com.JH.JhOnlineJudge.heart.domain.Heart;
 import com.JH.JhOnlineJudge.order.domain.Order;
-import com.JH.JhOnlineJudge.user.dto.UpdateDto;
+import com.JH.JhOnlineJudge.user.dto.UpdateRequest;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -54,6 +54,9 @@ public class User {
     @OneToMany(mappedBy = "user")
     private List<Order> orders = new ArrayList<>();
 
+    @Version
+    private Long version;
+
     @Builder
     public User(String username, String password, String nickname, String deliveryAddress, String detailAddress, int rewardPoints, UserRole role) {
         this.username = username;
@@ -78,13 +81,13 @@ public class User {
                 .build();
     }
 
-    public void update(UpdateDto updateDto) {
+    public void update(UpdateRequest updateDto) {
         this.nickname = updateDto.getNickname();
         this.deliveryAddress = updateDto.getDeliveryAddress();
         this.detailAddress = updateDto.getDetailAddress();
     }
 
-    public void updateWithPassword(UpdateDto updateDto) {
+    public void updateWithPassword(UpdateRequest updateDto) {
           this.nickname = updateDto.getNickname();
           this.deliveryAddress = updateDto.getDeliveryAddress();
           this.detailAddress = updateDto.getDetailAddress();

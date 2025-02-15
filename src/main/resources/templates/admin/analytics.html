@@ -3,89 +3,53 @@
       xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
       layout:decorate="layout/default_layout">
 <head>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        .chart-container {
-            width: 90%;
-            margin: 20px auto;
-            padding: 20px;
-            background: #f9f9f9;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
+    .chart-container {
+        width: 90%;
+        margin: 20px auto;
+        padding: 20px;
+        background: #f9f9f9;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
 
-        .chart-title {
-            text-align: center;
-            font-size: 18px;
-            font-weight: bold;
-            margin-bottom: 10px;
-        }
+    .chart-title {
+        text-align: center;
+        font-size: 18px;
+        font-weight: bold;
+        margin-bottom: 10px;
+    }
 
-        #chart1, #chart2 {
-            max-height: 400px;
-        }
+    #chart1, #chart2 {
+        max-height: 400px;
+    }
 
-        .filter-container {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            margin-bottom: 20px;
-        }
+    .filter-container {
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+        margin-bottom: 20px;
+    }
 
-        .filter-container select {
-            padding: 5px;
-            font-size: 14px;
-        }
+    .filter-container select {
+        padding: 5px;
+        font-size: 14px;
+    }
 
-        .tooltip {
-            background: rgba(0, 0, 0, 0.8);
-            color: white;
-            padding: 5px 10px;
-            border-radius: 5px;
-        }
+    .tooltip {
+        background: rgba(0, 0, 0, 0.8);
+        color: white;
+        padding: 5px 10px;
+        border-radius: 5px;
+    }
     </style>
-</head>
-<body>
-<div layout:fragment="content">
-    <div class="chart-container">
-        <div class="chart-title">일별, 월별, 년별로 상품 판매량 분석 (꺾은선형 그래프)</div>
-        <div class="filter-container">
-            <select id="time-filter1">
-                <option value="daily">일별</option>
-                <option value="monthly">월별</option>
-                <option value="yearly">년별</option>
-            </select>
-            <th:block th:each="product : ${products}">
-                    <option th:value="${product.id}" th:text="${product.name}"></option>
-            </th:block>
-        </div>
-        <canvas id="chart1"></canvas>
-    </div>
 
-    <div class="chart-container">
-        <div class="chart-title">일별, 월별, 년별로 팔린 상품 순위 분석 (막대그래프)</div>
-        <div class="filter-container">
-            <select id="time-filter2">
-                <option value="daily">일별</option>
-                <option value="monthly">월별</option>
-                <option value="yearly">년별</option>
-            </select>
-            <select id="year-filter" style="display: none;">
-                  <!-- 년도 옵션 동적으로 추가 -->
-              </select>
-              <select id="month-filter" style="display: none;">
-                  <!-- 월 옵션 동적으로 추가 -->
-              </select>
-            <select id="ranking-filter">
-                <option value="quantity">팔린 순</option>
-                <option value="price">가격 순</option>
-            </select>
-        </div>
-        <canvas id="chart2"></canvas>
-    </div>
-</div>
+    <script>
 
-<script>
+    let lineChartInstance = null;
+    let barChartInstance = null;
+
     const fetchChartData = async (url, params) => {
         try {
             const query = new URLSearchParams(params).toString();
@@ -97,166 +61,391 @@
         }
     };
 
-    const createLineChart = (ctx, labels, data) => {
-        return new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: labels,
-                datasets: [{
-                    label: '판매량',
-                    data: data.quantity,
-                    borderColor: '#4CAF50',
-                    backgroundColor: 'rgba(76, 175, 80, 0.2)',
-                    fill: true,
-                }, {
-                    label: '가격',
-                    data: data.price,
-                    borderColor: '#2196F3',
-                    backgroundColor: 'rgba(33, 150, 243, 0.2)',
-                    fill: true,
-                }]
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                return `${context.dataset.label}: ${context.raw}`;
-                            }
+   const createLineChart = (ctx, labels, data) => {
+
+    // 차트가 이미 존재하는 경우, 새로 그리기 전에 기존 차트 인스턴스 제거
+    if (lineChartInstance) {
+        lineChartInstance.destroy();
+    }
+
+    // 새로운 차트 인스턴스 생성
+      lineChartInstance = new Chart(ctx, {
+        type: 'line', // 'line' 차트 타입
+        data: {
+            labels: labels, // x축에 사용할 날짜 (labels)
+            datasets: [{
+                label: '판매량', // "판매량" 대신 "판매가격"으로 변경
+                data: data.quantity, // 판매량 데이터
+                borderColor: '#4CAF50', // 선 색상
+                backgroundColor: 'rgba(76, 175, 80, 0.2)', // 선 배경색 (선 내부 색상)
+                fill: true, // 선 밑을 채움
+                yAxisID: 'y1', // '판매량'을 첫 번째 y축에 표시
+                pointRadius: 0, // 선 위의 점을 보이지 않게 설정
+            }, {
+                label: '판매가격', // "가격"은 "판매가격"으로 변경
+                data: data.price, // 가격 데이터
+                borderColor: '#2196F3', // 선 색상
+                backgroundColor: 'rgba(33, 150, 243, 0.2)', // 선 배경색 (선 내부 색상)
+                fill: true, // 선 밑을 채움
+                yAxisID: 'y2', // '판매가격'을 두 번째 y축에 표시
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return `${context.dataset.label}: ${context.raw}`;
                         }
                     }
-                },
-                scales: {
-                    x: { title: { display: true, text: '날짜' } },
-                    y: { title: { display: true, text: '값' } }
                 }
-            }
-        });
-    };
-
-    const createBarChart = (ctx, labels, data) => {
-        return new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: labels,
-                datasets: [{
-                    label: '팔린 개수',
-                    data: data.quantity,
-                    backgroundColor: '#FFC107',
-                }, {
-                    label: '총 가격',
-                    data: data.price,
-                    backgroundColor: '#03A9F4',
-                }]
             },
-            options: {
-                responsive: true,
-                plugins: {
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                return `${context.dataset.label}: ${context.raw}`;
-                            }
-                        }
+            scales: {
+                x: {
+                    title: {
+                        display: true,
+                        text: '날짜'
+                    },
+                    reverse: true,
+                },
+                y1: { // 첫 번째 y축: 판매량
+                    title: {
+                        display: true,
+                        text: '판매량' // 판매량에 대한 y축
+                    },
+                    position: 'left',
+                    min: 0, // y축의 최소값을 0으로 설정
+                    ticks: {
+                        stepSize: 5, // 판매량은 5개 단위로 표시
                     }
                 },
-                scales: {
-                    x: { title: { display: true, text: '상품 이름' } },
-                    y: { title: { display: true, text: '값' } }
+                y2: { // 두 번째 y축: 판매가격
+                    title: {
+                        display: true,
+                        text: '총 가격' // 판매가격에 대한 y축
+                    },
+                    position: 'right',
+                    grid: {
+                        drawOnChartArea: false // 판매가격 y축에는 그리드선 표시 안 함
+                    },
+                    min: 0, // y축의 최소값을 0으로 설정
+                    ticks: {
+                        stepSize: 50000, // 판매가격은 5만원 단위로 표시
+                    }
                 }
+            },
+            hover: {
+                mode: 'nearest',
+                intersect: false
             }
-        });
+        }
+    });
+
+        return lineChartInstance;
     };
 
-    document.addEventListener('DOMContentLoaded', async () => {
-        const chart1Ctx = document.getElementById('chart1').getContext('2d');
-        const timeFilter1 = document.getElementById('time-filter1');
-        const yearFilter = document.getElementById('year-filter');
-        const monthFilter = document.getElementById('month-filter');
-        const productFilter = document.getElementById('product-filter');
+     const createBarChart = (ctx, labels, data) => {
+    // 차트가 이미 존재하는 경우, 새로 그리기 전에 기존 차트 인스턴스 제거
+    if (barChartInstance) {
+        barChartInstance.destroy();
+    }
 
-        // 년도 옵션 추가 (2022년부터 올해까지)
+    // 데이터를 가격을 기준으로 내림차순 정렬
+    const sortedData = data.quantity
+        .map((quantity, index) => ({
+            quantity,
+            price: data.price[index],
+            label: labels[index]
+        }))
+        .sort((a, b) => b.price - a.price); // 가격 내림차순 정렬
+
+    // 정렬된 데이터로 새 labels, quantity, price 배열 생성
+    const sortedLabels = sortedData.map(item => item.label);
+    const sortedQuantity = sortedData.map(item => item.quantity);
+    const sortedPrice = sortedData.map(item => item.price);
+
+    // 새로운 차트 인스턴스 생성
+    barChartInstance = new Chart(ctx, {
+        type: 'bar', // 'bar' 차트 타입
+        data: {
+            labels: sortedLabels, // x축에 사용할 상품 이름 (labels)
+            datasets: [{
+                label: '팔린 개수', // 팔린 개수
+                data: sortedQuantity, // 팔린 개수 데이터
+                backgroundColor: '#FFC107', // 막대 색상
+                yAxisID: 'y1', // 팔린 개수는 첫 번째 y축에 표시
+            }, {
+                label: '총 가격', // 총 가격
+                data: sortedPrice, // 총 가격 데이터
+                backgroundColor: '#03A9F4', // 막대 색상
+                yAxisID: 'y2', // 총 가격은 두 번째 y축에 표시
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return `${context.dataset.label}: ${context.raw}`;
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    title: {
+                        display: true,
+                        text: '상품 이름' // x축에 상품 이름 표시
+                    },
+                },
+                y1: { // 첫 번째 y축: 팔린 개수
+                    title: {
+                        display: true,
+                        text: '팔린 개수' // 팔린 개수에 대한 y축
+                    },
+                    position: 'left',
+                    min: 0, // y축의 최소값을 0으로 설정
+                    ticks: {
+                        stepSize: 5, // 팔린 개수는 5개 단위로 표시
+                    }
+                },
+                y2: { // 두 번째 y축: 총 가격
+                    title: {
+                        display: true,
+                        text: '총 가격' // 총 가격에 대한 y축
+                    },
+                    position: 'right',
+                    grid: {
+                        drawOnChartArea: false // 총 가격 y축에는 그리드선 표시 안 함
+                    },
+                    min: 0, // y축의 최소값을 0으로 설정
+                    ticks: {
+                        stepSize: 50000, // 총 가격은 5만원 단위로 표시
+                    }
+                }
+            },
+            hover: {
+                mode: 'nearest',
+                intersect: false
+            }
+        }
+    });
+    };
+
+   const updateDayFilter = (yearFilter, monthFilter, dayFilter) => {
+
+        dayFilter.innerHTML = ""; // 기존 옵션 제거
+        const selectedYear = parseInt(yearFilter.value, 10);
+        const selectedMonth = parseInt(monthFilter.value, 10);
+        const totalDays = new Date(selectedYear, selectedMonth, 0).getDate(); // 해당 월의 총 일수 계산
+        for (let day = 1; day <= totalDays; day++) {
+            const option = document.createElement('option');
+            option.value = day.toString().padStart(2, '0');
+            option.textContent = `${day}일`;
+            dayFilter.appendChild(option);
+         }
+         dayFilter.value = "01";
+    }
+
+    const initializeYearMonthDayFilters = (yearFilter, monthFilter, dayFilter) => {
         const currentYear = new Date().getFullYear();
+
+        // 년도 옵션 초기화
+        yearFilter.innerHTML = ""; // 기존 옵션 제거
         for (let year = 2022; year <= currentYear; year++) {
             const option = document.createElement('option');
             option.value = year;
             option.textContent = `${year}년`;
             yearFilter.appendChild(option);
         }
+        yearFilter.value = currentYear;
 
-        // 월 옵션 추가 (1월부터 12월까지)
+        // 월 옵션 초기화
+        monthFilter.innerHTML = ""; // 기존 옵션 제거
         for (let month = 1; month <= 12; month++) {
             const option = document.createElement('option');
             option.value = month.toString().padStart(2, '0');
             option.textContent = `${month}월`;
             monthFilter.appendChild(option);
         }
+        monthFilter.value = new Date().getMonth() + 1; // 0부터 시작하므로 +1
 
-        timeFilter1.addEventListener('change', () => {
-            const selected = timeFilter1.value;
-            if (selected === 'daily') {
-                yearFilter.style.display = 'inline-block';
-                monthFilter.style.display = 'inline-block';
-            } else if (selected === 'monthly') {
-                yearFilter.style.display = 'inline-block';
-                monthFilter.style.display = 'none';
-            } else {
-                yearFilter.style.display = 'none';
-                monthFilter.style.display = 'none';
-            }
-        });
-
-        const loadChart1 = async () => {
-            const params = {
-                timeFilter: timeFilter1.value,
-                productId: productFilter.value
-             };
-
-            if (timeFilter1.value === 'daily') {
-                params.year = yearFilter.value;
-                params.month = monthFilter.value;
-            } else if (timeFilter1.value === 'monthly') {
-                params.year = yearFilter.value;
-            }
-
-            const data = await fetchChartData('/admin/statistic/product', params);
-            const labels = data.map(d => d.date);
-            const chartData = {
-                quantity: data.map(d => d.quantity),
-                price: data.map(d => d.price)
-            };
-            createLineChart(chart1Ctx, labels, chartData);
+        // 일 옵션 초기화 (dayFilter가 null이 아닐 때만)
+         if (dayFilter) {
+                updateDayFilter(yearFilter, monthFilter, dayFilter);
+                dayFilter.value = new Date().getDate().toString().padStart(2, '0'); // 현재 날짜를 기본값으로 설정
         };
+   }
+    document.addEventListener('DOMContentLoaded', async () => {
 
-        const chart2Ctx = document.getElementById('chart2').getContext('2d');
-        const timeFilter2 = document.getElementById('time-filter2');
-        const rankingFilter = document.getElementById('ranking-filter');
+    // 기본 초기화 및 세팅
 
-        const loadChart2 = async () => {
-            const data = await fetchChartData('/api/product-ranking', {
-                time: timeFilter2.value,
-                ranking: rankingFilter.value
-            });
-            const labels = data.map(d => d.productName);
-            const chartData = {
-                quantity: data.map(d => d.quantity),
-                price: data.map(d => d.price)
-            };
-            createBarChart(chart2Ctx, labels, chartData);
-        };
+    const chart1Ctx = document.getElementById('chart1').getContext('2d');
+    const chart2Ctx = document.getElementById('chart2').getContext('2d');
 
-        timeFilter1.addEventListener('change', loadChart1);
-        productFilter.addEventListener('change', loadChart1);
-         yearFilter.addEventListener('change', loadChart1);
-        monthFilter.addEventListener('change', loadChart1);
+    const timeFilter1 = document.getElementById('time-filter1');
+    const yearFilter1 = document.getElementById('chart1-year-filter');
+    const monthFilter1 = document.getElementById('chart1-month-filter');
+    const productFilter = document.getElementById('product-filter');
 
-        timeFilter2.addEventListener('change', loadChart2);
-        rankingFilter.addEventListener('change', loadChart2);
+    const timeFilter2 = document.getElementById('time-filter2');
+    const yearFilter2 = document.getElementById('chart2-year-filter');
+    const monthFilter2 = document.getElementById('chart2-month-filter');
+    const dayFilter2 = document.getElementById('chart2-day-filter');
+    const rankingFilter = document.getElementById('ranking-filter');
 
-        await loadChart1();
-        await loadChart2();
+    initializeYearMonthDayFilters(yearFilter1, monthFilter1);
+    initializeYearMonthDayFilters(yearFilter2, monthFilter2, dayFilter2);
+
+    yearFilter1.style.display = 'inline-block';
+    monthFilter1.style.display = 'inline-block';
+
+    yearFilter2.style.display = 'inline-block';
+    monthFilter2.style.display = 'inline-block';
+    dayFilter2.style.display =  'inline-block';
+
+    // 차트 1 관련 요소 및 동작
+    const loadChart1 = async () => {
+        const params = { timeFilter: timeFilter1.value, productId: productFilter.value };
+
+        if (timeFilter1.value === 'daily') {
+            params.year = yearFilter1.value;
+            params.month = monthFilter1.value;
+        } else if (timeFilter1.value === 'monthly') {
+            params.year = yearFilter1.value;
+        }
+
+        const data = await fetchChartData('/admin/statistic/product', params);
+        const labels = data.map(d => d.date);
+        const chartData = { quantity: data.map(d => d.quantity), price: data.map(d => d.price) };
+        createLineChart(chart1Ctx, labels, chartData);
+    };
+
+    timeFilter1.addEventListener('change', () => {
+        const selected = timeFilter1.value;
+        if (selected === 'daily') {
+            yearFilter1.style.display = 'inline-block';
+            monthFilter1.style.display = 'inline-block';
+        } else if (selected === 'monthly') {
+            yearFilter1.style.display = 'inline-block';
+            monthFilter1.style.display = 'none';
+        } else {
+            yearFilter1.style.display = 'none';
+            monthFilter1.style.display = 'none';
+        }
     });
-</script>
+
+    timeFilter1.addEventListener('change', loadChart1);
+    productFilter.addEventListener('change', loadChart1);
+    yearFilter1.addEventListener('change', loadChart1);
+    monthFilter1.addEventListener('change', loadChart1);
+
+    // 차트 2 관련 요소 및 동작
+    const loadChart2 = async () => {
+        const params = { timeFilter: timeFilter2.value };
+
+    if (timeFilter2.value === 'daily') {
+        params.year = yearFilter2.value;
+        params.month = monthFilter2.value;
+        params.day = dayFilter2.value;
+    } else if (timeFilter2.value === 'monthly') {
+        params.year = yearFilter2.value;
+        params.month = monthFilter2.value;
+    } else if (timeFilter2.value === 'yearly') {
+        params.year = yearFilter2.value;
+    }
+
+        const data = await fetchChartData('/admin/statistic/rank', params);
+        const labels = data.map(d => d.name);
+        const chartData = { quantity: data.map(d => d.quantity), price: data.map(d => d.price) };
+        createBarChart(chart2Ctx, labels, chartData);
+    };
+
+    timeFilter2.addEventListener('change', () => {
+        const selected = timeFilter2.value;
+        if (selected === 'daily') {
+            yearFilter2.style.display = 'inline-block';
+            monthFilter2.style.display = 'inline-block';
+            dayFilter2.style.display = 'inline-block';
+
+        } else if (selected === 'monthly') {
+            yearFilter2.style.display = 'inline-block';
+            monthFilter2.style.display = 'inline-block';
+            dayFilter2.style.display = 'none';
+        } else {
+            yearFilter2.style.display = 'inline-block';
+            monthFilter2.style.display = 'none';
+            dayFilter2.style.display = 'none';
+        }
+    });
+
+    timeFilter2.addEventListener('change', loadChart2);
+    rankingFilter.addEventListener('change', loadChart2);
+   yearFilter2.addEventListener('change', () => updateDayFilter(yearFilter2, monthFilter2, dayFilter2));
+   monthFilter2.addEventListener('change', () => updateDayFilter(yearFilter2, monthFilter2, dayFilter2));
+    yearFilter2.addEventListener('change', loadChart2);
+    monthFilter2.addEventListener('change', loadChart2);
+    dayFilter2.addEventListener('change', loadChart2);
+
+    // 초기 데이터 로드
+    await loadChart1();
+    await loadChart2();
+});
+
+    </script>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="chart-container">
+        <div class="chart-title">상품 판매량 분석</div>
+        <div class="filter-container">
+            <select id="time-filter1">
+                <option value="daily">일별</option>
+                <option value="monthly">월별</option>
+                <option value="yearly">년별</option>
+            </select>
+            <select id="chart1-year-filter" style="display: none;">
+                <!-- 년도 옵션 동적으로 추가 -->
+            </select>
+            <select id="chart1-month-filter" style="display: none;">
+                <!-- 월 옵션 동적으로 추가 -->
+            </select>
+            <select id="product-filter">
+                <th:block th:each="product : ${products}">
+                    <option th:value="${product.id}" th:text="${product.name}"></option>
+                </th:block>
+            </select>
+        </div>
+        <canvas id="chart1"></canvas>
+    </div>
+
+    <div class="chart-container">
+        <div class="chart-title">팔린 상품 순위 분석 </div>
+        <div class="filter-container">
+            <select id="time-filter2">
+                <option value="daily">일별</option>
+                <option value="monthly">월별</option>
+                <option value="yearly">년별</option>
+            </select>
+            <select id="chart2-year-filter" style="display: none;">
+                <!-- 년도 옵션 동적으로 추가 -->
+            </select>
+            <select id="chart2-month-filter" style="display: none;">
+                <!-- 월 옵션 동적으로 추가 -->
+            </select>
+            <select id="chart2-day-filter" style="display: none;">
+                <!-- 월 옵션 동적으로 추가 -->
+            </select>
+            <select id="ranking-filter">
+                <option value="quantity">팔린 순</option>
+                <option value="price">가격 순</option>
+            </select>
+        </div>
+        <canvas id="chart2"></canvas>
+    </div>
+</div>
+
 </body>
 </html>

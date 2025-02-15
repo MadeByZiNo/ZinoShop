@@ -37,7 +37,7 @@
 <body>
 
 <div class="fixed-header">
-    <div th:replace="fragments/header :: header(username=${username},userStatus=${userStatus},nickname=${nickname})" class="fixed-header"></div>
+    <div th:replace="~{fragments/header :: header(username=${username},userStatus=${userStatus},nickname=${nickname})}" class="fixed-header"></div>
 </div>
 
 <div class="container">
@@ -47,7 +47,7 @@
 </div>
 
 <div class="fixed-footer">
-  <div th:replace="fragments/footer :: footer"></div>
+    <div th:replace="~{fragments/footer :: footer}"></div>
 </div>
 
 </body>

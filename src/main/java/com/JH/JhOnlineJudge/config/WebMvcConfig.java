@@ -3,7 +3,7 @@ package com.JH.JhOnlineJudge.config;
 import com.JH.JhOnlineJudge.user.domain.AuthUserResolver;
 import com.JH.JhOnlineJudge.user.interceptor.AuthorityCheckInterceptor;
 import com.JH.JhOnlineJudge.user.interceptor.TokenCheckInterceptor;
-import com.JH.JhOnlineJudge.utils.JwtUtil;
+import com.JH.JhOnlineJudge.common.utils.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

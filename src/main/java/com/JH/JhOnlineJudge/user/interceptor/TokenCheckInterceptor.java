@@ -1,7 +1,7 @@
 package com.JH.JhOnlineJudge.user.interceptor;
 
 import com.JH.JhOnlineJudge.user.domain.UserRole;
-import com.JH.JhOnlineJudge.utils.JwtUtil;
+import com.JH.JhOnlineJudge.common.utils.JwtUtil;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

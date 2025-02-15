@@ -1,21 +1,19 @@
 package com.JH.JhOnlineJudge.user.admin;
 
-import com.JH.JhOnlineJudge.common.statistic.ProductSalesStatDto;
-import com.JH.JhOnlineJudge.common.statistic.ProductStat;
-import com.JH.JhOnlineJudge.common.statistic.ProductStatJpaRepository;
-import com.JH.JhOnlineJudge.notification.NotificationFrom;
-import com.JH.JhOnlineJudge.notification.NotificationService;
+import com.JH.JhOnlineJudge.user.admin.statistic.ProductSalesRankDto;
+import com.JH.JhOnlineJudge.user.admin.statistic.ProductSalesStatDto;
+import com.JH.JhOnlineJudge.user.admin.statistic.ProductStat;
+import com.JH.JhOnlineJudge.user.admin.statistic.ProductStatJpaRepository;
+import com.JH.JhOnlineJudge.notification.domain.NotificationFrom;
+import com.JH.JhOnlineJudge.notification.service.NotificationService;
 import com.JH.JhOnlineJudge.order.domain.Order;
 import com.JH.JhOnlineJudge.order.domain.OrderStatus;
 import com.JH.JhOnlineJudge.order.service.OrderService;
-import com.JH.JhOnlineJudge.product.domain.Product;
-import com.JH.JhOnlineJudge.product.service.ProductService;
 import com.JH.JhOnlineJudge.user.admin.dto.DeliverySearchFilterDto;
 import com.JH.JhOnlineJudge.user.admin.dto.DeliverySearchResponseDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -32,15 +30,16 @@ public class AdminService {
     private final ProductStatJpaRepository productStatJpaRepository;
     private final NotificationService notificationService;
 
+    private final int initialYear = 2023;
     @Transactional
     public List<DeliverySearchResponseDto> getDeliveries(DeliverySearchFilterDto deliverySearchFilterDto) {
-        List<Order> searchOrders = orderService.findByStatusAndSearchText(deliverySearchFilterDto);
+        List<Order> searchOrders = orderService.searchOrdersByStatusAndText(deliverySearchFilterDto);
 
         return searchOrders.stream()
                 .map(order -> DeliverySearchResponseDto.builder()
                         .orderId(order.getId())
                         .name(order.getName())
-                        .username(order.getRecipientName())
+                        .username(order.getUser().getUsername())
                         .price(order.getFinalPrice())
                         .status(order.getStatus().toString())
                         .recipientName(order.getRecipientName())
@@ -54,7 +53,7 @@ public class AdminService {
     @Transactional
     public void updateDeliveryStatus(List<Long> deliveryIds,OrderStatus status) {
         for (Long id : deliveryIds) {
-            Order order = orderService.findById(id);
+            Order order = orderService.getOrderById(id);
             String message = order.getExternalId() + "의 주문이 " + order.getStatus() + "에서 " + status + " 상태로 변경되었습니다.";
             order.updateStatus(status);
 
@@ -63,37 +62,44 @@ public class AdminService {
     }
 
 
-
-    private List<ProductSalesStatDto> getDailyProductSalesStatistic(Long productId, int year, int month) {
-        List<ProductSalesStatDto> dailyResult = new ArrayList<>();
+    @Transactional
+    public List<ProductSalesStatDto> getDailyProductSalesStatistic(Long productId, Integer year, Integer month) {
 
         LocalDate startDate = LocalDate.of(year, month, 1);
         LocalDate endDate = startDate.withDayOfMonth(startDate.lengthOfMonth());
+        Map<LocalDate, ProductSalesStatDto> dailyStatMap = new HashMap<>();
+        for (LocalDate date = startDate; !date.isAfter(endDate); date = date.plusDays(1)) {
+            dailyStatMap.put(date, new ProductSalesStatDto(0, 0, date.toString())); // 기본값 0으로 초기화
+        }
 
-        List<ProductStat> dailyStats = productStatJpaRepository.findByProductIdAndDateBetween(
+        // 해당 달의 데이터를 가져온다.
+        List<ProductStat> dailyStats = productStatJpaRepository.findByProductIdAndYearAndMonth(
             productId,
-            startDate,
-            endDate
+            year,
+            month
         );
 
         // 일별 데이터 그대로 반환
         dailyStats.forEach(stat -> {
-            dailyResult.add(new ProductSalesStatDto(
-                stat.getQuantity(),
-                stat.getTotalPrice(),
-                stat.getDate().toString()
-            ));
+            LocalDate statDate = stat.getDate();
+            ProductSalesStatDto statDto = dailyStatMap.get(statDate);
+            statDto.setQuantity(stat.getQuantity());
+            statDto.setPrice(stat.getTotalPrice());
         });
 
+        List<ProductSalesStatDto> dailyResult = new ArrayList<>();
+        dailyResult.addAll(dailyStatMap.values());
         return dailyResult;
     }
 
-    private List<ProductSalesStatDto> getMonthlyProductSalesStatistic(Long productId, int year) {
+    @Transactional
+    public List<ProductSalesStatDto> getMonthlyProductSalesStatistic(Long productId, Integer year) {
         List<ProductSalesStatDto> monthlyResult = new ArrayList<>();
 
-        List<ProductStat> monthlyStats = productStatJpaRepository.findByProductIdAndYear(
+        List<ProductStat> monthlyStats = productStatJpaRepository.findByProductIdAndYearAndMonth(
             productId,
-            year
+            year,
+      null
         );
 
         // 월별 데이터 합산
@@ -118,12 +124,12 @@ public class AdminService {
         return monthlyResult;
     }
 
-    private List<ProductSalesStatDto> getYearlyProductSalesStatistic(Long productId, int year, Product product) {
+    @Transactional
+    public List<ProductSalesStatDto> getYearlyProductSalesStatistic(Long productId) {
         List<ProductSalesStatDto> yearlyResult = new ArrayList<>();
 
-        List<ProductStat> yearlyStats = productStatJpaRepository.findByProductIdAndYearGreaterThanEqual(
-            productId,
-            year
+        List<ProductStat> yearlyStats = productStatJpaRepository.findAllByProductId(
+            productId
         );
 
         // 년별 데이터 합산
@@ -137,7 +143,7 @@ public class AdminService {
         }
 
         // 년별 통계 반환
-        for (int currentYear = year; currentYear <= LocalDate.now().getYear(); currentYear++) {
+        for (int currentYear = initialYear; currentYear <= LocalDate.now().getYear(); currentYear++) {
             yearlyResult.add(new ProductSalesStatDto(
                 yearlyQuantityMap.getOrDefault(currentYear, 0),
                 yearlyPriceMap.getOrDefault(currentYear, 0),
@@ -148,4 +154,48 @@ public class AdminService {
         return yearlyResult;
     }
 
+    public List<ProductSalesRankDto> getDailyStatistics(Integer year, Integer month, Integer day) {
+        List<ProductStat> stats = productStatJpaRepository.findDailyStats(year, month, day);
+        return stats.stream()
+                .map(stat -> new ProductSalesRankDto(stat.getProduct().getName(), stat.getQuantity(), stat.getTotalPrice()))
+                .collect(Collectors.toList());
+    }
+
+    public List<ProductSalesRankDto> getMonthlyStatistics(Integer year, Integer month) {
+        List<ProductStat> stats = productStatJpaRepository.findMonthlyStats(year, month);
+        Map<String, ProductSalesRankDto> statMap = new HashMap<>();
+
+        for (ProductStat stat : stats) {
+            statMap.merge(
+                    stat.getProduct().getName(),
+                    new ProductSalesRankDto(stat.getProduct().getName(), stat.getQuantity(), stat.getTotalPrice()),
+                    (result, curse) -> {
+                        result.addQuantity(curse.getQuantity());
+                        result.addPrice(curse.getPrice());
+                        return result;
+                    }
+            );
+        }
+
+        return new ArrayList<>(statMap.values());
+    }
+
+    public List<ProductSalesRankDto> getYearlyStatistics(Integer year) {
+        List<ProductStat> stats = productStatJpaRepository.findYearlyStats(year);
+        Map<String, ProductSalesRankDto> statMap = new HashMap<>();
+
+        for (ProductStat stat : stats) {
+            statMap.merge(
+                    stat.getProduct().getName(),
+                    new ProductSalesRankDto(stat.getProduct().getName(), stat.getQuantity(), stat.getTotalPrice()),
+                    (result, curse) -> {
+                        result.addQuantity(curse.getQuantity());
+                        result.addPrice(curse.getPrice());
+                        return result;
+                    }
+            );
+        }
+
+        return new ArrayList<>(statMap.values());
+    }
 }

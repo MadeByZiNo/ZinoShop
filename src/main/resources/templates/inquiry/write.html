@@ -76,7 +76,7 @@
     }
 
     function loadOrders() {
-        fetch('/order/api/my-order')  // 서버에서 주문 목록 가져오는 API
+        fetch('/order/my-order')  // 서버에서 주문 목록 가져오는 API
             .then(response => response.json())
             .then(data => {
                 const ordersList = document.getElementById('ordersList');

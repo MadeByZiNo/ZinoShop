@@ -8,10 +8,14 @@ group = 'com.JH'
 version = '0.0.1-SNAPSHOT'
 
 java {
-	sourceCompatibility = '17'
+	sourceCompatibility = '21'
 }
 
-compileJava.options.encoding = 'UTF-8'
+compileJava {
+	options.encoding = 'UTF-8'
+	options.compilerArgs << '-parameters'
+}
+
 tasks.withType(JavaCompile) {
 options.encoding = 'UTF-8'
 }
@@ -35,6 +39,9 @@ dependencies {
 	implementation "org.springframework.boot:spring-boot-starter-security"
 	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 	implementation 'org.springframework.boot:spring-boot-starter-batch'
+	implementation 'org.springframework.boot:spring-boot-starter-aop'
+	implementation 'org.springframework.retry:spring-retry'
+
 	implementation 'org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE'
 	implementation 'org.springframework.boot:spring-boot-devtools' // 서버 재시작없이 html수정
 

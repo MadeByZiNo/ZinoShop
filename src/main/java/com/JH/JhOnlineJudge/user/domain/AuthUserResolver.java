@@ -2,8 +2,7 @@ package com.JH.JhOnlineJudge.user.domain;
 
 import com.JH.JhOnlineJudge.user.exception.LoginInvalidException;
 import com.JH.JhOnlineJudge.user.repository.UserRepository;
-import com.JH.JhOnlineJudge.utils.JwtUtil;
-import jakarta.servlet.http.Cookie;
+import com.JH.JhOnlineJudge.common.utils.JwtUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -13,8 +12,6 @@ import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
-
-import java.util.Arrays;
 
 @Component
 @RequiredArgsConstructor

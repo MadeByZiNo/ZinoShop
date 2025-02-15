@@ -2,13 +2,13 @@ package com.JH.JhOnlineJudge.product.service;
 
 import com.JH.JhOnlineJudge.category.CategoryService;
 import com.JH.JhOnlineJudge.category.domain.Category;
-import com.JH.JhOnlineJudge.common.Image.ProductImage.ProductImage;
-import com.JH.JhOnlineJudge.common.Image.ProductImage.ProductImageRepository;
+import com.JH.JhOnlineJudge.Image.ProductImage.ProductImage;
+import com.JH.JhOnlineJudge.Image.ProductImage.ProductImageRepository;
 import com.JH.JhOnlineJudge.product.domain.Product;
 import com.JH.JhOnlineJudge.product.dto.ProductDto;
 import com.JH.JhOnlineJudge.product.exception.NotFoundProductException;
 import com.JH.JhOnlineJudge.product.repository.ProductRepository;
-import com.JH.JhOnlineJudge.utils.S3Uploader;
+import com.JH.JhOnlineJudge.common.utils.S3Uploader;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -33,22 +33,15 @@ public class ProductService {
     private final CategoryService categoryService;
     private final S3Uploader s3Uploader;
 
-    @Transactional
-    public Product findProductById(Long id) {
+    @Transactional(readOnly = true)
+    public Product getProductById(Long id) {
         Product product =  productRepository.findById(id)
                 .orElseThrow(NotFoundProductException::new);
         return product;
     }
 
-    @Transactional
-    public Product findProductByIdWithLock(Long id) {
-        Product product =  productRepository.findById(id)
-                .orElseThrow(NotFoundProductException::new);
-        return product;
-    }
-
-    @Transactional
-    public List<Product> findAll() {
+    @Transactional(readOnly = true)
+    public List<Product> getAllProducts() {
         return productRepository.findAll();
     }
 
@@ -59,7 +52,7 @@ public class ProductService {
         Product product = Product.of(request);
 
         // 카테고리 설정
-        Category category = categoryService.findById(request.getCategoryId());
+        Category category = categoryService.getCategoryById(request.getCategoryId());
         product.attachCategory(category);
 
         // 저장
@@ -86,7 +79,7 @@ public class ProductService {
     @Transactional(rollbackFor = Exception.class)
     public void updateProduct(ProductDto productDto, MultipartFile[] images) {
 
-        Product product = findProductById(productDto.getId());
+        Product product = getProductById(productDto.getId());
 
         // 기본데이터 수정
         product.updateProduct(productDto);
@@ -94,10 +87,9 @@ public class ProductService {
         // 카테고리 수정
         if(product.getCategory().getId() != productDto.getCategoryId()) {
             product.getCategory().removeProduct(product);
-            Category category = categoryService.findById(productDto.getCategoryId());
+            Category category = categoryService.getCategoryById(productDto.getCategoryId());
             product.attachCategory(category);
         }
-
 
         // 이미지 수정
         if(images != null) {
@@ -148,6 +140,5 @@ public class ProductService {
         Pageable pageable = PageRequest.of(offset -1, 6);
         return productRepository.findProductsByCategoryIds(categoryIds, pageable);
     }
-
 
 }

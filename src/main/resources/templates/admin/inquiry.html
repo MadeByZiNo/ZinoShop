@@ -129,19 +129,19 @@
         <ul style="display: inline-flex; padding: 0; margin: 0;">
             <!-- 이전 페이지 버튼 -->
             <li th:if="${currentPage > 5}" class="page-item">
-                <a th:href="@{/inquiry/page(page=${startPage - 5})}">이전</a>
+                <a th:href="@{/inquiry/list(page=${startPage - 5})}">이전</a>
             </li>
 
             <!-- 페이지 번호 -->
             <li th:each="pageNum : ${#numbers.sequence(startPage, endPage)}" class="page-item">
-                <a th:href="@{/inquiry/page(page=${pageNum})}"
+                <a th:href="@{/inquiry/list(page=${pageNum})}"
                    th:text="${pageNum}"
                    th:classappend="${currentPage == pageNum} ? 'active' : ''"></a>
             </li>
 
             <!-- 다음 페이지 버튼 -->
             <li th:if="${endPage < totalPages}" class="page-item">
-                <a th:href="@{/inquiry/page(page=${endPage + 1})}">다음</a>
+                <a th:href="@{/inquiry/list(page=${endPage + 1})}">다음</a>
             </li>
         </ul>
     </div>

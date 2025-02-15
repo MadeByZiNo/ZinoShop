@@ -1,0 +1,7 @@
+package com.JH.JhOnlineJudge.Image.ReviewImage;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface ReviewImageJpaRepository extends JpaRepository<ReviewImage, Long> {
+
+}

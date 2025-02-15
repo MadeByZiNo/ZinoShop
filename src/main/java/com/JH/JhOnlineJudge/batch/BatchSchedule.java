@@ -24,4 +24,10 @@ public class BatchSchedule {
             jobLauncher.run(jobRegistry.getJob("updateStatJob"), new JobParameters());
         }
 
+        @Scheduled(cron = "0 0 06,18 * * ?", zone = "Asia/Seoul")
+        public void refundStatBatch() throws Exception {
+
+            jobLauncher.run(jobRegistry.getJob("refundRequestStep"), new JobParameters());
+        }
+
 }

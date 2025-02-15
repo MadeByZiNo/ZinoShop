@@ -19,7 +19,7 @@
     <div class="card" style=" width:600px;  margin: 0 auto;">
       <div class="card-body" >
         <h2 class="card-title" style="margin-top: 25px; margin-bottom: 40px; text-align: center;">로그인</h2>
-        <form th:action="@{/users/login}" method="post" th:object="${loginDto}">
+        <form th:action="@{/users/login}" method="post" th:object="${loginRequest}">
           <div th:if="${#fields.hasGlobalErrors()}">
             <p th:each="err : ${#fields.globalErrors()}" th:text="${err}" style= text-align: center;>...</p>
           </div>

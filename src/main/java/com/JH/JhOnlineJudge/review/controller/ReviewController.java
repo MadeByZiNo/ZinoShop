@@ -1,7 +1,7 @@
 package com.JH.JhOnlineJudge.review.controller;
 
-import com.JH.JhOnlineJudge.review.dto.ReviewCreateDto;
-import com.JH.JhOnlineJudge.review.dto.ReviewListDto;
+import com.JH.JhOnlineJudge.review.dto.ReviewCreateRequest;
+import com.JH.JhOnlineJudge.review.dto.ReviewListResponse;
 import com.JH.JhOnlineJudge.review.exception.ReviewPermissionException;
 import com.JH.JhOnlineJudge.review.service.ReviewService;
 import com.JH.JhOnlineJudge.user.domain.AuthUser;
@@ -24,31 +24,32 @@ public class ReviewController {
     private final ReviewService reviewService;
     private final int REVIEWS_PER_PAGE_LATEST = 2;
     private final int REVIEWS_PER_PAGE = 4;
+
+
     @GetMapping("/latest")
     @ResponseBody
-    public ResponseEntity<Page<ReviewListDto>> getLatestReviews(@RequestParam Long productId) {
-        return ResponseEntity.ok(reviewService.getReviews(productId, 0, REVIEWS_PER_PAGE_LATEST));
+    public ResponseEntity<Page<ReviewListResponse>> getLatestReviews(@RequestParam Long productId) {
+        return ResponseEntity.ok(reviewService.getReviewsByProductId(productId, 0, REVIEWS_PER_PAGE_LATEST));
     }
 
     @GetMapping("/custom")
     @ResponseBody
-    public ResponseEntity<Page<ReviewListDto>> getReviewsPage(@RequestParam Long productId, @RequestParam int page) {
-        return ResponseEntity.ok(reviewService.getReviews(productId, page, REVIEWS_PER_PAGE));
+    public ResponseEntity<Page<ReviewListResponse>> getReviewsPage(@RequestParam Long productId, @RequestParam int page) {
+        return ResponseEntity.ok(reviewService.getReviewsByProductId(productId, page, REVIEWS_PER_PAGE));
     }
-
 
    @GetMapping("/images")
    @ResponseBody
    public ResponseEntity<List<String>> getReviewImages(@RequestParam Long reviewId) {
-       return ResponseEntity.ok(reviewService.getReviewImages(reviewId));
+       return ResponseEntity.ok(reviewService.getReviewImagesByReviewId(reviewId));
    }
 
   @GetMapping("/page")
-  public String getReviewListPage(@AuthUser Long userId,
+  public String getUserReviewsPage(@AuthUser Long userId,
                                 @RequestParam(value = "page", required = false, defaultValue = "1") int page,
                                 Model model) {
 
-      Page<ReviewListDto> reviews = reviewService.getUserReviews(userId, page-1, REVIEWS_PER_PAGE);
+      Page<ReviewListResponse> reviews = reviewService.getReviewsByUserId(userId, page-1, REVIEWS_PER_PAGE);
       int totalPages = reviews.getTotalPages();
       int currentPage = reviews.getNumber() + 1;  //
       int pageGroup = (currentPage - 1) / 5;
@@ -63,7 +64,7 @@ public class ReviewController {
        return "users/review";
   }
 
-    @GetMapping("/write-page")
+    @GetMapping("/write")
     public String getWritePage(@AuthUser Long userId,
                                @RequestParam Long productId,
                                Model model) {
@@ -76,25 +77,23 @@ public class ReviewController {
 
     @PostMapping
     public String createReview(@AuthUser Long userId,
-                               @ModelAttribute ReviewCreateDto request,
+                               @ModelAttribute ReviewCreateRequest request,
                                @RequestParam(value = "files", required = false) MultipartFile[] files) {
 
-        System.out.println("request.getContent() + request.getProductId() = " + request.getContent() + request.getProductId());
         if (files != null && files.length > 5) {
             throw new IllegalArgumentException("이미지는 최대 5개까지 첨부할 수 있습니다.");
         }
-
         reviewService.createReview(userId, request, files);
 
         return "redirect:/product/review/" + request.getProductId();
     }
 
-  @DeleteMapping
-  @ResponseBody
-  public ResponseEntity deleteReview(@AuthUser Long userId,
+    @DeleteMapping
+    @ResponseBody
+    public ResponseEntity<?> deleteReview(@AuthUser Long userId,
                                      @RequestBody Map<String, Long> request) {
-      Long reviewId = request.get("reviewId");
+        Long reviewId = request.get("reviewId");
         reviewService.deleteReview(reviewId);
-        return new ResponseEntity(HttpStatus.OK);
-  }
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
 }
