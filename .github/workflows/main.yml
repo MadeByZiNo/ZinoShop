@@ -1,0 +1,47 @@
+name: Deploy to EC2 with Docker
+
+on:
+  push:
+    branches:
+      - main  # main 브랜치에 push하면 실행됨
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest  # GitHub Actions 실행 환경
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2  # 코드 가져오기
+
+      - name: Deploy to EC2
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            # 1️⃣ EC2에서 최신 코드 가져오기
+            cd /home/ubuntu/app
+            git pull origin main
+
+            # 2️⃣ 환경변수 저장
+            echo "AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}" > .env
+            echo "AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}" >> .env
+            echo "JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}" >> .env
+            echo "TOSS_CLIENT_KEY=${{ secrets.TOSS_CLIENT_KEY }}" >> .env
+            echo "TOSS_SECRET_KEY=${{ secrets.TOSS_SECRET_KEY }}" >> .env
+            chmod 600 .env  # 보안 강화
+
+            # 3️⃣ JAR 빌드 (Gradle 사용)
+            ./gradlew build -x test  # 테스트 제외하고 빌드
+            cp build/libs/*.jar app.jar  # JAR 파일 복사
+
+            # 4️⃣ Docker 이미지 생성
+            docker build -t my-app .
+
+            # 5️⃣ 기존 컨테이너 종료 및 삭제 (기존 컨테이너가 있다면)
+            docker stop my-app-container || true
+            docker rm my-app-container || true
+
+            # 6️⃣ 새로운 컨테이너 실행 (환경변수 포함)
+            docker run --env-file .env -d --name my-app-container -p 8080:8080 my-app
