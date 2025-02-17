@@ -22,6 +22,7 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           port: ${{ secrets.PORT }}
           script: |
+            whoami
             # 1️⃣ EC2에서 최신 코드 가져오기
             cd /home/ubuntu/app
             git pull origin main
