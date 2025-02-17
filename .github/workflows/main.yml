@@ -25,7 +25,7 @@ jobs:
             whoami
             # 1️⃣ EC2에서 최신 코드 가져오기
             cd /home/ubuntu/app
-            git pull origin main
+            git pull origin master
 
             # 2️⃣ 환경변수 저장
             echo "AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}" > .env
