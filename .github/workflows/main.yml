@@ -13,7 +13,10 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2  # 코드 가져오기
-
+  
+      - name: Grant execute permission to gradlew
+        run: chmod +x gradlew  # gradlew 실행 권한 부여
+        
       - name: Deploy to EC2
         uses: appleboy/ssh-action@v0.1.4
         with:
