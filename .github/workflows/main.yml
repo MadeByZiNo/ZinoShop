@@ -38,7 +38,7 @@ jobs:
             chmod 600 .env  # 보안 강화
 
             # 3️⃣ JAR 빌드 (Gradle 사용)
-            ./gradlew build -x test  # 테스트 제외하고 빌드
+            ./gradlew bootJar -x test  # 테스트 제외하고 빌드
             cp build/libs/JhOnlineJudge-0.0.1-SNAPSHOT-plain.jar app.jar  # JAR 파일 복사
 
             # 4️⃣ Docker 이미지 생성
