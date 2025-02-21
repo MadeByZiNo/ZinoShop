@@ -5,7 +5,7 @@ on:
   push:
     branches:
       - main  # main 브랜치에 push하면 실행됨
-    
+
 jobs:
   deploy:
     runs-on: ubuntu-latest  # GitHub Actions 실행 환경
@@ -28,7 +28,7 @@ jobs:
             # 1️⃣ EC2에서 최신 코드 가져오기
             cd /home/ubuntu/app
             git pull origin master
-
+            
             # 2️⃣ 환경변수 저장
             echo "AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}" > .env
             echo "AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}" >> .env
@@ -40,16 +40,20 @@ jobs:
             echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
             chmod 600 .env  # 보안 강화
 
-            # 3️⃣ JAR 빌드 (Gradle 사용)
+            # 3️⃣ .bashrc에 source .env 추가 (환경 변수 적용)
+            echo "source /home/ubuntu/app/.env" >> ~/.bashrc
+            source ~/.bashrc  # .bashrc에서 환경변수 적용
+
+            # 4️⃣ JAR 빌드 (Gradle 사용)
             ./gradlew bootJar -x test  # 테스트 제외하고 빌드
             cp build/libs/JhOnlineJudge-0.0.1-SNAPSHOT.jar app.jar  # JAR 파일 복사
-
-            # 4️⃣ Docker 이미지 생성
+            
+            # 5️⃣ Docker 이미지 생성
             docker build -t my-app .
-
-            # 5️⃣ 기존 컨테이너 종료 및 삭제 (기존 컨테이너가 있다면)
+            
+            # 6️⃣ 기존 컨테이너 종료 및 삭제 (기존 컨테이너가 있다면)
             docker stop my-app-container || true
             docker rm my-app-container || true
-
-            # 6️⃣ 새로운 컨테이너 실행 (환경변수 포함)
+            
+            # 7️⃣ 새로운 컨테이너 실행 (환경변수 포함)
             docker run --env-file .env -d --name my-app-container -p 8080:8080 my-app
