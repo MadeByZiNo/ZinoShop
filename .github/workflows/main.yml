@@ -35,6 +35,9 @@ jobs:
             echo "JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}" >> .env
             echo "TOSS_CLIENT_KEY=${{ secrets.TOSS_CLIENT_KEY }}" >> .env
             echo "TOSS_SECRET_KEY=${{ secrets.TOSS_SECRET_KEY }}" >> .env
+            echo "DB_URL=${{ secrets.DB_URL }}" >> .env
+            echo "DB_USERNAME=${{ secrets.DB_USERNAME }}" >> .env
+            echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
             chmod 600 .env  # 보안 강화
 
             # 3️⃣ JAR 빌드 (Gradle 사용)
