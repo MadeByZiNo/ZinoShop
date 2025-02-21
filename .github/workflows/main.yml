@@ -30,14 +30,14 @@ jobs:
             git pull origin master
             
             # 2️⃣ 환경변수 저장
-            echo "AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}" > .env
-            echo "AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}" >> .env
-            echo "JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}" >> .env
-            echo "TOSS_CLIENT_KEY=${{ secrets.TOSS_CLIENT_KEY }}" >> .env
-            echo "TOSS_SECRET_KEY=${{ secrets.TOSS_SECRET_KEY }}" >> .env
-            echo "DB_URL=${{ secrets.DB_URL }}" >> .env
-            echo "DB_USERNAME=${{ secrets.DB_USERNAME }}" >> .env
-            echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
+            echo "export AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}" > .env
+            echo "export AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}" >> .env
+            echo "export JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}" >> .env
+            echo "export TOSS_CLIENT_KEY=${{ secrets.TOSS_CLIENT_KEY }}" >> .env
+            echo "export TOSS_SECRET_KEY=${{ secrets.TOSS_SECRET_KEY }}" >> .env
+            echo "export DB_URL=${{ secrets.DB_URL }}" >> .env
+            echo "export DB_USERNAME=${{ secrets.DB_USERNAME }}" >> .env
+            echo "export DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
             chmod 600 .env  # 보안 강화
 
             # 3️⃣ .bashrc에 source .env 추가 (환경 변수 적용)
