@@ -40,7 +40,11 @@
 ---
 
 ### 아키텍처 구조
-넣을 것
+![제목 없는 다이어그램 drawio (1)](https://github.com/user-attachments/assets/ddf7f00c-9790-44b4-8520-cd3e7d3504d3)
+
+Github Action을 통해서 개발자가 운영 Branch에 push를 하면 감지를 해서 EC2에서 pull을 하고 빌드해서 JAR파일을 생성 후 Dockerfile을 통해서  
+
+프로젝트 서버 Docker 이미지를 생성하고 컨테이너에서 실행시키게 해놓아서 자동배포를 구현하였습니다. 
 
 ---
 
