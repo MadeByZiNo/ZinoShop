@@ -41,30 +41,34 @@
 ### 아키텍처 구조
 넣을 것
 
+---
+
 ## 📌 주요 기능  
 
 ### 1. 회원 및 인증 관리
 
 - **JWT**를 이용한 로그인 및 세션 관리
+
 ![JWT](https://github.com/user-attachments/assets/e1b052fc-a7ea-470e-beeb-4abf705aad14)
 
-사용자가 로그인하면 서버는 JWT 형태의 **AccessToken**과 **RefreshToken**을 발급합니다.
-
+사용자가 로그인하면 서버는 JWT 형태의 **AccessToken**과 **RefreshToken**을 발급합니다.  
 이 두 토큰은 **쿠키**에 저장되어 탈취 위험성을 위해 **유효 시간을 설정**합니다.
 
-- **AccessToken**은 인증하는 데 사용되며 유효 시간이 짧고, 유효 시간이 지나면 만료되어 인증이 불가능합니다.
+- **AccessToken**은 인증하는 데 사용되며 유효 시간이 짧고, 유효 시간이 지나면 만료되어 인증이 불가능합니다.  
 - **RefreshToken**은 AccessToken의 유효 기간이 끝났을 때 새로운 AccessToken을 발급받을 수 있도록 도와줍니다.
 
 - **회원 역할 세분화**: 일반 회원, VIP 회원, 관리자
 ![Role](https://github.com/user-attachments/assets/3b91c6d0-76bf-4a5a-a524-e4449b62ce8f)
 
 - **ArgumentResolver와 Annotation**을 활용한 역할 기반 인가 처리
+
 ![Authorization](https://github.com/user-attachments/assets/3f47c45f-3898-472d-a322-584362f6a848)
 
 `ArgumentResolver`와 `Annotation`을 이용해 인가 처리를 하였습니다.  
+
 ![AuthUser Annotation](https://github.com/user-attachments/assets/ac4ad6cb-602c-46a7-91f6-a2dbfd4eea30)
 
-`@AuthUser`라는 Annotation을 만든 후 `ArgumentResolver`에 인증 로직을 넣고, 인가 처리가 필요한 메소드에 해당 Annotation을 추가하여 인증과정을 거칩니다.
+`@AuthUser`라는 Annotation을 만든 후 `ArgumentResolver`에 인증 로직을 넣고, 인가 처리가 필요한 메소드에 해당 Annotation을 추가하여 인증과정을 거칩니다.  
 
 운영자의 경우, `@Admin` Annotation을 만들어서 운영자 여부 인증을 거치게 합니다.
 
@@ -80,9 +84,11 @@
 ### 3. 문의 게시판
 
 - 문의 등록 및 답변 기능
+
 ![Inquiry](https://github.com/user-attachments/assets/c8116a3e-f194-4102-819c-4ed00a381303)
 
 - 문의 상태 관리 (예: 답변 대기, 답변 완료)
+
 ![Inquiry Status](https://github.com/user-attachments/assets/2a76e981-8bd7-4c39-b0bd-b19eaa4dee6f)
 
 유저는 자신의 주문에 대해 문의 게시글을 올릴 수 있으며, 운영자는 문의들에 대해 답변 처리가 가능합니다.
@@ -110,7 +116,8 @@
 
 - 고객은 제품들을 장바구니에 담아서 주문 할 수 있습니다.
 - **토스(Toss)**와의 결제 연동 (**가상 결제**)
-![Payment](https://github.com/user-attachments/assets/0eca0f12-1edd-46c7-ac2d-00dab8964117)
+
+![Payment](https://github.com/user-attachments/assets/0eca0f12-1edd-46c7-ac2d-00dab8964117)  
 ![Payment Confirmation](https://github.com/user-attachments/assets/e5542f29-e33c-4b36-b4b2-1c8968e0df8a)
 
 - **낙관적 Lock**과 **Retry**를 이용한 동시성 결제 문제 해결
