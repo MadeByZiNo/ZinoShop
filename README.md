@@ -55,18 +55,18 @@
 - **AccessToken**은 인증하는데 사용되며 유효 시간이 짧고, 유효 시간이 지나면 만료되어 인증이 불가능합니다.
 - **RefreshToken**은 AccessToken의 유효 기간이 끝났을 때 새로운 AccessToken을 발급받을 수 있도록 도와줍니다.
 
-- **회원 역할 세분화**: 일반 회원, VIP 회원, 관리자
-![Role](https://github.com/user-attachments/assets/3b91c6d0-76bf-4a5a-a524-e4449b62ce8f)
+- **회원 역할 세분화**: 일반 회원, VIP 회원, 관리자  
+![Role](https://github.com/user-attachments/assets/3b91c6d0-76bf-4a5a-a524-e4449b62ce8f)  
 
-- **ArgumentResolver와 Annotation**을 활용한 역할 기반 인가 처리
-![Authorization](https://github.com/user-attachments/assets/3f47c45f-3898-472d-a322-584362f6a848)
+- **ArgumentResolver와 Annotation**을 활용한 역할 기반 인가 처리  
+![Authorization](https://github.com/user-attachments/assets/3f47c45f-3898-472d-a322-584362f6a848)  
 
-`ArgumentResolver`와 `Annotation`을 이용해 인가 처리를 하였습니다.
-![AuthUser Annotation](https://github.com/user-attachments/assets/ac4ad6cb-602c-46a7-91f6-a2dbfd4eea30)
+`ArgumentResolver`와 `Annotation`을 이용해 인가 처리를 하였습니다.  
+![AuthUser Annotation](https://github.com/user-attachments/assets/ac4ad6cb-602c-46a7-91f6-a2dbfd4eea30)  
 
-`@AuthUser`라는 Annotation을 만든 후 `ArgumentResolver`에 인증 로직을 넣고, 인가 처리가 필요한 메소드에 해당 Annotation을 추가하여 인증과정을 거칩니다.
+`@AuthUser`라는 Annotation을 만든 후 `ArgumentResolver`에 인증 로직을 넣고, 인가 처리가 필요한 메소드에 해당 Annotation을 추가하여 인증과정을 거칩니다.  
 
-운영자의 경우, `@Admin` Annotation을 만들어서 운영자 여부 인증을 거치게 합니다.
+운영자의 경우, `@Admin` Annotation을 만들어서 운영자 여부 인증을 거치게 합니다.  
 
 ### 2. 상품 관리
 
@@ -167,32 +167,32 @@ public Map<String, Object> confirmPaymentAndUpdate(OrderConfirmRequest orderConf
 
 ### **낙관적 락을 통한 동시성 문제 해결**
 
-낙관적 락을 사용하여 **유저의 쿠폰 중복 사용**, **리워드 포인트 한도 오류**, **결제된 주문 중복 요청**을 방지하였고, 상품의 재고에 대해 **Race Condition**으로 인한 재고보다 많은 주문 요청을 방지하였습니다.
+낙관적 락을 사용하여 **유저의 쿠폰 중복 사용**, **리워드 포인트 한도 오류**, **결제된 주문 중복 요청**을 방지하였고, 상품의 재고에 대해 **Race Condition**으로 인한 재고보다 많은 주문 요청을 방지하였습니다.  
 
-`@Retryable` 어노테이션을 사용하여 **낙관적 락의 버전 예외**가 발생할 경우 최대 **3번 재요청**을 하게 해주었습니다. 이로 인해 재요청 시 **재고가 없으면 구매가 불가능**, **재고가 남아있으면 구매 가능**하게 됩니다.
+`@Retryable` 어노테이션을 사용하여 **낙관적 락의 버전 예외**가 발생할 경우 최대 **3번 재요청**을 하게 해주었습니다. 이로 인해 재요청 시 **재고가 없으면 구매가 불가능**, **재고가 남아있으면 구매 가능**하게 됩니다.  
 
 ---
 
 ### **JMeter 동시성 테스트**
 
-다음과 같이 재고가 **101개**인 상품에 대해 **2개씩 구매**하는 주문 요청을 **JMeter**를 이용해 동시성 테스트를 진행했습니다.
+다음과 같이 재고가 **101개**인 상품에 대해 **2개씩 구매**하는 주문 요청을 **JMeter**를 이용해 동시성 테스트를 진행했습니다.  
 
-![JMeter Testing](https://github.com/user-attachments/assets/0178b023-cc9d-4ca5-b2e2-15b6fdf5b12d)
+![JMeter Testing](https://github.com/user-attachments/assets/0178b023-cc9d-4ca5-b2e2-15b6fdf5b12d)  
 
-**총 110회의 구매 요청**을 했으며, 정확히 **51번째 요청부터 품절된 상품**으로 나타났습니다.
+**총 110회의 구매 요청**을 했으며, 정확히 **51번째 요청부터 품절된 상품**으로 나타났습니다.  
 
-- **50번째 요청까지는 2개씩 구매**하므로 **101개 중 100개가 판매**됩니다.
-- **51번째 요청부터 품절 처리**되었습니다.
+- **50번째 요청까지는 2개씩 구매**하므로 **101개 중 100개가 판매**됩니다.  
+- **51번째 요청부터 품절 처리**되었습니다.  
 
-정확히 **한 개의 재고**가 남은 것을 알 수 있습니다.
+정확히 **한 개의 재고**가 남은 것을 알 수 있습니다.  
 
-![Remaining Stock](https://github.com/user-attachments/assets/4d0356f0-175f-4041-b594-99a1d636f9ff)
+![Remaining Stock](https://github.com/user-attachments/assets/4d0356f0-175f-4041-b594-99a1d636f9ff)  
 
 ---
 
-### **6. 배치 작업**
+### **6. 배치 작업**  
 
-- **Spring Batch**를 활용한 다양한 작업:
+- **Spring Batch**를 활용한 다양한 작업:  
   - 결제 취소 자동 처리
   - 회원 VIP 등급 자동 처리
   - 상품 판매 분석
@@ -207,28 +207,31 @@ Spring AOP를 이용하여 로그 추적기를 구현했습니다. (Elastic Sear
 
 ---
 
-### **8. 파일 업로드 개선**
+### **8. 파일 업로드 개선**  
 
-- 상품 등록 시 이미지 저장을 **비동기 처리**하여 업로드 속도를 높였고, 파일 업로드 실패 시 **롤백 처리** 설계를 추가했습니다.
+- 상품 등록 시 이미지 저장을 **비동기 처리**하여 업로드 속도를 높였고, 파일 업로드 실패 시 **롤백 처리** 설계를 추가했습니다.  
 
 ---
 
-### **9. 성능 최적화**
+### **9. 성능 최적화**   
 
-- **N+1 문제 해결**: `Fetch Join`을 사용하여 N+1 문제를 방지했습니다.
-- `Pageable`을 사용한 경우, `Fetch Join` 시 **limit**문이 해결되지 않는 문제를 보았습니다. 그래서 `@BatchSize` 어노테이션을 사용하여 동일한 `where`문에 대한 N+1 문제를 한번에 불러올 수 있도록 최적화했습니다.
+- **N+1 문제 해결**: `Fetch Join`을 사용하여 N+1 문제를 방지했습니다.  
+- `Pageable`을 사용한 경우, `Fetch Join` 시 **limit**문이 해결되지 않는 문제를 보았습니다. 그래서 `@BatchSize` 어노테이션을 사용하여 동일한 `where`문에 대한 N+1 문제를 한번에 불러올 수 있도록 최적화했습니다.  
 
-#### **성능 문제**
+#### **성능 문제**  
 
-![Performance Issue](https://github.com/user-attachments/assets/2a69318e-ce0d-4b6b-ad58-b966f75048b1)
+![Performance Issue](https://github.com/user-attachments/assets/2a69318e-ce0d-4b6b-ad58-b966f75048b1)  
 
-300여 개의 스레드를 통해 동시에 제품 페이지 요청을 할 때, 매우 느린 응답 속도가 발생하는 문제를 확인했습니다. JPA에서 제공하는 **`Page`**로 데이터를 받을 때 모든 데이터를 **Count**하고 페이징 처리를 하므로, 300개 스레드의 요청에 대해 **30만 개의 product 데이터**를 모두 카운팅하고 있었습니다.
+300여 개의 스레드를 통해 동시에 제품 페이지 요청을 할 때, 매우 느린 응답 속도가 발생하는 문제를 확인했습니다.   
 
-이를 해결하기 위해 **`Page` 대신 `Slice`**를 사용하여, 해당 페이지 처리에 필요한 데이터만 받아와 페이징 처리를 하였습니다.
 
-![Slice Performance](https://github.com/user-attachments/assets/9de1e390-87e8-455d-ab62-a1955319e282)
+JPA에서 제공하는 **`Page`**로 데이터를 받을 때 모든 데이터를 **Count**하고 페이징 처리를 하므로, 300개 스레드의 요청에 대해 **30만 개의 product 데이터**를 모두 카운팅하고 있었습니다.  
 
-**`Slice`**를 이용하니 성능이 현저히 향상되었습니다.
+이를 해결하기 위해 **`Page` 대신 `Slice`**를 사용하여, 해당 페이지 처리에 필요한 데이터만 받아와 페이징 처리를 하였습니다.  
+
+![Slice Performance](https://github.com/user-attachments/assets/9de1e390-87e8-455d-ab62-a1955319e282)  
+
+**`Slice`**를 이용하니 성능이 현저히 향상되었습니다.  
 
 ---
 
