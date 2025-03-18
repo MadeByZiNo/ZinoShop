@@ -61,6 +61,11 @@ Github Action을 통해서 개발자가 운영 Branch에 push를 하면 감지�
 
 ### 1. 회원 및 인증 관리
 
+
+![image](https://github.com/user-attachments/assets/00089dd6-e464-4376-8992-76aa642b462f)
+![image](https://github.com/user-attachments/assets/27d07939-adae-4fd6-b8dd-4522a4f0801d)
+
+
 - **JWT**를 이용한 로그인 및 세션 관리
 
 ![JWT](https://github.com/user-attachments/assets/e1b052fc-a7ea-470e-beeb-4abf705aad14)
@@ -69,7 +74,11 @@ Github Action을 통해서 개발자가 운영 Branch에 push를 하면 감지�
 이 두 토큰은 **쿠키**에 저장되어 탈취 위험성을 위해 **유효 시간을 설정**합니다.
 
 - **AccessToken**은 인증하는 데 사용되며 유효 시간이 짧고, 유효 시간이 지나면 만료되어 인증이 불가능합니다.  
-- **RefreshToken**은 AccessToken의 유효 기간이 끝났을 때 새로운 AccessToken을 발급받을 수 있도록 도와줍니다.
+- **RefreshToken**은 AccessToken의 유효 기간이 끝났을 때 새로운 AccessToken을 발급받을 수 있도록 도와줍니다.  
+
+
+![image](https://github.com/user-attachments/assets/a030d8ba-4ee1-40ff-8430-5ee20f3e4171)
+
 
 - **회원 역할 세분화**: 일반 회원, VIP 회원, 관리자
 
@@ -86,7 +95,11 @@ Github Action을 통해서 개발자가 운영 Branch에 push를 하면 감지�
 
 `@AuthUser`라는 Annotation을 만든 후 `ArgumentResolver`에 인증 로직을 넣고, 인가 처리가 필요한 메소드에 해당 Annotation을 추가하여 인증과정을 거칩니다.  
 
-운영자의 경우, `@Admin` Annotation을 만들어서 운영자 여부 인증을 거치게 합니다.
+운영자의 경우, `@Admin` Annotation을 만들어서 운영자 여부 인증을 거치게 합니다.  
+
+
+![image](https://github.com/user-attachments/assets/576137fa-ea7b-49ee-bba1-59300d640113)
+
 
 ---
 
