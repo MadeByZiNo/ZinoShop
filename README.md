@@ -48,32 +48,27 @@
 - **JWT**를 이용한 로그인 및 세션 관리
 ![JWT](https://github.com/user-attachments/assets/e1b052fc-a7ea-470e-beeb-4abf705aad14)
 
-사용자가 로그인하면 서버는 JWT 형태의 AccessToken과 RefreshToken을 발급합니다.
+사용자가 로그인하면 서버는 JWT 형태의 **AccessToken**과 **RefreshToken**을 발급합니다.
 
-이 두 토큰은 쿠키에 저장되어 탈취 위험성을 위해 유효 시간을 가집니다.
+이 두 토큰은 **쿠키**에 저장되어 탈취 위험성을 위해 **유효 시간을 설정**합니다.
 
-- **AccessToken**은 인증하는데 사용되며 유효 시간이 짧고, 유효 시간이 지나면 만료되어 인증이 불가능합니다.
+- **AccessToken**은 인증하는 데 사용되며 유효 시간이 짧고, 유효 시간이 지나면 만료되어 인증이 불가능합니다.
 - **RefreshToken**은 AccessToken의 유효 기간이 끝났을 때 새로운 AccessToken을 발급받을 수 있도록 도와줍니다.
 
 - **회원 역할 세분화**: 일반 회원, VIP 회원, 관리자
-  
-![Role](https://github.com/user-attachments/assets/3b91c6d0-76bf-4a5a-a524-e4449b62ce8f)  
+![Role](https://github.com/user-attachments/assets/3b91c6d0-76bf-4a5a-a524-e4449b62ce8f)
 
 - **ArgumentResolver와 Annotation**을 활용한 역할 기반 인가 처리
-  
-![Authorization](https://github.com/user-attachments/assets/3f47c45f-3898-472d-a322-584362f6a848)  
+![Authorization](https://github.com/user-attachments/assets/3f47c45f-3898-472d-a322-584362f6a848)
 
 `ArgumentResolver`와 `Annotation`을 이용해 인가 처리를 하였습니다.  
+![AuthUser Annotation](https://github.com/user-attachments/assets/ac4ad6cb-602c-46a7-91f6-a2dbfd4eea30)
 
-![AuthUser Annotation](https://github.com/user-attachments/assets/ac4ad6cb-602c-46a7-91f6-a2dbfd4eea30)  
+`@AuthUser`라는 Annotation을 만든 후 `ArgumentResolver`에 인증 로직을 넣고, 인가 처리가 필요한 메소드에 해당 Annotation을 추가하여 인증과정을 거칩니다.
 
+운영자의 경우, `@Admin` Annotation을 만들어서 운영자 여부 인증을 거치게 합니다.
 
-`@AuthUser`라는 Annotation을 만든 후 `ArgumentResolver`에 인증 로직을 넣고, 인가 처리가 필요한 메소드에 해당 Annotation을 추가하여 인증과정을 거칩니다.  
-
-
-운영자의 경우, `@Admin` Annotation을 만들어서 운영자 여부 인증을 거치게 합니다.  
-
-
+---
 
 ### 2. 상품 관리
 
@@ -85,39 +80,31 @@
 ### 3. 문의 게시판
 
 - 문의 등록 및 답변 기능
-
-- 
 ![Inquiry](https://github.com/user-attachments/assets/c8116a3e-f194-4102-819c-4ed00a381303)
 
- 
 - 문의 상태 관리 (예: 답변 대기, 답변 완료)
-
-- 
 ![Inquiry Status](https://github.com/user-attachments/assets/2a76e981-8bd7-4c39-b0bd-b19eaa4dee6f)
 
+유저는 자신의 주문에 대해 문의 게시글을 올릴 수 있으며, 운영자는 문의들에 대해 답변 처리가 가능합니다.
 
-
-유저는 자신의 주문에 대해 문의 게시글을 올릴 수 있으며, 운영자는 문의들에 대해 답변처리가 가능합니다.  
-
-
+---
 
 ### 4. 좋아요 및 포인트/쿠폰 시스템
 
 - 상품에 대한 좋아요 기능
 ![Like](https://github.com/user-attachments/assets/27c5f29f-72a8-40a3-a31b-09e71f128963)
 
-좋아요 버튼을 통해서 원하는 상품에 대해 찜 등록이 가능합니다.
+좋아요 버튼을 통해 원하는 상품에 대해 찜 등록이 가능합니다.
 
 - 쿠폰 발급 및 포인트 적립/사용 관리
- 
 ![Coupon](https://github.com/user-attachments/assets/f05c174d-367c-4aed-8e34-02d2851997df)
 
-
-
-해당 주문에 대해서 쿠폰 및 리워드 포인트 사용이 가능합니다.
+해당 주문에 대해서 **쿠폰** 및 **리워드 포인트** 사용이 가능합니다.
 ![Coupon Usage](https://github.com/user-attachments/assets/a521976d-6426-4e0e-a72c-cbfc16ec27af)
 
 쿠폰은 만료일, 최소주문금액, % 혹은 원 단위 설정이 가능합니다.
+
+---
 
 ### 5. 결제 시스템
 
@@ -128,62 +115,7 @@
 
 - **낙관적 Lock**과 **Retry**를 이용한 동시성 결제 문제 해결
 
-```java
-@Retryable(
-        retryFor = {OptimisticLockException.class, StaleObjectStateException.class},
-        maxAttempts = 3,
-        backoff = @Backoff(delay = 500)
-)
-@Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = Exception.class)
-public Map<String, Object> confirmPaymentAndUpdate(OrderConfirmRequest orderConfirmRequest) {
-    Order order = getOrderByExternalId(orderConfirmRequest.getExternalId());
-
-    if(order.getStatus() != OrderStatus.결제전) {
-        throw new InvalidOrderException("적절하지 않은 주문 요청입니다.");
-    }
-
-    User user = order.getUser();
-    Coupon coupon = order.getCoupon();
-
-    // 포인트 개수 예외처리
-    if(order.getRewardPointsDiscountPrice() > user.getRewardPoints() || order.getDiscountedPrice() < 0) {
-        throw new InvalidRewardPointsException();
-    }
-
-    // 포인트 업데이트
-    int point = user.updateRewardPoints(order);
-
-    // 재고 차감
-    for (OrderProduct orderProduct : order.getOrderProducts()) {
-        Product product = orderProduct.getProduct();
-        int quantity = orderProduct.getQuantity();
-
-        // 품절일 경우 예외 처리
-        if (product.getRemain() < orderProduct.getQuantity() || product.getState().name().equals("품절")) {
-            throw new InsufficientRemainException(user.getNickname() + " 품절 된 상품입니다.");
-        }
-
-        // 재고 차감
-        product.updateRemain(-quantity);
-        System.out.println("QUANTITY : " + product.getRemain());
-    }
-
-    // 쿠폰 개수 예외처리
-    if(coupon != null) {
-        if(coupon.isUsed()) {throw new InsufficientRemainException(user.getNickname() + " 이미 사용된 쿠폰입니다.");}
-        coupon.updateUsed();
-    }
-
-    // 결제 확정 처리
-    order.updateConfirm(order.getPaymentKey(), order.getPaymentMethod());
-
-    Map<String, Object> responseData = new HashMap<>();
-    responseData.put("result", true);
-    responseData.put("point", point);
-    return responseData;
-}
-```
-
+---
 
 ### **낙관적 락을 통한 동시성 문제 해결**
 
@@ -197,16 +129,16 @@ public Map<String, Object> confirmPaymentAndUpdate(OrderConfirmRequest orderConf
 
 다음과 같이 재고가 **101개**인 상품에 대해 **2개씩 구매**하는 주문 요청을 **JMeter**를 이용해 동시성 테스트를 진행했습니다.  
 
-![JMeter Testing](https://github.com/user-attachments/assets/0178b023-cc9d-4ca5-b2e2-15b6fdf5b12d)  
+![JMeter Testing](https://github.com/user-attachments/assets/0178b023-cc9d-4ca5-b2e2-15b6fdf5b12d)
 
-**총 110회의 구매 요청**을 했으며, 정확히 **51번째 요청부터 품절된 상품**으로 나타났습니다.  
+**총 110회의 구매 요청**을 했으며, 정확히 **51번째 요청부터 품절된 상품**으로 나타났습니다.
 
 - **50번째 요청까지는 2개씩 구매**하므로 **101개 중 100개가 판매**됩니다.  
-- **51번째 요청부터 품절 처리**되었습니다.  
+- **51번째 요청부터 품절 처리**되었습니다.
 
-정확히 **한 개의 재고**가 남은 것을 알 수 있습니다.  
+정확히 **한 개의 재고**가 남은 것을 알 수 있습니다.
 
-![Remaining Stock](https://github.com/user-attachments/assets/4d0356f0-175f-4041-b594-99a1d636f9ff)  
+![Remaining Stock](https://github.com/user-attachments/assets/4d0356f0-175f-4041-b594-99a1d636f9ff)
 
 ---
 
@@ -240,16 +172,15 @@ Spring AOP를 이용하여 로그 추적기를 구현했습니다. (Elastic Sear
 
 #### **성능 문제**  
 
-![Performance Issue](https://github.com/user-attachments/assets/2a69318e-ce0d-4b6b-ad58-b966f75048b1)  
+![Performance Issue](https://github.com/user-attachments/assets/2a69318e-ce0d-4b6b-ad58-b966f75048b1)
 
 300여 개의 스레드를 통해 동시에 제품 페이지 요청을 할 때, 매우 느린 응답 속도가 발생하는 문제를 확인했습니다.   
-
 
 JPA에서 제공하는 **`Page`**로 데이터를 받을 때 모든 데이터를 **Count**하고 페이징 처리를 하므로, 300개 스레드의 요청에 대해 **30만 개의 product 데이터**를 모두 카운팅하고 있었습니다.  
 
 이를 해결하기 위해 **`Page` 대신 `Slice`**를 사용하여, 해당 페이지 처리에 필요한 데이터만 받아와 페이징 처리를 하였습니다.  
 
-![Slice Performance](https://github.com/user-attachments/assets/9de1e390-87e8-455d-ab62-a1955319e282)  
+![Slice Performance](https://github.com/user-attachments/assets/9de1e390-87e8-455d-ab62-a1955319e282)
 
 **`Slice`**를 이용하니 성능이 현저히 향상되었습니다.  
 
