@@ -34,6 +34,7 @@
 ---
 
 ### ERD
+
 ![ERD](https://github.com/user-attachments/assets/918f56f4-449f-454b-a552-4e14f935766a)
 
 ---
@@ -105,7 +106,7 @@
 - 쿠폰 발급 및 포인트 적립/사용 관리
 ![Coupon](https://github.com/user-attachments/assets/f05c174d-367c-4aed-8e34-02d2851997df)
 
-해당 주문에 대해서 **쿠폰** 및 **리워드 포인트** 사용이 가능합니다.
+해당 주문에 대해서 **쿠폰** 및 **리워드 포인트** 사용이 가능합니다.  
 ![Coupon Usage](https://github.com/user-attachments/assets/a521976d-6426-4e0e-a72c-cbfc16ec27af)
 
 쿠폰은 만료일, 최소주문금액, % 혹은 원 단위 설정이 가능합니다.
