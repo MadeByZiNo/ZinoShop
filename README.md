@@ -35,44 +35,72 @@
 
 
 ### ERD
-  ![1](https://github.com/user-attachments/assets/918f56f4-449f-454b-a552-4e14f935766a)
+  ![1](https://github.com/user-attachments/assets/918f56f4-449f-454b-a552-4e14f935766a)  
+
+  
 
 
 ### 아키텍쳐 구조
 넣을것것
 
 
-## 📌 주요 기능
+## 📌 주요 기능  
+
+
 
 ### 1. 회원 및 인증 관리
 
 - **JWT**를 이용한 로그인 및 세션 관리
 
-![image](https://github.com/user-attachments/assets/e1b052fc-a7ea-470e-beeb-4abf705aad14)
+- 
 
-사용자가 로그인하면 서버는 JWT형태의 AccessToken과 RefreshToken을 발급합니다.
-이 두 토큰은 쿠키에 저장되어 탈취 위험성을 위해 유효 시간을 가집니다.
-AccessToken은 인증하는데 사용되며 유혀 시간이 짧고 유효 시간이 지나면 만료되어 인증이 불가능합니다.
-RefreshToken은 AccessToken의 유효 기간이 끝났을 때 새로운 AccessToken을 발급받을 수 있도록 도와줍니다.
+![image](https://github.com/user-attachments/assets/e1b052fc-a7ea-470e-beeb-4abf705aad14)  
 
 
 
+사용자가 로그인하면 서버는 JWT형태의 AccessToken과 RefreshToken을 발급합니다.  
 
+
+이 두 토큰은 쿠키에 저장되어 탈취 위험성을 위해 유효 시간을 가집니다.  
+
+ 
+AccessToken은 인증하는데 사용되며 유혀 시간이 짧고 유효 시간이 지나면 만료되어 인증이 불가능합니다.  
+
+
+RefreshToken은 AccessToken의 유효 기간이 끝났을 때 새로운 AccessToken을 발급받을 수 있도록 도와줍니다.  
+
+
+
+
+
+
+
+  
 - **회원 역할 세분화**: 일반 회원, VIP 회원, 관리자
 - ![image](https://github.com/user-attachments/assets/3b91c6d0-76bf-4a5a-a524-e4449b62ce8f)
+
+  
 
 
 
 - **ArgumentResolver와 Annotation**을 활용한 역할 기반 인가 처리
   ![image](https://github.com/user-attachments/assets/3f47c45f-3898-472d-a322-584362f6a848)
 
-ArgumentResolver와 Annotation을 이용해 인가처리를 하였습니다.
+ArgumentResolver와 Annotation을 이용해 인가처리를 하였습니다.  
 
-![image](https://github.com/user-attachments/assets/ac4ad6cb-602c-46a7-91f6-a2dbfd4eea30)
+
+
+![image](https://github.com/user-attachments/assets/ac4ad6cb-602c-46a7-91f6-a2dbfd4eea30)  
+
+
 
 @AuthUser라는 Annotation을 만든 후 ArgumentResolver에 인증 로직을 넣고 인가처리가 필요한 메소드에 다음과 같이 Annotation을 달아줘서 항상 인증 과정을 거치게됩니다.
 
+
+
 ![image](https://github.com/user-attachments/assets/aea3fbdc-cb6a-4056-938d-fb5a96ab9296)
+
+
 
 번외로 운영자의 경우는 @Admin Annotation을 만들어서 운영자 여부 인증을 거치게 됩니다.
 
