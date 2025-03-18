@@ -44,6 +44,12 @@
 
 ---
 
+
+
+![image](https://github.com/user-attachments/assets/916b1382-a895-4067-a661-c9a912edc70c)  
+
+
+
 ## 📌 주요 기능  
 
 ### 1. 회원 및 인증 관리
