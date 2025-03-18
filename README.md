@@ -1,9 +1,36 @@
 # 🛒 ZinoShop 프로젝트
 
-ZinoShop은 **Spring, Spring Boot, JPA, MySQL**를 기반으로 한 **서버 사이드 렌더링(SSR)** 쇼핑몰 프로젝트입니다. SPRING MVC를 이용하여 JWT를 활용한 인증 및 세션 관리, 상품 관리, 결제 연동 등 다양한 기능을 포함하여 실제 운영중인 쇼핑몰 시스템의 구조를 예상하여 개발해보았습니다.
+**Spring, Spring Boot, JPA, MySQL**를 기반으로 한 **서버 사이드 렌더링(SSR)** 쇼핑몰 프로젝트. SPRING MVC를 이용하여 JWT를 활용한 인증 및 세션 관리, 상품 관리, 결제 연동 등 다양한 기능을 포함하여 실제 운영중인 쇼핑몰 시스템의 구조를 예상하여 개발해보았습니다.
 
 ---
 
+### 개발환경
+- **IntelliJ**
+- **Postman**
+- **GitHub**
+
+### 백엔드
+- **Java**
+- **Spring**
+- **Spring Boot**
+- **JPA**
+
+### 데이터베이스
+- **MySQL**
+
+### 인프라
+- **AWS EC2**
+- **AWS S3**
+- **Docker**
+### CI/CD
+- **GitHub Actions**
+
+### 프론트엔드 (프론트는 주로 ChatGpt의 도움을 받았습니다)
+- **HTML**
+- **JavaScript**
+- **Thymeleaf**
+
+- 
 ## 📌 주요 기능
 
 ### 1. 회원 및 인증 관리
