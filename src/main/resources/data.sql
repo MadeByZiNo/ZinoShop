@@ -14,22 +14,24 @@ VALUES ('상의',NULL),
        ('운동화', '12'),
        ('스니커즈', '12');
 
-INSERT INTO user (username, password, nickname, delivery_address, detail_address, reward_points, role, version)
-VALUES ('user', 'password', '김진호', '인천 계양구','510호', 12000, '고객님', 1),
-       ('admin', 'password', '운영자', '인천 강화군','510호', 0, '관리자', 1),
-       ('user2', 'password', '부자1', '서울 강남구','210호', 40000, '고객님', 1),
-       ('user3', 'password', '부자2', '서울 강남구','210호', 40000, '고객님', 1),
-       ('user4', 'password', '부자3', '서울 강남구','210호', 40000, '고객님', 1),
-       ('user5', 'password', '부자4', '서울 강남구','210호', 40000, '고객님', 1),
-       ('user6', 'password', '부자5', '서울 강남구','210호', 40000, '고객님', 1),
-       ('user7', 'password', '부자6', '서울 강남구','210호', 40000, '고객님', 1),
-       ('user8', 'password', '부자7', '서울 강남구','210호', 40000, '고객님', 1),
-       ('user9', 'password', '부자8', '서울 강남구','210호', 40000, '고객님', 1),
-       ('user10', 'password', '부자9', '서울 강남구','210호', 40000, '고객님', 1),
-       ('user11', 'password', '부자10', '서울 강남구','210호', 40000, '고객님', 1);
-
-INSERT INTO cart (user_id)
+INSERT INTO cart (id)
 VALUES (1),(2),(3),(4),(5),(6),(7),(8),(9),(10),(11),(12);
+
+INSERT INTO user (username, password, nickname, delivery_address, detail_address, reward_points, role, version, cart_id)
+VALUES ('user', 'password', '김진호', '인천 계양구','510호', 12000, '고객님', 1, 1),
+       ('admin', 'password', '운영자', '인천 강화군','510호', 0, '관리자', 1, 2),
+       ('user2', 'password', '부자1', '서울 강남구','210호', 40000, '고객님', 1, 3),
+       ('user3', 'password', '부자2', '서울 강남구','210호', 40000, '고객님', 1, 4),
+       ('user4', 'password', '부자3', '서울 강남구','210호', 40000, '고객님', 1, 5),
+       ('user5', 'password', '부자4', '서울 강남구','210호', 40000, '고객님', 1, 6),
+       ('user6', 'password', '부자5', '서울 강남구','210호', 40000, '고객님', 1, 7),
+       ('user7', 'password', '부자6', '서울 강남구','210호', 40000, '고객님', 1, 8),
+       ('user8', 'password', '부자7', '서울 강남구','210호', 40000, '고객님', 1, 9),
+       ('user9', 'password', '부자8', '서울 강남구','210호', 40000, '고객님', 1, 10),
+       ('user10', 'password', '부자9', '서울 강남구','210호', 40000, '고객님', 1, 11),
+       ('user11', 'password', '부자10', '서울 강남구','210호', 40000, '고객님', 1, 12);
+
+
 
 INSERT INTO product (name, price, description, remain, category_id, state, version)
 VALUES ('긴팔옷',10000,'입으면 잘생겨짐',12,2,'판매중', 1),
@@ -114,21 +116,26 @@ VALUES(1, 1, 5, 10000),
 INSERT INTO review (user_id, product_id, created_at, content)
 VALUES  (1, 1, '2023-10-08 14:20:15', '이 제품 정말 좋습니다. 추천합니다!'),
         (1, 1, '2023-10-08 14:20:15', '품질이 기대 이하입니다. 다시 구매하지 않겠습니다.'),
-        (1, 1, '2023-10-08 14:20:15', '가격 대비 성능이 뛰어나네요. 만족합니다.'),
-        (1, 1, '2023-10-08 14:20:15', '배송이 빠르고, 제품도 좋습니다. 강추!'),
-        (2, 1, '2023-10-08 14:20:15', '디자인은 마음에 드는데, 사용성이 떨어집니다.');
+        (2, 1, '2023-10-08 14:20:15', '가격 대비 성능이 뛰어나네요. 만족합니다.'),
+        (3, 1, '2023-10-08 14:20:15', '배송이 빠르고, 제품도 좋습니다. 강추!'),
+        (1, 1, '2023-10-08 14:20:15', '디자인은 마음에 드는데, 사용성이 떨어집니다.');
 
 
 INSERT INTO product_image (url, product_id)
-VALUES  ('https://zinoshop.s3.us-east-2.amazonaws.com/Product/ef03b0cd-463c-4bb3-9445-9138025f4f03_1.jpg', 1),
-        ('https://zinoshop.s3.us-east-2.amazonaws.com/Product/2.png', 1),
-        ('https://zinoshop.s3.us-east-2.amazonaws.com/Product/2.png', 2),
-        ('https://zinoshop.s3.us-east-2.amazonaws.com/Product/2.png', 3),
-        ('https://zinoshop.s3.us-east-2.amazonaws.com/Product/2.png', 4),
-        ('https://zinoshop.s3.us-east-2.amazonaws.com/Product/2.png', 5),
-        ('https://zinoshop.s3.us-east-2.amazonaws.com/Product/2.png', 6),
-        ('https://zinoshop.s3.us-east-2.amazonaws.com/Product/2.png', 7),
-        ('https://zinoshop.s3.us-east-2.amazonaws.com/Product/1.jpg', 8);
+VALUES  ('https://zinoshop.s3.us-east-2.amazonaws.com/Product/33.jpg', 1),
+        ('https://zinoshop.s3.us-east-2.amazonaws.com/Product/44.jpg', 1),
+        ('https://zinoshop.s3.us-east-2.amazonaws.com/Product/44.jpg', 1),
+        ('https://zinoshop.s3.us-east-2.amazonaws.com/Product/44.jpg', 1),
+        ('https://zinoshop.s3.us-east-2.amazonaws.com/Product/44.jpg', 1),
+        ('https://zinoshop.s3.us-east-2.amazonaws.com/Product/33.jpg', 2),
+        ('https://zinoshop.s3.us-east-2.amazonaws.com/Product/33.jpg', 2),
+        ('https://zinoshop.s3.us-east-2.amazonaws.com/Product/33.jpg', 2),
+        ('https://zinoshop.s3.us-east-2.amazonaws.com/Product/44.jpg', 3),
+        ('https://zinoshop.s3.us-east-2.amazonaws.com/Product/33.jpg', 4),
+        ('https://zinoshop.s3.us-east-2.amazonaws.com/Product/44.jpg', 5),
+        ('https://zinoshop.s3.us-east-2.amazonaws.com/Product/33.jpg', 6),
+        ('https://zinoshop.s3.us-east-2.amazonaws.com/Product/44.jpg', 7),
+        ('https://zinoshop.s3.us-east-2.amazonaws.com/Product/33.jpg', 8);
 
 
 INSERT INTO review_image (url, review_id)

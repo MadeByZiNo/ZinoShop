@@ -27,5 +27,10 @@ public class OrderRepositoryImpl implements OrderRepository{
         return orderJpaRepository.findByStatusAndSearchText(status,searchText);
     }
 
+    @Override
+    public Order findOrderWithProducts(Long orderId) {
+        return orderJpaRepository.findOrderWithProducts(orderId);
+    }
+
     public List<Order> findByUserId(Long userId) {return orderJpaRepository.findByUserId(userId);}
 }

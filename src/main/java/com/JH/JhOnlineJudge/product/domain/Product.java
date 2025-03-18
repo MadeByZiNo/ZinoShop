@@ -8,6 +8,7 @@ import com.JH.JhOnlineJudge.heart.domain.Heart;
 import com.JH.JhOnlineJudge.product.dto.ProductDto;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.BatchSize;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -43,6 +44,7 @@ public class Product {
     private Category category;
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+    @BatchSize(size = 30)
     private List<ProductImage> images = new ArrayList<>();
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)

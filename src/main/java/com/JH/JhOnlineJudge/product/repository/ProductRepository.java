@@ -3,6 +3,7 @@ package com.JH.JhOnlineJudge.product.repository;
 import com.JH.JhOnlineJudge.product.domain.Product;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.Optional;
@@ -18,5 +19,9 @@ public interface ProductRepository {
     Optional<Product> findById(Long id);
 
     Page<Product> findProductsByCategoryIds(List<Long> categoryIds, Pageable pageable);
+
+    Page<Product> getProductsPageWithImages(List<Long> categoryIds, Pageable pageable);
+
+    List<Product> findSliceByCategoryIds(List<Long> categoryIds, Pageable pageable);
 
 }

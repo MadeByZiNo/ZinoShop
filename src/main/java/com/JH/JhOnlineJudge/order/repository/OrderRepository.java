@@ -13,4 +13,6 @@ public interface OrderRepository {
     List<Order> findByUserId(Long id);
     Optional<Order> findByExternalId(String externalId);
     List<Order> findByStatusAndSearchText(OrderStatus status, String searchText);
+    Order findOrderWithProducts(Long orderId);
+
 }

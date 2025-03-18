@@ -14,6 +14,7 @@ import com.JH.JhOnlineJudge.user.domain.User;
 import com.JH.JhOnlineJudge.user.service.UserService;
 import com.JH.JhOnlineJudge.common.utils.S3Uploader;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -26,6 +27,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ReviewService {
@@ -41,23 +43,19 @@ public class ReviewService {
     @Transactional
     public Page<ReviewListResponse> getReviewsByProductId(Long productId, int page, int size) {
         PageRequest pageRequest = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
-        Page<Review> reviewPage = reviewRepository.findByProductId(productId, pageRequest);
+        Page<ReviewListResponse> reviewPage = reviewRepository.getReviewDTOByProductId(productId, pageRequest);
 
-        List<ReviewListResponse> reviewDtoList = reviewPage.getContent().stream()
-                .map(review -> ReviewListResponse.of(review.getId(), review.getUser().getNickname(), review.getCreatedAt(), review.getContent(), review.getImages().isEmpty() ? null : review.getImages().get(0).getUrl()))
-                .collect(Collectors.toList());
-
-        return new PageImpl<>(reviewDtoList, pageRequest, reviewPage.getTotalElements());
+        return new PageImpl<>(reviewPage.getContent(), pageRequest, reviewPage.getTotalElements());
     }
 
     @Transactional
     public Page<ReviewListResponse> getReviewsByUserId(Long userId, int page, int size) {
         PageRequest pageRequest = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
-        Page<Review> reviewPage = reviewRepository.findByUserId(userId, pageRequest);
-
+        Page<Review> reviewPage = reviewRepository.getByUserIdWithUserAndImages(userId, pageRequest);
         List<ReviewListResponse> reviewDtoList = reviewPage.getContent().stream()
                 .map(review -> ReviewListResponse.of(review.getId(), review.getUser().getNickname(), review.getCreatedAt(), review.getContent(), review.getImages().isEmpty() ? null : review.getImages().get(0).getUrl()))
                 .collect(Collectors.toList());
+
         return new PageImpl<>(reviewDtoList, pageRequest, reviewPage.getTotalElements());
     }
 

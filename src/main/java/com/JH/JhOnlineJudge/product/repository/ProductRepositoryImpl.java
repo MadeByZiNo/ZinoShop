@@ -40,4 +40,14 @@ public class ProductRepositoryImpl implements ProductRepository {
         return productJpaRepository.findProductsByCategoryIds(categoryIds,pageable);
     }
 
+
+    @Override
+    public Page<Product> getProductsPageWithImages(List<Long> categoryIds, Pageable pageable){
+        return productJpaRepository.getProductsPageWithImages(categoryIds, pageable);
+    }
+
+    @Override
+    public List<Product> findSliceByCategoryIds(List<Long> categoryIds, Pageable pageable) {
+        return productJpaRepository.findSliceByCategoryIds(categoryIds, pageable);
+    }
 }

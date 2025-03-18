@@ -1,6 +1,8 @@
 package com.JH.JhOnlineJudge.config;
 
+import com.JH.JhOnlineJudge.user.admin.domain.AdminResolver;
 import com.JH.JhOnlineJudge.user.domain.AuthUserResolver;
+import com.JH.JhOnlineJudge.user.domain.IsLoginResolver;
 import com.JH.JhOnlineJudge.user.interceptor.AuthorityCheckInterceptor;
 import com.JH.JhOnlineJudge.user.interceptor.TokenCheckInterceptor;
 import com.JH.JhOnlineJudge.common.utils.JwtUtil;
@@ -22,10 +24,14 @@ public class WebMvcConfig implements WebMvcConfigurer {
     private final TokenCheckInterceptor tokenCheckInterceptor;
     private final AuthorityCheckInterceptor authorityCheckInterceptor;
     private final AuthUserResolver authUserResolver;
+    private final AdminResolver adminResolver;
+    private final IsLoginResolver isLoginResolver;
 
     @Override
     public void addArgumentResolvers(final List<HandlerMethodArgumentResolver> resolvers) {
         resolvers.add(authUserResolver);
+        resolvers.add(adminResolver);
+        resolvers.add(isLoginResolver);
     }
 
     @Bean
@@ -38,11 +44,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
         registry.addInterceptor(tokenCheckInterceptor)      // 토큰 체크 및 재발급
                 .order(1)
                 .addPathPatterns("/**");
-                //.excludePathPatterns("/public/**");
 
-        registry.addInterceptor(authorityCheckInterceptor)      // 권한 확인 후 처리
-                .order(2)
-                .addPathPatterns("/board/write", "/purchase", "/review");
     }
 
 }

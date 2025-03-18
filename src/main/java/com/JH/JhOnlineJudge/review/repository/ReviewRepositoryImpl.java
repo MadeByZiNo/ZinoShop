@@ -1,9 +1,11 @@
 package com.JH.JhOnlineJudge.review.repository;
 
 import com.JH.JhOnlineJudge.review.domain.Review;
+import com.JH.JhOnlineJudge.review.dto.ReviewListResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
@@ -24,14 +26,15 @@ public class ReviewRepositoryImpl implements ReviewRepository{
     }
 
     @Override
-    public Page<Review> findByProductId(Long productId, Pageable pageable) {
-        return reviewJpaRepository.findByProductId(productId, pageable);
+    public Page<ReviewListResponse> getReviewDTOByProductId(Long productId, Pageable pageable){
+        return reviewJpaRepository.getReviewDTOByProductId(productId, pageable);
     }
 
     @Override
-    public Page<Review> findByUserId(Long userId, Pageable pageable) {
-        return reviewJpaRepository.findByUserId(userId, pageable);
+    public Page<Review> getByUserIdWithUserAndImages(Long userId, Pageable pageable){
+        return reviewJpaRepository.findByUserIdWithUserAndImages(userId, pageable);
     }
+
     @Override
     public Optional<Review> findById(Long id){
         return reviewJpaRepository.findById(id);
@@ -39,4 +42,6 @@ public class ReviewRepositoryImpl implements ReviewRepository{
 
     @Override
     public void deleteById(Long id) {reviewJpaRepository.deleteById(id);}
+
+
 }

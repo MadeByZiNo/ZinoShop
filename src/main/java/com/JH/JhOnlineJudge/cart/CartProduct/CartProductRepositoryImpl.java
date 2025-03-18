@@ -36,4 +36,10 @@ public class CartProductRepositoryImpl implements CartProductRepository{
     public void delete(CartProduct cartProduct) {
         cartProductRepositoryJpa.delete(cartProduct);
     }
+
+    @Override
+    public List<CartProduct> findCartProductsWithProduct(Long userId){
+        return cartProductRepositoryJpa.findCartProductsWithProduct(userId);
+    }
+
 }

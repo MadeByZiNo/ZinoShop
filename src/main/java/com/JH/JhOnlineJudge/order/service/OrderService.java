@@ -8,6 +8,7 @@ import com.JH.JhOnlineJudge.order.domain.Order;
 import com.JH.JhOnlineJudge.order.domain.OrderStatus;
 import com.JH.JhOnlineJudge.order.dto.*;
 import com.JH.JhOnlineJudge.order.exception.InsufficientRemainException;
+import com.JH.JhOnlineJudge.order.exception.InvalidOrderException;
 import com.JH.JhOnlineJudge.order.exception.NotFoundOrderException;
 import com.JH.JhOnlineJudge.order.repository.OrderRepository;
 import com.JH.JhOnlineJudge.product.domain.Product;
@@ -20,11 +21,13 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.OptimisticLockException;
 import lombok.RequiredArgsConstructor;
+import org.hibernate.StaleObjectStateException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
@@ -119,15 +122,19 @@ public class OrderService {
     }
 
     @Retryable(
-            retryFor = {OptimisticLockException.class},
+            retryFor = {OptimisticLockException.class, StaleObjectStateException.class},
             maxAttempts = 3,
-            backoff = @Backoff(delay = 1000)
+            backoff = @Backoff(delay = 500)
     )
-    @Transactional(rollbackFor = Exception.class)
+    @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = Exception.class)
     public Map<String, Object> confirmPaymentAndUpdate(OrderConfirmRequest orderConfirmRequest) {
-        System.out.println("tryConfirm");
 
         Order order = getOrderByExternalId(orderConfirmRequest.getExternalId());
+
+      /*  if(order.getStatus() != OrderStatus.결제전) {
+            throw new InvalidOrderException("적절하지 않은 주문 요청입니다.");
+        }*/
+
         User user = order.getUser();
         Coupon coupon = order.getCoupon();
 
@@ -154,11 +161,11 @@ public class OrderService {
         }
 
         // 쿠폰 개수 예외처리
-        if(coupon != null) {
+    /*    if(coupon != null) {
             if(coupon.isUsed()) {throw new InsufficientRemainException(user.getNickname() +    "이미 사용된 쿠폰입니다.");}
             // 쿠폰 차감
             coupon.updateUsed();
-        }
+        }*/
 
         /*/ 테스트전용(실제 결제한 데이터가 없기에 race condition 체크
         Map<String, Object> responseData = new HashMap<>();
@@ -170,14 +177,14 @@ public class OrderService {
         // 테스트 끝나면 주석풀기
 
         // 결제 확정 요청 후 정보 추출
-        ResponseEntity<String> response = requestPaymentVerification(orderConfirmRequest);
-        ExtractPaymentDto paymentInfo = extractPaymentInfo(response.getBody());
+        //ResponseEntity<String> response = requestPaymentVerification(orderConfirmRequest);
+        //ExtractPaymentDto paymentInfo = extractPaymentInfo(response.getBody());
 
         // 결제 확정 처리
-        order.updateConfirm(paymentInfo.getPaymentKey(), paymentInfo.getMethod());
+        order.updateConfirm(order.getPaymentKey(), order.getPaymentMethod());
 
         Map<String, Object> responseData = new HashMap<>();
-        responseData.put("result", response.getStatusCode() == HttpStatus.OK);
+        responseData.put("result", true);
         responseData.put("point", point);
         return responseData;
 
@@ -225,17 +232,17 @@ public class OrderService {
 
       @Transactional
       public OrderDetailRequest getOrderDetailRequestDto(Long orderId) {
-          Order order = getOrderById(orderId);
-          List<OrderProductDetailDto> products = order.getOrderProducts()
-              .stream()
-              .map(orderProduct -> new OrderProductDetailDto(
-                  orderProduct.getProduct().getName(),
-                  orderProduct.getQuantity(),
-                  orderProduct.getProduct().getPrice()))
-              .collect(Collectors.toList());
+          Order order = orderRepository.findOrderWithProducts(orderId);
 
-         OrderDetailRequest request=  OrderDetailRequest.of(order,products);
-         return request;
+          List<OrderProductDetailDto> products = order.getOrderProducts()
+                  .stream()
+                  .map(orderProduct -> new OrderProductDetailDto(
+                          orderProduct.getProduct().getName(),
+                          orderProduct.getQuantity(),
+                          orderProduct.getProduct().getPrice()))
+                  .collect(Collectors.toList());
+
+          return OrderDetailRequest.of(order, products);
       }
 
 

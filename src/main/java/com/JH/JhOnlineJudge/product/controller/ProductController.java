@@ -2,13 +2,15 @@ package com.JH.JhOnlineJudge.product.controller;
 
 import com.JH.JhOnlineJudge.category.CategoryService;
 import com.JH.JhOnlineJudge.Image.ProductImage.ProductImage;
+import com.JH.JhOnlineJudge.category.domain.Category;
 import com.JH.JhOnlineJudge.product.domain.Product;
 import com.JH.JhOnlineJudge.product.dto.ProductDto;
+import com.JH.JhOnlineJudge.product.dto.ProductListResponse;
 import com.JH.JhOnlineJudge.product.service.ProductService;
 import com.JH.JhOnlineJudge.user.admin.domain.Admin;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
+import org.springframework.data.domain.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -24,6 +26,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 @RequestMapping("/product")
 public class ProductController {
+
     private final ProductService productService;
     private final CategoryService categoryService;
 
@@ -71,20 +74,22 @@ public class ProductController {
         return ResponseEntity.ok(response);
     }
 
-    // 카테고리에 따른 상품 리스트 페이지 보여주기
+  /*  // 카테고리에 따른 상품 리스트 페이지 보여주기
     @GetMapping("/list")
     public String getProductListPage(@RequestParam(value = "category_id", required = true) Long categoryId,
                                   @RequestParam(value = "page", required = false, defaultValue = "1") int page,
                                   Model model) {
 
-        // 부모포함 모든 카테고리의 id를 가져오기
-        List<Long> categoryIds = categoryService.getCategoryIdsWithParentCategory(categoryId);
+        // 부모카테고리 및 모든 자식 카테고리의 id를 가져오기
+        Map<String,Object> result= categoryService.getCategoryIdsWithParentCategory(categoryId);
+        List<Long> categoryIds = (List<Long>) result.get("categoryIds");
+        Category parentCategory = (Category) result.get("rootCategory");
 
-        // 상품 목록 페이지 가져오기
-        Page<Product> products = productService.getProductsPageByCategoryIds(categoryIds,page);
+        // 상품 들
+        Page<ProductListResponse> products = productService.getProductsPageByCategoryIds(categoryIds, page);
 
-        model.addAttribute("category", categoryService.getCategoryById(categoryId));
-        model.addAttribute("childCategories", categoryService.getFirstLevelChildCategories(categoryId));
+        model.addAttribute("category", parentCategory);
+        model.addAttribute("childCategories", parentCategory.getChild());
         model.addAttribute("products", products);
 
         int totalPages = products.getTotalPages() == 0 ? 1 : products.getTotalPages();
@@ -97,6 +102,28 @@ public class ProductController {
         model.addAttribute("startPage", startPage);
         model.addAttribute("endPage", endPage);
         model.addAttribute("totalPages", totalPages);
+
+        return "product/list";
+    }*/
+
+
+    @GetMapping("/list")
+    public String getProductListSlicePage(@RequestParam(value = "category_id") Long categoryId,
+                                          @RequestParam(value = "page", defaultValue = "1") int page,
+                                          Model model) {
+        Map<String, Object> result = categoryService.getCategoryIdsWithParentCategory(categoryId);
+        List<Long> categoryIds = (List<Long>) result.get("categoryIds");
+        Category parentCategory = (Category) result.get("rootCategory");
+
+        int pageIndex = page - 1; // 0-index 맞추기
+        int pageSize = 21; // 한 페이지 21개 기준
+        Slice<ProductListResponse> products = productService.getProductSliceByCategoryIds(categoryIds, pageIndex, pageSize);
+
+        model.addAttribute("category", parentCategory);
+        model.addAttribute("childCategories", parentCategory.getChild());
+        model.addAttribute("products", products.getContent());
+        model.addAttribute("hasNext", products.hasNext());
+        model.addAttribute("currentPage", page );
 
         return "product/list";
     }
@@ -120,7 +147,7 @@ public class ProductController {
     public String getReviewsPage(@PathVariable(value = "product_id", required = true) Long id, Model model) {
         Product product = productService.getProductById(id);
         model.addAttribute("product", product);
-           return "product/review";
+        return "product/review";
     }
 
 }

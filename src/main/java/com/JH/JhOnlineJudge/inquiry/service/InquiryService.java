@@ -8,6 +8,8 @@ import com.JH.JhOnlineJudge.inquiry.exception.DuplicateInquiryReplyException;
 import com.JH.JhOnlineJudge.inquiry.exception.InquiryPermissionException;
 import com.JH.JhOnlineJudge.inquiry.exception.NotFoundInquiryException;
 import com.JH.JhOnlineJudge.inquiry.repository.InquiryRepository;
+import com.JH.JhOnlineJudge.notification.domain.NotificationFrom;
+import com.JH.JhOnlineJudge.notification.service.NotificationService;
 import com.JH.JhOnlineJudge.order.domain.Order;
 import com.JH.JhOnlineJudge.order.service.OrderService;
 import com.JH.JhOnlineJudge.product.exception.NotFoundProductException;
@@ -35,6 +37,7 @@ public class InquiryService {
     private final InquiryRepository inquiryRepository;
     private final UserService userService;
     private final OrderService orderService;
+    private final NotificationService notificationService;
     private final S3Uploader s3Uploader;
 
     private final String DIR_NAME = "Inquiry";
@@ -109,5 +112,9 @@ public class InquiryService {
           Inquiry inquiry = getInquiryById(inquiryId);
           if(inquiry.checkReplyState()){throw new DuplicateInquiryReplyException();}
           inquiry.updateReplyState(reply);
-      }
+
+        String message = "'" + inquiry.getTitle() + "' 문의에 답변이 달렸습니다.";
+        notificationService.sendNotificationMessage(inquiry.getUser().getId(),message, NotificationFrom.문의);
+
+    }
 }

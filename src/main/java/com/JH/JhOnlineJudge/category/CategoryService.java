@@ -8,7 +8,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -29,14 +31,12 @@ public class CategoryService {
     }
 
     @Transactional(readOnly = true)
-    public List<Long> getCategoryIdsWithParentCategory(Long categoryId) {
+    public Map<String, Object> getCategoryIdsWithParentCategory(Long categoryId) {
        Category findCategory = getCategoryById(categoryId);
-       return findCategory.getCategoryIdsIncludingChildren(categoryId);
+       HashMap<String,Object> result = new HashMap<>();
+       result.put("rootCategory",findCategory);
+       result.put("categoryIds",findCategory.getCategoryIdsIncludingChildren(categoryId));
+       return result;
     }
 
-    @Transactional(readOnly = true)
-    public List<Category> getFirstLevelChildCategories(Long categoryId) {
-       Category findCategory = getCategoryById(categoryId);
-       return findCategory.getFirstLevelChildCategories();
-    }
 }

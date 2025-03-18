@@ -47,9 +47,7 @@ public class CartService {
     @Transactional(readOnly = true)
     public List<CartProduct> getProductsInCart(Long userId) {
         User user = userService.findUserById(userId);
-
-        Cart cart = user.getCart();
-        return cartProductRepository.findByCartId(cart.getId());
+        return cartProductRepository.findCartProductsWithProduct(userId);
     }
 
     @Transactional

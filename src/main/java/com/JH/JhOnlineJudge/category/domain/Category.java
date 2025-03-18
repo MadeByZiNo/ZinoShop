@@ -61,8 +61,4 @@ public class Category {
         return categoryIds;
     }
 
-    // 첫번째 자식 카테고리만 반환
-    public List<Category> getFirstLevelChildCategories() {
-          return this.child;
-    }
 }

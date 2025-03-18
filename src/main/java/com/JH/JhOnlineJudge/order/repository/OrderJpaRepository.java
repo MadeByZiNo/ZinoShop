@@ -49,4 +49,11 @@ public interface OrderJpaRepository extends JpaRepository<Order, Long> {
                 "ORDER BY o.orderAt DESC")
     List<Order> findByStatusAndSearchText(@Param("status") OrderStatus status,
                                           @Param("searchText") String searchText);
+
+    @Query("SELECT o FROM Order o " +
+            "JOIN FETCH o.orderProducts op " +
+            "JOIN FETCH op.product " +
+            "WHERE o.id = :orderId")
+    Order findOrderWithProducts(@Param("orderId") Long orderId);
+
 }

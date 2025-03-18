@@ -6,14 +6,13 @@ import com.JH.JhOnlineJudge.Image.ProductImage.ProductImage;
 import com.JH.JhOnlineJudge.Image.ProductImage.ProductImageRepository;
 import com.JH.JhOnlineJudge.product.domain.Product;
 import com.JH.JhOnlineJudge.product.dto.ProductDto;
+import com.JH.JhOnlineJudge.product.dto.ProductListResponse;
 import com.JH.JhOnlineJudge.product.exception.NotFoundProductException;
 import com.JH.JhOnlineJudge.product.repository.ProductRepository;
 import com.JH.JhOnlineJudge.common.utils.S3Uploader;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -134,11 +133,32 @@ public class ProductService {
 
     }
 
-
+    /*
     @Transactional(readOnly = true)
-    public Page<Product> getProductsPageByCategoryIds(List<Long> categoryIds, int offset) {
-        Pageable pageable = PageRequest.of(offset -1, 6);
-        return productRepository.findProductsByCategoryIds(categoryIds, pageable);
+    public Page<ProductListResponse> getProductsPageByCategoryIds(List<Long> categoryIds, int page) {
+        Pageable pageable = PageRequest.of(page - 1, 6, Sort.by("id").ascending());
+
+        Page<Product> products = productRepository.getProductsPageWithImages(categoryIds, pageable);
+
+        return products.map(ProductListResponse::from);
+    }*/
+
+    public Slice<ProductListResponse> getProductSliceByCategoryIds(List<Long> categoryIds, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size + 1, Sort.by(Sort.Direction.ASC, "id"));
+
+        List<Product> productEntities = productRepository.findSliceByCategoryIds(categoryIds, pageable);
+
+        boolean hasNext = productEntities.size() > size;
+        if (hasNext) {
+            productEntities.remove(productEntities.size() - 1); // 초과분 제거
+        }
+
+        List<ProductListResponse> dtoList = productEntities.stream()
+                .map(ProductListResponse::from)
+                .toList();
+
+        return new SliceImpl<>(dtoList, pageable, hasNext);
     }
+
 
 }

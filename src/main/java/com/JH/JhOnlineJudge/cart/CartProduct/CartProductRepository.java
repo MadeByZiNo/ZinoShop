@@ -10,4 +10,6 @@ public interface CartProductRepository {
     boolean existsByCartIdAndProductId(Long cartId, Long productId);
     Optional<CartProduct> findByCartIdAndProductId(Long cartId, Long productId);
     void delete(CartProduct cartProduct);
+    List<CartProduct> findCartProductsWithProduct(Long userId);
+
 }

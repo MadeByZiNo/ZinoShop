@@ -8,6 +8,7 @@ import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.BatchSize;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -23,6 +24,7 @@ public class Review {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
+    @BatchSize(size = 10)
     private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -37,6 +39,7 @@ public class Review {
 
     @OneToMany(mappedBy = "review" , cascade = CascadeType.ALL, orphanRemoval = true)
     @Nullable
+    @BatchSize(size = 10)
     private List<ReviewImage> images = new ArrayList<>();
 
     @Builder

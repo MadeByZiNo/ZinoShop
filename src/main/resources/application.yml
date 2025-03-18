@@ -5,28 +5,6 @@ spring:
   server:
     port: 8080
 
-  datasource:
-    url: ${DB_URL}
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
-    driver-class-name: com.mysql.cj.jdbc.Driver
-
-  sql:
-    init:
-      mode: never
-
-  jpa:
-    defer-datasource-initialization: true
-    hibernate:
-      ddl-auto: none
-
-    properties:
-      hibernate:
-        dialect: "org.hibernate.dialect.MySQL8Dialect"
-        #show_sql: true                  # System.out 으로 출력
-        format_sql: true                 # 로그, 콘솔의 SQL을 좀 더 이쁘게 출력합니다.
-        highlight_sql: true             # SQL 출력을 ANSI escape codes를 사용하여 색을 부여합니다.
-        #use_sql_comments: true          # 보다 쉬운 디버깅을 위해 SQL 내부에 /* */의 주석을 추가합니다.
   batch:
     jdbc:
       initialize-schema: always
@@ -37,45 +15,17 @@ spring:
     scheduling:
       pool:
         size: 10
+
   servlet:
     multipart:
       max-file-size: 3MB
       max-request-size: 3MB
+
   redis:
     host: localhost
     port: 6379
 
-devtools:
-  restart:
-    enabled: false
-
-cloud:
-  aws:
-    credentials:
-      accessKey: ${AWS_ACCESS_KEY_ID}
-      secretKey: ${AWS_SECRET_ACCESS_KEY}
-    region:
-      static: us-east-2
-    stack:
-      auto: false
-    s3:
-      bucket: zinoshop
-
-jwt:
-  secretKey: ${JWT_SECRET_KEY}
-  accessExpire: 1800000
-  refreshExpire: 186400000
-
-toss:
-  client-key: ${TOSS_CLIENT_KEY}
-  secret-key: ${TOSS_SECRET_KEY}
-
-
-
-# need login
-#login-required-urls: /purchase,/board,/review,/logout
-
-# Logging
 logging:
   level:
-    org.hibernate.type: trace
+    org:
+      hibernate:

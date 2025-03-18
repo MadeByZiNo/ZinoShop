@@ -65,12 +65,11 @@ public class UserService {
             throw new LoginFailedException();
         }
 
-        User loginUser = userRepository.findByUsername(loginDto.getUsername()).get();
-        log.info("로그인 성공 : {}",loginUser);
+        log.info("로그인 성공 : {}",user);
 
         ConcurrentHashMap<String,String> tokenMap = new ConcurrentHashMap();
-        String accessToken = jwtUtil.generateAccessToken(loginUser.getUsername(),loginUser.getNickname(),loginUser.getRole());
-        String refreshToken = jwtUtil.generateRefreshToken(loginUser.getUsername(),loginUser.getNickname(),loginUser.getRole());
+        String accessToken = jwtUtil.generateAccessToken(user.getUsername(),user.getNickname(),user.getRole());
+        String refreshToken = jwtUtil.generateRefreshToken(user.getUsername(),user.getNickname(),user.getRole());
         tokenMap.put("accessToken",accessToken);
         tokenMap.put("refreshToken",refreshToken);
         return tokenMap;

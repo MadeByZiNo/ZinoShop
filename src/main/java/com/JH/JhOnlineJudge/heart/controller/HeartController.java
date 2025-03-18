@@ -3,6 +3,10 @@ package com.JH.JhOnlineJudge.heart.controller;
 import com.JH.JhOnlineJudge.heart.service.HeartService;
 import com.JH.JhOnlineJudge.heart.domain.Heart;
 import com.JH.JhOnlineJudge.user.domain.AuthUser;
+import com.JH.JhOnlineJudge.user.domain.IsLogin;
+import com.JH.JhOnlineJudge.user.dto.IsLoginRequest;
+import com.JH.JhOnlineJudge.user.exception.LoginInvalidException;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -24,9 +28,16 @@ public class HeartController {
 
     @PostMapping
     @ResponseBody
-    public ResponseEntity<Map> toggleHeartStatus(@AuthUser Long userId,
-                                            @RequestBody Map<String, Long> request) {
-        Long productId = request.get("productId");
+    public ResponseEntity<Map<String, Boolean>> toggleHeartStatus(@IsLogin IsLoginRequest isLoginRequest,
+                                            @RequestBody Map<String, Long> requestId) {
+
+        if(!isLoginRequest.getIsLogin()) {
+            throw new LoginInvalidException();
+        }
+
+        Long userId = isLoginRequest.getUserId();
+        Long productId = requestId.get("productId");
+
         boolean isHearted = heartService.toggleHeart(userId, productId);
 
         return ResponseEntity.ok(Collections.singletonMap("isFavorite", isHearted));
@@ -34,7 +45,15 @@ public class HeartController {
 
     @GetMapping("/{productId}/status")
     @ResponseBody
-    public ResponseEntity<Boolean> isProductHearted(@AuthUser Long userId, @PathVariable Long productId) {
+    public ResponseEntity<Boolean> isProductHearted(@IsLogin IsLoginRequest isLoginRequest,
+                                                    @PathVariable Long productId) {
+
+        if(!isLoginRequest.getIsLogin()){
+            return ResponseEntity.ok(false);
+        }
+
+        Long userId = isLoginRequest.getUserId();
+
         boolean isHearted = heartService.isHearted(userId, productId);
         return ResponseEntity.ok(isHearted);
     }
