@@ -50,11 +50,16 @@ Github Action을 통해서 개발자가 운영 Branch에 push를 하면 감지�
 
 ### yml 관리
 
+
+![image](https://github.com/user-attachments/assets/b6c996f1-8802-4e1d-b543-fdeb225b5015)  
+
+  
+
 로컬 개발과 실제 운영 환경은 다를 수 밖에 없습니다. (DB의 URL, JPA 초기화설정 등)
 
 그래서 application.yml을 개발 환경용인 application-local.yml과 application-prod.yml로 나눠서 사용하였습니다.
 
-특히 시크릿키 등의 환경변수의 경우에는 보안상 로컬에서 그대로 옮길 수 없으므로 Github Secrets을 이용하여 저장해주었고 EC2 배포과정에서 환경변수들을 담아서 보내줍니다.
+특히 시크릿키 등의 환경변수의 경우에는 보안상 로컬에서 그대로 옮길 수 없으므로 Github Secrets을 이용하여 저장해주었고 EC2 배포과정에서 환경변수들을 담아서 보내줍니다.  
 
 
 ### 메인 화면
