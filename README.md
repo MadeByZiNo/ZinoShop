@@ -77,7 +77,7 @@ RefreshToken은 AccessToken의 유효 기간이 끝났을 때 새로운 AccessTo
 
   
 - **회원 역할 세분화**: 일반 회원, VIP 회원, 관리자
-- ![image](https://github.com/user-attachments/assets/3b91c6d0-76bf-4a5a-a524-e4449b62ce8f)
+ ![image](https://github.com/user-attachments/assets/3b91c6d0-76bf-4a5a-a524-e4449b62ce8f)
 
   
 
