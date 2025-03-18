@@ -52,7 +52,7 @@
 
 - **JWT**를 이용한 로그인 및 세션 관리
 
-- 
+
 
 ![image](https://github.com/user-attachments/assets/e1b052fc-a7ea-470e-beeb-4abf705aad14)  
 
