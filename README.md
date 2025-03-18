@@ -141,12 +141,16 @@ Github Action을 통해서 개발자가 운영 Branch에 push를 하면 감지�
 
 좋아요 버튼을 통해 원하는 상품에 대해 찜 등록이 가능합니다.  
 
-**- 쿠폰 발급 및 포인트 적립/사용 관리**
+**- 쿠폰 발급 및 포인트 적립/사용 관리**  
+
+
 ![Coupon](https://github.com/user-attachments/assets/f05c174d-367c-4aed-8e34-02d2851997df)
 
 
 
-![Coupon Usage](https://github.com/user-attachments/assets/a521976d-6426-4e0e-a72c-cbfc16ec27af)
+![Coupon Usage](https://github.com/user-attachments/assets/a521976d-6426-4e0e-a72c-cbfc16ec27af)  
+
+
 주문에 대해서 **쿠폰** 및 **리워드 포인트** 사용이 가능합니다.  
 쿠폰은 만료일, 최소주문금액, % 혹은 원 단위 설정이 가능합니다.
 
@@ -159,8 +163,6 @@ Github Action을 통해서 개발자가 운영 Branch에 push를 하면 감지�
 
 ![Payment](https://github.com/user-attachments/assets/0eca0f12-1edd-46c7-ac2d-00dab8964117)  
 ![Payment Confirmation](https://github.com/user-attachments/assets/e5542f29-e33c-4b36-b4b2-1c8968e0df8a)
-
-- **낙관적 Lock**과 **Retry**를 이용한 동시성 결제 문제 해결
 
 ---
 
@@ -181,18 +183,22 @@ Github Action을 통해서 개발자가 운영 Branch에 push를 하면 감지�
 **총 110회의 구매 요청**을 했으며, 정확히 **51번째 요청부터 품절된 상품**으로 나타났습니다.
 
 - **50번째 요청까지는 2개씩 구매**하므로 **101개 중 100개가 판매**됩니다.  
-- **51번째 요청부터 품절 처리**되었습니다.
+- **51번째 요청부터는 거절 처리**되었습니다. (재고보다 많은 물량 구매요청)
+
+
+
+![Remaining Stock](https://github.com/user-attachments/assets/4d0356f0-175f-4041-b594-99a1d636f9ff)  
+
+
 
 정확히 **한 개의 재고**가 남은 것을 알 수 있습니다.
-
-![Remaining Stock](https://github.com/user-attachments/assets/4d0356f0-175f-4041-b594-99a1d636f9ff)
 
 ---
 
 ### **6. 배치 작업**  
 
 - **Spring Batch**를 활용한 다양한 작업:  
-  - 결제 취소 자동 처리
+  - 결제 취소 자동 처리 (실제 결제가 아니라서 확인이 안됨)
   - 회원 VIP 등급 자동 처리
   - 상품 판매 분석
 
@@ -208,7 +214,7 @@ Spring AOP를 이용하여 로그 추적기를 구현했습니다. (Elastic Sear
 
 ### **8. 파일 업로드 개선**  
 
-- 상품 등록 시 이미지 저장을 **비동기 처리**하여 업로드 속도를 높였고, 파일 업로드 실패 시 **롤백 처리** 를 해야함.  
+- 상품 등록 시 S3에 대한 이미지 저장을 **비동기 처리**로 수정하여 업로드 속도를 높이고, 파일 업로드 실패 시 **롤백 처리** 를 해야함.  
 
 ---
 
@@ -223,12 +229,14 @@ Spring AOP를 이용하여 로그 추적기를 구현했습니다. (Elastic Sear
 
 300여 개의 스레드를 통해 동시에 제품 페이지 요청을 할 때, 매우 느린 응답 속도가 발생하는 문제를 확인했습니다.   
 
-JPA에서 제공하는 **`Page`**로 데이터를 받을 때 모든 데이터를 **Count**하고 페이징 처리를 하므로, 300개 스레드의 요청에 대해 **30만 개의 product 데이터**를 모두 카운팅하고 있었습니다.  
+많은 량의 데이터를 테스트하기위해서 임의로 30만개의 product를 INSERT 하였습니다.
+
+JPA에서 제공하는 **`Page`**로 데이터를 받을 때 모든 PRODUCT 데이터를 **Count**하고 페이징 처리를 하므로, 300개 스레드의 요청에 대해 **30만 개의 product 데이터**를 모두 카운팅하고 있었습니다.  
 
 이를 해결하기 위해 **`Page` 대신 `Slice`**를 사용하여, 해당 페이지 처리에 필요한 데이터만 받아와 페이징 처리를 하였습니다.  
 
 ![Slice Performance](https://github.com/user-attachments/assets/9de1e390-87e8-455d-ab62-a1955319e282)
 
-**`Slice`**를 이용하니 성능이 현저히 향상되었습니다.  
+**`Slice`**를 이용하니 응답속도가 최소 1/10가량 줄면서 성능이 현저히 향상되었습니다.  
 
 
