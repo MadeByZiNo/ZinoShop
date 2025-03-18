@@ -55,18 +55,25 @@
 - **AccessToken**은 인증하는데 사용되며 유효 시간이 짧고, 유효 시간이 지나면 만료되어 인증이 불가능합니다.
 - **RefreshToken**은 AccessToken의 유효 기간이 끝났을 때 새로운 AccessToken을 발급받을 수 있도록 도와줍니다.
 
-- **회원 역할 세분화**: 일반 회원, VIP 회원, 관리자  
+- **회원 역할 세분화**: 일반 회원, VIP 회원, 관리자
+- 
 ![Role](https://github.com/user-attachments/assets/3b91c6d0-76bf-4a5a-a524-e4449b62ce8f)  
 
-- **ArgumentResolver와 Annotation**을 활용한 역할 기반 인가 처리  
+- **ArgumentResolver와 Annotation**을 활용한 역할 기반 인가 처리
+- 
 ![Authorization](https://github.com/user-attachments/assets/3f47c45f-3898-472d-a322-584362f6a848)  
 
 `ArgumentResolver`와 `Annotation`을 이용해 인가 처리를 하였습니다.  
+
 ![AuthUser Annotation](https://github.com/user-attachments/assets/ac4ad6cb-602c-46a7-91f6-a2dbfd4eea30)  
+
 
 `@AuthUser`라는 Annotation을 만든 후 `ArgumentResolver`에 인증 로직을 넣고, 인가 처리가 필요한 메소드에 해당 Annotation을 추가하여 인증과정을 거칩니다.  
 
+
 운영자의 경우, `@Admin` Annotation을 만들어서 운영자 여부 인증을 거치게 합니다.  
+
+
 
 ### 2. 상품 관리
 
@@ -78,11 +85,21 @@
 ### 3. 문의 게시판
 
 - 문의 등록 및 답변 기능
+
+- 
 ![Inquiry](https://github.com/user-attachments/assets/c8116a3e-f194-4102-819c-4ed00a381303)
+
+ 
 - 문의 상태 관리 (예: 답변 대기, 답변 완료)
+
+- 
 ![Inquiry Status](https://github.com/user-attachments/assets/2a76e981-8bd7-4c39-b0bd-b19eaa4dee6f)
 
-유저는 자신의 주문에 대해 문의 게시글을 올릴 수 있으며, 운영자는 문의들에 대해 답변처리가 가능합니다.
+
+
+유저는 자신의 주문에 대해 문의 게시글을 올릴 수 있으며, 운영자는 문의들에 대해 답변처리가 가능합니다.  
+
+
 
 ### 4. 좋아요 및 포인트/쿠폰 시스템
 
@@ -92,7 +109,10 @@
 좋아요 버튼을 통해서 원하는 상품에 대해 찜 등록이 가능합니다.
 
 - 쿠폰 발급 및 포인트 적립/사용 관리
+ 
 ![Coupon](https://github.com/user-attachments/assets/f05c174d-367c-4aed-8e34-02d2851997df)
+
+
 
 해당 주문에 대해서 쿠폰 및 리워드 포인트 사용이 가능합니다.
 ![Coupon Usage](https://github.com/user-attachments/assets/a521976d-6426-4e0e-a72c-cbfc16ec27af)
