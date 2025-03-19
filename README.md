@@ -40,7 +40,9 @@
 ---
 
 ### 아키텍처 구조
-![제목 없는 다이어그램 drawio (1)](https://github.com/user-attachments/assets/ddf7f00c-9790-44b4-8520-cd3e7d3504d3)
+![설계구조](https://github.com/user-attachments/assets/6733435d-b05c-4bae-a9da-47159541b56e)  
+
+
 
 Github Action을 통해서 개발자가 운영 Branch에 push를 하면 감지를 해서 EC2에서 pull을 하고 빌드해서 JAR파일을 생성 후 Dockerfile을 통해서  
 
@@ -77,7 +79,7 @@ Github Action을 통해서 개발자가 운영 Branch에 push를 하면 감지�
 ![image](https://github.com/user-attachments/assets/27d07939-adae-4fd6-b8dd-4522a4f0801d)
 
 
-- **JWT**를 이용한 로그인 및 세션 관리
+- **JWT**와 **Redis** 이용한 로그인 및 세션 관리
 
 ![JWT](https://github.com/user-attachments/assets/e1b052fc-a7ea-470e-beeb-4abf705aad14)
 
