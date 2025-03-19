@@ -63,7 +63,7 @@ Github Action을 통해서 개발자가 운영 Branch에 push를 하면 감지�
 특히 시크릿키 등의 환경변수의 경우에는 보안상 로컬에서 그대로 옮길 수 없으므로 Github Secrets을 이용하여 저장해주었고 EC2 배포과정에서 환경변수들을 담아서 보내줍니다.  
 
 ---
-<br>
+
 ### 메인 화면
 
 ![image](https://github.com/user-attachments/assets/916b1382-a895-4067-a661-c9a912edc70c)  
@@ -139,7 +139,7 @@ Github Action을 통해서 개발자가 운영 Branch에 push를 하면 감지�
 ### 3. 문의 게시판
 
 - 문의 등록(유저)
-<br>
+  
 ![Inquiry](https://github.com/user-attachments/assets/c8116a3e-f194-4102-819c-4ed00a381303)
 
 
@@ -147,14 +147,14 @@ Github Action을 통해서 개발자가 운영 Branch에 push를 하면 감지�
 <br>
 
 - 문의 답변(운영자)
-<br>
+  
 ![Inquiry Status](https://github.com/user-attachments/assets/2a76e981-8bd7-4c39-b0bd-b19eaa4dee6f)
 
 
 ---
 
 ### 4. 좋아요 및 포인트/쿠폰 시스템
-<br>
+
 ![Like](https://github.com/user-attachments/assets/27c5f29f-72a8-40a3-a31b-09e71f128963)
 
 좋아요 버튼을 통해 원하는 상품에 대해 찜 등록이 가능합니다. 
@@ -177,7 +177,7 @@ Github Action을 통해서 개발자가 운영 Branch에 push를 하면 감지�
 
 
 ---
-<br>
+
 ### 5. 결제 시스템
 
 ![Coupon](https://github.com/user-attachments/assets/f05c174d-367c-4aed-8e34-02d2851997df)
@@ -231,7 +231,7 @@ Github Action을 통해서 개발자가 운영 Branch에 push를 하면 감지�
 ---
 
 ### **7. 로그 추적기**
-<br>
+
 ![Log Tracker](https://github.com/user-attachments/assets/24fb9520-a26e-4264-8145-b840971d9968)
 
 Spring AOP를 이용하여 로그 추적기를 구현했습니다. (Elastic Search?)
