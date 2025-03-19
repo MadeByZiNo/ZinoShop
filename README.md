@@ -31,13 +31,13 @@
 - **JavaScript**
 - **Thymeleaf** 
 ---
-<br>
+
 ### ERD
 
 ![ERD](https://github.com/user-attachments/assets/918f56f4-449f-454b-a552-4e14f935766a)
 
 ---
-<br>
+
 ### 아키텍처 구조
 ![설계구조](https://github.com/user-attachments/assets/6733435d-b05c-4bae-a9da-47159541b56e)  
 
@@ -48,7 +48,7 @@ Github Action을 통해서 개발자가 운영 Branch에 push를 하면 감지�
 프로젝트 서버 Docker 이미지를 생성하고 컨테이너에서 실행시키게 해놓아서 자동배포를 구현하였습니다. 
 
 ---
-<br>
+
 ### yml 관리
 
 
@@ -81,7 +81,7 @@ Github Action을 통해서 개발자가 운영 Branch에 push를 하면 감지�
 
 <br>
 - **JWT**를 이용한 로그인 및 세션 관리
-<br>
+
 ![JWT](https://github.com/user-attachments/assets/e1b052fc-a7ea-470e-beeb-4abf705aad14)
 <br>
 사용자가 로그인하면 서버는 JWT 형태의 **AccessToken**과 **RefreshToken**을 발급합니다.  
@@ -90,9 +90,9 @@ Github Action을 통해서 개발자가 운영 Branch에 push를 하면 감지�
 - **AccessToken**은 인증하는 데 사용되며 유효 시간이 짧고, 유효 시간이 지나면 만료되어 인증이 불가능합니다.  
 - **RefreshToken**은 AccessToken의 유효 기간이 끝났을 때 새로운 AccessToken을 발급받을 수 있도록 도와줍니다.  
 <br>
-<br>
+  
 ![image](https://github.com/user-attachments/assets/a030d8ba-4ee1-40ff-8430-5ee20f3e4171)
-    <br>
+    
        
        
 - **ArgumentResolver와 Annotation**을 활용한 역할 기반 인가 처리
