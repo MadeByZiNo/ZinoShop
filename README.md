@@ -331,4 +331,12 @@ JPA에서 제공하는 **`Page`**로 데이터를 받을 때 모든 PRODUCT 데�
 인덱싱 후 월별 TOP30
 
 
-**여기서도** 문제는 연별 TOP30은 인덱싱을 했음에도 데이터가 연단위로 가져오기 때문에 별 차이가 없었습니다.
+**여기서도** 문제는 연별 TOP30은 인덱싱을 했음에도 시간차이가 거의 없었습니다.
+
+
+![image](https://github.com/user-attachments/assets/7f6585f1-4293-4d46-9249-57ae4b45d4c1)
+
+
+왜냐하면 인덱스를 거친 후에 ps.product.id와 ps.product.name과 Group By를 해야하는데 product_name을 가져오기 위해 모든 데이터들이 Join을 해야했기 때문입니다.
+
+
