@@ -266,3 +266,69 @@ JPA에서 제공하는 **`Page`**로 데이터를 받을 때 모든 PRODUCT 데�
 **`Slice`**를 이용하니 응답속도가 최소 1/10가량 줄면서 성능이 현저히 향상되었습니다.  
 
 
+
+
+**인덱스를 이용한 속도 개선**
+
+
+![image](https://github.com/user-attachments/assets/9a1e17b4-d9e9-4471-a900-47c840b7da43)
+
+**product_stat**이라는 상품의 날짜마다 팔린 개수와 총 가격의 정보를 담는 테이블이 있습니다.
+
+임의로 720만개 가량의 데이터를 삽입하였고
+
+**상품의 날짜 별 통계** 및 **상품들의 날짜 별 팔린 순위 TOP30**과 같은 통계기능을 구현하기 위해서 JPQL을 이용해서 가져오게 하였습니다.
+
+
+**그러나...**
+
+
+![image](https://github.com/user-attachments/assets/9e623928-f045-4252-918a-eead0d61fa38)
+
+**상품의 날짜 별 통계**의 속도입니다.
+
+700만개의 데이터를 모두 체크해서 그런지 2.1초가 걸렸습니다.
+
+심각한 수준은 아니지만 데이터가 더 많아질때 속도는 더욱 느려질 것 입니다.
+
+해당 데이터를 불러오는 JPQL 쿼리문은 product_id와 date 순서로 탐색이 이루어지기 때문에 시퀀스의 순서를  product_id와 date순서로 인덱스를 생성하였습니다.
+
+![image](https://github.com/user-attachments/assets/bacc071d-846a-44ab-8f30-7ef0843f4f79)
+
+시간이 놀라울정도로 감소한 것을 확인 할 수 있습니다.
+
+
+
+다음은  **상품들의 날짜 별 팔린 순위 TOP30**의 속도들 입니다.
+
+
+![image](https://github.com/user-attachments/assets/26862e70-f1c7-4230-90fc-0f56433bd1cf)
+
+일별 TOP30
+
+![image](https://github.com/user-attachments/assets/279e1442-5d4c-422c-8598-d40aa34aa458)
+
+월별 TOP30
+
+![image](https://github.com/user-attachments/assets/3534c939-21c7-4047-928d-8c3b648d1c8d)
+
+연별 TOP30
+
+
+연별의 경우에는 8초나 소요하며 매우 느린 모습을 보여줍니다.
+
+
+이번 쿼리들은 date와 product_id 순서로 인덱스를 생성하였습니다.
+
+
+![image](https://github.com/user-attachments/assets/de080bc2-93c9-4e77-9901-957deece8d05)
+
+인덱싱 후 일별 TOP30
+
+
+![image](https://github.com/user-attachments/assets/6d1c0750-1f17-45ff-882d-e8d96cc7f3a9)
+
+인덱싱 후 월별 TOP30
+
+
+**여기서도** 문제는 연별 TOP30은 인덱싱을 했음에도 데이터가 연단위로 가져오기 때문에 별 차이가 없었습니다.
