@@ -87,7 +87,7 @@ public class OauthController {
     }
 
     @GetMapping("/{provider}/callback")
-    public RedirectView handleCallback(@PathVariable String provider, @RequestParam String code, @RequestParam String state, HttpServletResponse response) {
+    public RedirectView handleCallbackToLogin(@PathVariable String provider, @RequestParam String code, @RequestParam String state, HttpServletResponse response) {
         OAuthProvider oauthProvider = OAuthProvider.valueOf(provider.toUpperCase());
         OAuthService providerService = oauthProviderServiceFactory.getProviderService(oauthProvider);
 
