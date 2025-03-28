@@ -60,7 +60,7 @@ public interface ProductStatJpaRepository extends JpaRepository<ProductStat, Lon
 
 
     @Query("""
-    SELECT new com.JH.JhOnlineJudge.product.statistic.ProductSalesRankDto(ps.product.name, SUM(ps.quantity), SUM(ps.totalPrice))
+    SELECT new com.JH.JhOnlineJudge.domain.product.statistic.ProductSalesRankDto(ps.product.name, SUM(ps.quantity), SUM(ps.totalPrice))
     FROM ProductStat ps 
     WHERE ps.date BETWEEN :startDate AND :endDate
     GROUP BY ps.product.id, ps.product.name
@@ -69,7 +69,7 @@ public interface ProductStatJpaRepository extends JpaRepository<ProductStat, Lon
     List<ProductSalesRankDto> getTop30ByPrice(@Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate, Pageable pageable);
 
     @Query("""
-    SELECT new com.JH.JhOnlineJudge.product.statistic.ProductSalesRankDto(ps.product.name, SUM(ps.quantity), SUM(ps.totalPrice))
+    SELECT new com.JH.JhOnlineJudge.domain.product.statistic.ProductSalesRankDto(ps.product.name, SUM(ps.quantity), SUM(ps.totalPrice))
     FROM ProductStat ps
     WHERE ps.date BETWEEN :startDate AND :endDate
     GROUP BY ps.product.id, ps.product.name
