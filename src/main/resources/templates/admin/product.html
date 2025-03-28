@@ -7,93 +7,78 @@
             width: 100%;
             border-collapse: collapse;
             margin: 20px 0;
-            font-size: 14px; /* 글자 크기 축소 */
+            font-size: 14px;
         }
         table th, table td {
             border: 1px solid #ddd;
-            padding: 8px; /* 셀 내부 여백 축소 */
+            padding: 8px;
             text-align: center;
         }
         table th {
             background-color: #f4f4f4;
             font-weight: bold;
         }
+        .btn-primary { background-color: #007bff; }
+        .btn-danger { background-color: #dc3545; }
+        .btn-secondary { background-color: #6c757d; }
 
-        .btn-primary {
-            background-color: #007bff;
+        .modal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 60%;
+            max-height: 80vh;
+            background: white;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            z-index: 1000;
+            padding: 20px;
         }
-        .btn-danger {
-            background-color: #dc3545;
+        .modal.show { display: block; }
+        .modal-header {
+            padding: 15px;
+            border-bottom: 1px solid #ddd;
+            background-color: #f4f4f4;
+            font-weight: bold;
         }
-        .btn-secondary {
-            background-color: #6c757d;
+        .modal-body {
+            padding: 15px;
+            max-height: calc(80vh - 100px);
+            overflow-y: auto;
         }
-
-    .modal {
-        display: none;  /* 기본적으로 숨김 */
-        position: fixed;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        width: 60%;
-        max-height: 80vh;
-        background: white;
-        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-        border-radius: 10px;
-        z-index: 1000;
-        padding: 20px;
-    }
-
-    .modal.show {
-        display: block;  /* show 클래스로만 모달을 표시 */
-    }
-
-    .modal-header {
-        padding: 15px;
-        border-bottom: 1px solid #ddd;
-        background-color: #f4f4f4;
-        font-weight: bold;
-    }
-
-    .modal-body {
-        padding: 15px;
-        flex-grow: 1; /* body가 가능한 한 공간을 차지하게 함 */
-        max-height: calc(80vh - 100px); /* 모달 높이에서 헤더와 푸터의 높이를 뺀 크기 */
-        overflow-y: auto; /* 내용이 넘치면 스크롤 */
-    }
-
-    .modal-footer {
-        padding: 15px;
-        border-top: 1px solid #ddd;
-        background-color: #f4f4f4;
-        text-align: right; /* 버튼 오른쪽 정렬 */
-        flex-shrink: 0; /* footer는 축소되지 않음 */
-    }
-
-  body.modal-open {
-      overflow: hidden;
-  }
-
-  body.modal-open > *:not(#product-modal) {
-      pointer-events: none;
-  }
-
-  #product-modal {
-      pointer-events: auto; /* 모달 내부 요소는 클릭 가능 */
-}
-
-    .form-control {
-        width: 100%;
-        padding: 8px;
-        margin-bottom: 10px;
-        box-sizing: border-box;
-    }
+        .modal-footer {
+            padding: 15px;
+            border-top: 1px solid #ddd;
+            background-color: #f4f4f4;
+            text-align: right;
+        }
+        body.modal-open { overflow: hidden; }
+        body.modal-open > *:not(#product-modal) { pointer-events: none; }
+        #product-modal { pointer-events: auto; }
+        .form-control {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            box-sizing: border-box;
+        }
     </style>
 </head>
 <body>
 <div layout:fragment="content">
-    <!-- 재고 테이블 -->
     <button class="btn btn-primary" id="btn-add-product">상품 추가</button>
+    <div>
+        <select id="category-select">
+            <option value="">전체 카테고리</option>
+            <option th:each="category : ${categories}" th:value="${category.id}" th:text="${category.name}"
+                    th:selected="${category.id == selectedCategoryId}"></option>
+        </select>
+
+        <input type="text" id="search-name" placeholder="상품명 검색" th:value="${searchName}">
+        <button id="btn-search" class="btn btn-primary">검색</button>
+    </div>
+
     <table>
         <thead>
         <tr>
@@ -107,8 +92,8 @@
             <th>삭제</th>
         </tr>
         </thead>
-        <tbody>
-        <tr th:each="product : ${products}">
+        <tbody id="product-tbody">
+        <tr th:each="product : ${products}" th:fragment="productRows">
             <td th:text="${product.id}"></td>
             <td th:text="${product.name}"></td>
             <td th:text="${product.price}"></td>
@@ -125,10 +110,15 @@
         </tbody>
     </table>
 
+    <!-- 페이지네이션 버튼 테이블 바깥으로 이동 -->
+    <div id="pagination-area" th:if="${hasNext}">
+        <button id="btn-load-more" class="btn btn-secondary" th:attr="data-page=${currentPage + 1}">다음 페이지 →</button>
+    </div>
+
     <!-- 모달 -->
     <div class="modal" id="product-modal">
         <div class="modal-header">
-            <h3>상품 수정</h3>
+            <h3>상품</h3>
             <button id="btn-close-modal">&times;</button>
         </div>
         <div class="modal-body">
@@ -141,7 +131,7 @@
                 <label>설명</label>
                 <textarea id="product-description" class="form-control" rows="3" required></textarea>
                 <label>남은 수량</label>
-                <input type="number" id="product-remain" class="form-control" min="0" max="1000"  step="1"  required>
+                <input type="number" id="product-remain" class="form-control" min="0" max="1000" step="1" required>
                 <label>상태</label>
                 <select id="product-state" class="form-control" required>
                     <option value="판매중">판매중</option>
@@ -151,7 +141,7 @@
                 <select id="product-category" class="form-control" required>
                     <option th:each="category : ${categories}" th:value="${category.id}" th:text="${category.name}"></option>
                 </select>
-                <label>이미지 (최대 5개, 첫번째 사진이 썸네일이 적용됩니다, 사진 첨부시 전의 사진들은 사라집니다.)</label>
+                <label>이미지 (최대 5개, 첫번째 사진이 썸네일이 적용됩니다, 첨부 시 기존 사진은 초기화됩니다.)</label>
                 <input type="file" id="product-images" class="form-control" accept="image/*" multiple required>
             </form>
         </div>
@@ -159,46 +149,37 @@
             <button class="btn btn-primary" id="btn-save-product">저장</button>
         </div>
     </div>
+
     <script>
-        const modal = document.getElementById('product-modal');
-        const btnAddProduct = document.getElementById('btn-add-product');
-        const btnCloseModal = document.getElementById('btn-close-modal');
-        const editButtons = document.querySelectorAll('.btn-edit');
-        const btnSaveProduct = document.getElementById('btn-save-product');
-
-        btnAddProduct.addEventListener('click', () => {
-            document.getElementById('product-form').reset();
-            modal.classList.add('show');  // show 클래스를 추가하여 모달을 보이게 함
-            document.body.classList.add('modal-open');  // 페이지 비활성화
-        });
-
-        document.querySelectorAll('.btn-delete').forEach(button => {
-            button.addEventListener('click', function(e) {
-            const productId = e.target.getAttribute('data-id');
-
-            if (confirm("정말로 이 상품을 삭제하시겠습니까?")) {
-                fetch(`/product?productId=${productId}`, {
-                    method: 'DELETE',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                })
-                .then(response => {
-                    if (response.ok) {
-                        alert("상품이 삭제되었습니다.");
-                      window.location.replace(window.location.href);
-                    } else {
-                        alert("상품 삭제에 실패했습니다.");
-                    }
-                })
-                .catch(error => {
-                    console.error('삭제 중 오류 발생:', error);
-                });
-            }
-            });
-        });
-
         document.addEventListener('DOMContentLoaded', function() {
+            const modal = document.getElementById('product-modal');
+            const btnAddProduct = document.getElementById('btn-add-product');
+            const btnCloseModal = document.getElementById('btn-close-modal');
+            const btnSaveProduct = document.getElementById('btn-save-product');
+
+            btnAddProduct.addEventListener('click', () => {
+                document.getElementById('product-form').reset();
+                modal.classList.add('show');
+                document.body.classList.add('modal-open');
+            });
+
+            document.querySelectorAll('.btn-delete').forEach(button => {
+                button.addEventListener('click', function(e) {
+                    const productId = e.target.getAttribute('data-id');
+                    if (confirm("정말로 이 상품을 삭제하시겠습니까?")) {
+                        fetch(`/product?productId=${productId}`, { method: 'DELETE' })
+                            .then(response => {
+                                if (response.ok) {
+                                    alert("상품이 삭제되었습니다.");
+                                    window.location.reload();
+                                } else {
+                                    alert("상품 삭제에 실패했습니다.");
+                                }
+                            }).catch(error => console.error('삭제 중 오류 발생:', error));
+                    }
+                });
+            });
+
             document.querySelectorAll('.btn-edit').forEach(button => {
                 button.addEventListener('click', (e) => {
                     const productId = e.target.getAttribute('data-id');
@@ -218,75 +199,95 @@
                 });
             });
 
-            // 모달 닫기 버튼 클릭 시
             btnCloseModal.addEventListener('click', () => {
-                modal.classList.remove('show');  // show 클래스를 제거하여 모달을 숨김
-                document.body.classList.remove('modal-open');  // 페이지 활성화
+                modal.classList.remove('show');
+                document.body.classList.remove('modal-open');
             });
 
-            // 모달 외부 클릭 시 모달 닫기 (선택적 기능)
             window.addEventListener('click', (event) => {
                 if (event.target === modal) {
-                    modal.classList.remove('show');  // show 클래스를 제거하여 모달을 숨김
-                    document.body.classList.remove('modal-open');  // 페이지 활성화
+                    modal.classList.remove('show');
+                    document.body.classList.remove('modal-open');
                 }
             });
 
-             // 상품 저장 버튼 클릭 시 데이터 저장
             btnSaveProduct.addEventListener('click', () => {
                 const productId = document.getElementById('product-id').value;
-                const name = document.getElementById('product-name').value;
-                const price = document.getElementById('product-price').value;
-                const description = document.getElementById('product-description').value;
-                const remain = document.getElementById('product-remain').value;
-                const state = document.getElementById('product-state').value;
-                const categoryId = document.getElementById('product-category').value;
-
-                const method = productId ? 'PUT' : 'POST';
-                const url = '/product';
-                console.log(method);
-                if (price < 0 || remain < 0) {
-                    alert('가격과 수량이 유효하지 않습니다.');
-                    return false;
-                }
-
-                const formData = new FormData();
+                const formData = new FormData(document.getElementById('product-form'));
                 formData.append('id', productId);
-                formData.append('name', name);
-                formData.append('price', price);
-                formData.append('description', description);
-                formData.append('remain', remain);
-                formData.append('state', state);
-                formData.append('categoryId', categoryId);
 
                 const images = document.getElementById('product-images').files;
-                console.log(images);
-                if (method === 'POST' && (images.length <1 || images.length > 5)){
-                    alert('이미지는 한 개 이상, 다섯 개 이하로 첨부 가능합니다.');
-                    return false;
+                if (!productId && (images.length < 1 || images.length > 5)) {
+                    alert('이미지는 1개 이상, 5개 이하로 첨부 가능합니다.');
+                    return;
                 }
-
                 for (let i = 0; i < images.length; i++) {
                     formData.append('images', images[i]);
                 }
 
-                fetch(url, {
-                    method: method,
-                    body: formData
-                }).then(response => response.json())
-                  .then(data => {
-                      alert(data.message);
-                      modal.classList.remove('show');
-                      document.body.classList.remove('modal-open');
-                      window.location.reload();
-                  }).catch(error => {
-                      console.error('저장 오류:', error);
-                  });
+                fetch('/product', { method: productId ? 'PUT' : 'POST', body: formData })
+                    .then(response => response.json())
+                    .then(data => {
+                        alert(data.message);
+                        modal.classList.remove('show');
+                        document.body.classList.remove('modal-open');
+                        window.location.reload();
+                    })
+                    .catch(error => console.error('저장 오류:', error));
             });
+
+            const loadMoreBtn = document.getElementById('btn-load-more');
+            const categorySelect = document.getElementById('category-select');
+            const searchNameInput = document.getElementById('search-name');
+            const searchBtn = document.getElementById('btn-search');
+
+           // 검색 버튼 클릭 시 새로 검색
+            searchBtn.addEventListener('click', function () {
+                const categoryId = categorySelect.value;
+                const name = searchNameInput.value;
+
+                // URL 동적 생성 (파라미터가 있을 때만 추가)
+                let url = `/admin/product-form?page=0&size=20`;
+                if (categoryId) {
+                    url += `&categoryId=${categoryId}`;
+                }
+                if (name) {
+                    url += `&name=${encodeURIComponent(name)}`;
+                }
+
+                window.location.href = url; // 새로 요청 (초기화)
+            });
+
+            // 다음 페이지 로딩
+            loadMoreBtn?.addEventListener('click', function () {
+                const nextPage = this.getAttribute('data-page');
+                const categoryId = categorySelect.value;
+                const name = searchNameInput.value;
+
+                let fetchUrl = `/admin/product-form-fragment?page=${nextPage}&size=20`;
+                if (categoryId) {
+                    fetchUrl += `&categoryId=${categoryId}`;
+                }
+                if (name) {
+                    fetchUrl += `&name=${encodeURIComponent(name)}`;
+                }
+
+                fetch(fetchUrl)
+                    .then(response => response.text())
+                    .then(html => {
+                        document.getElementById('product-tbody').insertAdjacentHTML('beforeend', html);
+
+                        const rowCount = (html.match(/<tr/g) || []).length;
+                        if (rowCount < 20) {
+                            this.remove();
+                        } else {
+                            this.setAttribute('data-page', parseInt(nextPage) + 1);
+                        }
+                    });
+            });
+
         });
     </script>
-
 </div>
-
 </body>
 </html>

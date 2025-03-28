@@ -42,7 +42,23 @@
             </form>
           </div>
         </form>
+        <div class="text-center mt-3">
+          <p>또는 소셜 계정으로 로그인하기</p>
 
+          <!-- ⭐ 여기에 centering을 위한 container 추가 -->
+          <div class="d-flex justify-content-center gap-2 mt-3" style="max-width: 500px; margin: 0 auto;">
+            <!-- Kakao -->
+            <a href="/oauth/authorize/kakao" class="btn" style="background-color: #FEE500; color: #3c1e1e; font-weight: bold;">
+              <img src="/images/kakaoImage.png" alt="Kakao" style="height:20px; margin-right:8px; vertical-align:middle;">
+              <span style="vertical-align:middle;">Kakao</span>
+            </a>
+            <!-- Naver -->
+            <a href="/oauth/authorize/naver" class="btn" style="background-color: #03C75A; color: white; font-weight: bold;">
+              <img src="/images/naverIcon.png" alt="Naver" style="height:20px; margin-right:8px; vertical-align:middle;">
+              <span style="vertical-align:middle;">Naver</span>
+            </a>
+          </div>
+        </div>
       </div>
     </div>
   </div>

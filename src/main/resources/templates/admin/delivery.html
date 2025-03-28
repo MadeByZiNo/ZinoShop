@@ -3,12 +3,14 @@
       xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
       layout:decorate="layout/default_layout">
 <head>
+    <meta charset="UTF-8">
+    <title>배송 관리</title>
     <style>
         .container {
             margin-top: 30px;
         }
         .filter-container, .table-container, .summary-container {
-            margin-bottom: 50px; /* 각 섹션 간격 조정 */
+            margin-bottom: 50px;
         }
         .summary-container {
             font-weight: bold;
@@ -17,153 +19,69 @@
             margin-top: 10px;
         }
     </style>
-
-    <script>
-        $(document).ready(function() {
-            $('#filterForm').submit(function(event) {
-                event.preventDefault(); // 기본 폼 제출 막기
-
-                const filterData = {
-                    status: $('#status').val(),
-                    search: $('#search').val()
-                };
-                $.ajax({
-                    url: '/admin/deliveries',
-                    type: 'GET',
-                    data: filterData,
-                    success: function(deliveries) {
-                        const tableBody = $('#deliveryTableBody');
-                        tableBody.empty();
-                        let totalPrice = 0;
-
-                        deliveries.forEach(delivery => {
-                         const orderDate = new Date(delivery.orderAt);
-                        const formattedDate = orderDate.toLocaleString();
-                            const row = `
-                                <tr>
-                                    <td><input type="checkbox" class="rowCheckbox" value=${delivery.orderId}></td>
-                                    <td>${delivery.name}</td>
-                                    <td>${delivery.username}</td>
-                                    <td>${delivery.price.toLocaleString()}</td>
-                                    <td>${delivery.status}</td>
-                                    <td>${delivery.recipientName}</td>
-                                    <td>${delivery.recipientAddress}</td>
-                                    <td>${delivery.memo}</td>
-                                    <td>${formattedDate}</td>
-                                </tr>
-                            `;
-                            tableBody.append(row);
-                            totalPrice += delivery.price;
-                        });
-                        $('.summary-container span').text(totalPrice.toLocaleString());
-                    }
-                });
-            });
-        });
-
-        $(document).ready(function() {
-            $('#selectAll').change(function() {
-                $('.rowCheckbox').prop('checked', $(this).prop('checked'));
-            });
-
-            $('#applyButton').click(function() {
-                const selectedStatus = $('#statusSelect').val();
-                if (!selectedStatus) {
-                    alert("변경할 상태를 선택하세요.");
-                    return;
-                }
-
-            const selectedDeliveries = [];
-            $('.rowCheckbox:checked').each(function() {
-                selectedDeliveries.push($(this).val());
-            });
-
-            if (selectedDeliveries.length === 0) {
-                alert("변경할 항목을 선택하세요.");
-                return;
-            }
-
-            $.ajax({
-                url: '/admin/deliveries',
-                type: 'PUT',
-                contentType: 'application/json',
-                data: JSON.stringify({
-                    deliveryIds: selectedDeliveries,
-                    status: selectedStatus
-                }),
-                success: function(response) {
-                    alert("상태가 성공적으로 변경되었습니다.");
-                    location.reload(); // 성공 후 페이지 새로고침
-                },
-                error: function() {
-                    alert("상태 변경에 실패했습니다.");
-                }
-            });
-        });
-    });
-    </script>
-
 </head>
 <body>
 <div layout:fragment="content">
     <div class="container">
-        <div class="container">
-            <h2 class="text-center">배달 관리</h2>
+        <h2 class="text-center">배송 관리</h2>
 
-                <div class="filter-container">
-                    <form id="filterForm" method="get">
-                        <div class="d-flex">
-                            <div class="col-md-4 px-1">
-                                <label for="status">카테고리</label>
-                                <select id="status" class="form-control" name="status">
-                                    <option value="">전체</option>
-                                    <option value="배송중">배송중</option>
-                                    <option value="구매확정">구매확정</option>
-                                    <option value="취소">취소</option>
-                                    <option value="환불신청">환불신청</option>
-                                </select>
-                            </div>
-                            <div class="col-md-4 px-1">
-                                <label for="search">상품 검색</label>
-                                <input type="text" id="search" class="form-control" name="search" placeholder="수취자명, 주문id, 주소 등 입력">
-                            </div>
-                            <div class="col-md-4 d-flex align-items-end px-1">
-                                <button type="submit" class="btn btn-primary w-100">검색</button>
-                            </div>
-                        </div>
-                    </form>
+        <!-- 필터 -->
+        <div class="filter-container">
+            <form id="filterForm" method="get">
+                <div class="d-flex">
+                    <div class="col-md-4 px-1">
+                        <label for="status">상태 선택</label>
+                        <select id="status" class="form-control" name="status">
+                            <option value="">전체</option>
+                            <option value="배송중">배송중</option>
+                            <option value="구매확정">구매확정</option>
+                            <option value="취소">취소</option>
+                            <option value="환불신청">환불신청</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4 px-1">
+                        <label for="search">검색어</label>
+                        <input type="text" id="search" class="form-control" name="search" placeholder="수취자명, 주문ID, 주소 등">
+                    </div>
+                    <div class="col-md-4 d-flex align-items-end px-1">
+                        <button type="submit" class="btn btn-primary w-100">검색</button>
+                    </div>
                 </div>
-
-            <!-- 표 섹션 -->
-            <div class="table-container">
-                <table class="table table-bordered">
-                    <thead>
-                        <tr>
-                            <th><input type="checkbox" id="selectAll"></th>
-                            <th>주문 이름</th>
-                            <th>사용자 이름</th>
-                            <th>가격</th>
-                            <th>배송 상태</th>
-                            <th>받는 사람 이름</th>
-                            <th>받는 사람 주소</th>
-                            <th>메모</th>
-                            <th>주문 일자</th>
-                        </tr>
-                    </thead>
-                    <tbody id="deliveryTableBody">
-                    </tbody>
-                </table>
-            </div>
-
-
-            <div class="summary-container">
-                총 가격: <span>0</span> 원
-            </div>
+            </form>
         </div>
 
-        <div class="d-flex justify-content-end align-items-center mt-3">
-            <select id="statusSelect" class="form-select me-2" style="width: 200px; max-width: 100%; font-size: 0.9rem;">
-                <option value="">상태 선택</option>
+        <!-- 테이블 -->
+        <div class="table-container">
+            <table class="table table-bordered">
+                <thead>
+                <tr>
+                    <th><input type="checkbox" id="selectAll"></th>
+                    <th>주문 이름</th>
+                    <th>사용자 이름</th>
+                    <th>가격</th>
+                    <th>배송 상태</th>
+                    <th>받는 사람 이름</th>
+                    <th>받는 사람 주소</th>
+                    <th>메모</th>
+                    <th>주문 일자</th>
+                </tr>
+                </thead>
+                <tbody id="deliveryTableBody">
+                </tbody>
+            </table>
+        </div>
+
+        <div class="d-flex justify-content-center mt-3">
+            <button id="loadMoreButton" class="btn btn-secondary" style="display: none;">더보기</button>
+        </div>
+
+        <div class="summary-container mt-3">
+            총 가격: <span>0</span> 원
+        </div>
+
+        <div class="d-flex justify-content-end align-items-center mt-4">
+            <select id="statusSelect" class="form-select me-2" style="width: 200px;">
+                <option value="">상태 변경 선택</option>
                 <option value="결제전">결제전</option>
                 <option value="결제완료">결제완료</option>
                 <option value="배송중">배송중</option>
@@ -172,9 +90,122 @@
                 <option value="환불신청">환불신청</option>
                 <option value="환불완료">환불완료</option>
             </select>
-            <button id="applyButton" class="btn btn-success" style="font-size: 0.9rem; padding: 8px 16px;">적용</button>
+            <button id="applyButton" class="btn btn-success">선택 상태 적용</button>
         </div>
     </div>
+
+    <script>
+        let currentPage = 0;
+        let currentStatus = '';
+        let currentSearch = '';
+        let totalPrice = 0;
+
+        async function loadDeliveries(page) {
+            try {
+                const params = new URLSearchParams({
+                    status: currentStatus,
+                    search: currentSearch,
+                    page: page,
+                    size: 20
+                });
+
+                const response = await fetch(`/admin/deliveries?${params}`);
+                const data = await response.json();
+
+                const tableBody = document.getElementById('deliveryTableBody');
+
+                data.content.forEach(delivery => {
+                    const orderDate = new Date(delivery.orderAt);
+                    const formattedDate = orderDate.toLocaleString();
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td><input type="checkbox" class="rowCheckbox" value="${delivery.orderId}"></td>
+                        <td>${delivery.name}</td>
+                        <td>${delivery.username}</td>
+                        <td>${delivery.price.toLocaleString()}</td>
+                        <td>${delivery.status}</td>
+                        <td>${delivery.recipientName}</td>
+                        <td>${delivery.recipientAddress}</td>
+                        <td>${delivery.memo}</td>
+                        <td>${formattedDate}</td>
+                    `;
+                    tableBody.appendChild(row);
+                    totalPrice += delivery.price;
+                });
+
+                document.querySelector('.summary-container span').innerText = totalPrice.toLocaleString();
+
+                const loadMoreButton = document.getElementById('loadMoreButton');
+                if (data.hasNext) {
+                    loadMoreButton.style.display = 'inline-block';
+                    loadMoreButton.setAttribute('data-next-page', page + 1);
+                } else {
+                    loadMoreButton.style.display = 'none';
+                }
+            } catch (error) {
+                console.error('배송 데이터 가져오기 오류:', error);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('filterForm').addEventListener('submit', async (event) => {
+                event.preventDefault();
+                currentPage = 0;
+                totalPrice = 0;
+                currentStatus = document.getElementById('status').value;
+                currentSearch = document.getElementById('search').value;
+                document.getElementById('deliveryTableBody').innerHTML = '';
+                await loadDeliveries(currentPage);
+            });
+
+            document.getElementById('loadMoreButton').addEventListener('click', async (event) => {
+                const nextPage = event.target.getAttribute('data-next-page');
+                await loadDeliveries(parseInt(nextPage));
+            });
+
+            document.getElementById('selectAll').addEventListener('change', (event) => {
+                const checked = event.target.checked;
+                document.querySelectorAll('.rowCheckbox').forEach(cb => cb.checked = checked);
+            });
+
+            document.getElementById('applyButton').addEventListener('click', async () => {
+                const selectedStatus = document.getElementById('statusSelect').value;
+                if (!selectedStatus) {
+                    alert("변경할 상태를 선택하세요.");
+                    return;
+                }
+
+                const selectedDeliveries = Array.from(document.querySelectorAll('.rowCheckbox:checked'))
+                    .map(cb => cb.value);
+
+                if (selectedDeliveries.length === 0) {
+                    alert("변경할 항목을 선택하세요.");
+                    return;
+                }
+
+                try {
+                    const response = await fetch('/admin/deliveries', {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            deliveryIds: selectedDeliveries,
+                            status: selectedStatus
+                        })
+                    });
+
+                    if (response.ok) {
+                        alert("상태가 성공적으로 변경되었습니다.");
+                        location.reload();
+                    } else {
+                        alert("상태 변경에 실패했습니다.");
+                    }
+                } catch (error) {
+                    console.error('상태 변경 오류:', error);
+                    alert("서버 오류가 발생했습니다.");
+                }
+            });
+        });
+    </script>
 </div>
 </body>
 </html>

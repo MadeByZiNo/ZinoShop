@@ -1,8 +1,8 @@
 package com.JH.JhOnlineJudge.common.exception;
 
-import com.JH.JhOnlineJudge.cart.exception.InvalidQuantityException;
-import com.JH.JhOnlineJudge.order.exception.InsufficientRemainException;
-import com.JH.JhOnlineJudge.order.exception.InvalidOrderException;
+import com.JH.JhOnlineJudge.domain.cart.exception.InvalidQuantityException;
+import com.JH.JhOnlineJudge.domain.order.exception.InsufficientRemainException;
+import com.JH.JhOnlineJudge.domain.order.exception.InvalidOrderException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

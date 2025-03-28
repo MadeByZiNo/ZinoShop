@@ -46,3 +46,12 @@ jwt:
 toss:
   client-key: ${TOSS_CLIENT_KEY}
   secret-key: ${TOSS_SECRET_KEY}
+
+oauth:
+  naver:
+    client_id: ${OAUTH_NAVER_CLIENT_ID}
+    client_secret: ${OAUTH_NAVER_CLIENT_SECRET}
+    url: http://localhost:8080/oauth/naver/callback
+  kakao:
+    client_id: ${OAUTH_KAKAO_CLIENT_ID}
+    url: http://localhost:8080/oauth/kakao/callback
