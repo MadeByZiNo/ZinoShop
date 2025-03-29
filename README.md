@@ -76,8 +76,8 @@ Github Action을 통해서 개발자가 운영 Branch에 push를 하면 감지�
 ### 1. 회원 및 인증 관리
 
 
-![image](https://github.com/user-attachments/assets/00089dd6-e464-4376-8992-76aa642b462f)
-![image](https://github.com/user-attachments/assets/27d07939-adae-4fd6-b8dd-4522a4f0801d)
+![image](https://github.com/user-attachments/assets/5b092cbe-b98d-4086-b007-5b837ae4ccdd)
+![image](https://github.com/user-attachments/assets/686a920e-d023-4992-859f-f3ab67e18633)
 
 <br>
 - **JWT**를 이용한 로그인 및 세션 관리
