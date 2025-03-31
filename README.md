@@ -485,144 +485,68 @@ JPA에서 제공하는 **Page**로 데이터를 받을 때 모든 PRODUCT 데이
 <br>
 
 
-### **인덱스를 이용한 속도 개선**
+### 인덱스를 이용한 성능 최적화
 
-
-<br>
-
-
-![image](https://github.com/user-attachments/assets/9a1e17b4-d9e9-4471-a900-47c840b7da43)
-
+720만 건 이상의 데이터를 가진 `product_stat` 테이블에서 상품별 통계를 조회하는 과정에서 성능 병목이 발생했습니다.  
+이를 개선하기 위해 **인덱스를 추가 적용**하여 조회 속도를 대폭 개선하였습니다.
 
 <br>
 
-
-**product_stat**이라는 상품의 날짜마다 팔린 개수와 총 가격의 정보를 담는 테이블이 있습니다.
-
-
-임의로 720만개 가량의 데이터를 삽입하였고  
-**상품의 날짜 별 통계** 및 **상품들의 날짜 별 팔린 순위 TOP30**과 같은 통계기능을 구현하기 위해서 JPQL을 이용해서 가져오게 하였습니다.
-
+![테이블 구성](https://github.com/user-attachments/assets/9a1e17b4-d9e9-4471-a900-47c840b7da43)  
+*이미지: product_stat 테이블 구성 (상품 ID, 날짜 기준 통계)*
 
 <br>
 
-
-**그러나...**
-
+통계 조회 시 초기에는 **약 2.1초**가 소요되었으며, 데이터가 많아질수록 더욱 느려질 것이므로 성능 저하가 우려되었습니다.
 
 <br>
 
-
-![image](https://github.com/user-attachments/assets/9e623928-f045-4252-918a-eead0d61fa38)
-
-
-<br>
-
-
-**상품의 날짜 별 통계**의 속도입니다.
-
-
-700만개의 데이터를 모두 체크해서 그런지 2.1초가 걸렸습니다.
-
-
-심각한 수준은 아니지만 데이터가 더 많아질 때 속도는 더욱 느려질 것입니다.
-
-
-해당 데이터를 불러오는 JPQL 쿼리문은 product_id와 date 순서로 탐색이 이루어지기 때문에  
-시퀀스의 순서를 product_id와 date 순서로 인덱스를 생성하였습니다.
-
+![쿼리 속도 전](https://github.com/user-attachments/assets/9e623928-f045-4252-918a-eead0d61fa38)  
+*이미지: 인덱스 적용 전 통계 조회 쿼리 소요 시간*
 
 <br>
 
-
-![image](https://github.com/user-attachments/assets/bacc071d-846a-44ab-8f30-7ef0843f4f79)
-
-
-<br>
-
-
-시간이 놀라울 정도로 감소한 것을 확인할 수 있습니다.
-
+JPQL 쿼리에서 `product_id`와 `date` 순으로 조회가 이루어졌기 때문에  
+해당 컬럼 조합에 대해 복합 인덱스를 생성하였습니다.
 
 <br>
 
-
-다음은 **상품들의 날짜 별 팔린 순위 TOP30**의 속도들입니다.
-
-
-<br>
-
-
-![image](https://github.com/user-attachments/assets/26862e70-f1c7-4230-90fc-0f56433bd1cf)
-
+![인덱스 생성 후 속도](https://github.com/user-attachments/assets/bacc071d-846a-44ab-8f30-7ef0843f4f79)  
+*이미지: 인덱스 적용 후 통계 쿼리 속도 개선 결과*
 
 <br>
-
-
-일별 TOP30
-
-
-<br>
-
-
-![image](https://github.com/user-attachments/assets/279e1442-5d4c-422c-8598-d40aa34aa458)
-
-
-<br>
-
-
-월별 TOP30
-
-
-<br>
-
-
-![image](https://github.com/user-attachments/assets/3534c939-21c7-4047-928d-8c3b648d1c8d)
-
-
-<br>
-
-
-연별 TOP30
-
-
-<br>
-
-
-연별의 경우에는 8초나 소요하며 매우 느린 모습을 보여줍니다.
-
-
-이번 쿼리들은 date와 product_id 순서로 인덱스를 생성하였습니다.
-
-
-<br>
-
-
-![image](https://github.com/user-attachments/assets/de080bc2-93c9-4e77-9901-957deece8d05)
-
-
-<br>
-
-
-인덱싱 후 일별 TOP30
-
-
-<br>
-
-
-![image](https://github.com/user-attachments/assets/6d1c0750-1f17-45ff-882d-e8d96cc7f3a9)
-
-
-<br>
-
-
-인덱싱 후 월별 TOP30
-
-
-<br>
-
 
 ---
 
+#### ✅ 상품별 통계 TOP30 조회 속도 비교
+
+TOP30 통계를 일/월/년 단위로 각각 조회하였고, 인덱스 적용 전후 성능 차이를 확인해보았습니다.
 
 <br>
+
+![일별 TOP30 - Before](https://github.com/user-attachments/assets/26862e70-f1c7-4230-90fc-0f56433bd1cf)  
+*이미지: 인덱스 적용 전 일별 TOP30 조회 속도*
+
+<br>
+
+![월별 TOP30 - Before](https://github.com/user-attachments/assets/279e1442-5d4c-422c-8598-d40aa34aa458)  
+*이미지: 인덱스 적용 전 월별 TOP30 조회 속도*
+
+<br>
+
+![연별 TOP30 - Before](https://github.com/user-attachments/assets/3534c939-21c7-4047-928d-8c3b648d1c8d)  
+*이미지: 인덱스 적용 전 연별 TOP30 조회 속도 (최대 8초)*
+
+<br>
+
+전과는 달리 `date`, `product_id` 순서를 기준으로 인덱스를 생성하여 최적화하였습니다.
+
+<br>
+
+![일별 TOP30 - After](https://github.com/user-attachments/assets/de080bc2-93c9-4e77-9901-957deece8d05)  
+*이미지: 인덱스 적용 후 일별 TOP30 속도 개선*
+
+<br>
+
+![월별 TOP30 - After](https://github.com/user-attachments/assets/6d1c0750-1f17-45ff-882d-e8d96cc7f3a9)  
+*이미지: 인덱스 적용 후 월별 TOP30 속도 개선*
