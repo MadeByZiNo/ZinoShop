@@ -259,21 +259,61 @@ Github Action을 통해서 개발자가 운영 Branch에 push를 하면 감지�
 
 
 
-![image](https://github.com/user-attachments/assets/3141d7cd-21aa-425d-8dbd-6c4937e0822c)
-
-
-<br>
-
-
-![image](https://github.com/user-attachments/assets/a9a2c022-7d43-4e27-8af9-5c197c4956c7)
-
+### 5. 리뷰 작성
 
 
 <br>
 
 
 
-### 2. 상품 관리
+![image](https://github.com/user-attachments/assets/947844de-f547-4d57-bad8-ad1219506f26)
+
+
+
+<br>
+
+
+
+구매한 상품들에 대해 리뷰를 작성 할 수 있으며 중복작성은 불가능합니다.
+
+
+자신이 단 리뷰들을 확인 할 수 있으며 삭제가 가능합니다.
+
+
+
+<br>
+
+
+
+### 5. 문의 게시판
+
+
+
+<br>
+
+
+
+![1](https://github.com/user-attachments/assets/26268ba0-ae8b-408f-9536-c83c57b0498a)
+![2](https://github.com/user-attachments/assets/3c0750b9-95ab-4be3-a8e9-e60bc0586523)
+
+
+
+<br>
+
+
+주문에 대해서 문의 글을 올릴 수 있으며 운영진은 문의에 대해 답변이 가능합니다.
+
+
+사용자에게는 문의 답변에 대해 알림이 갑니다.
+
+
+
+<br>
+
+
+
+
+### 6. 상품 관리
 
 
 <br>
@@ -306,58 +346,27 @@ Github Action을 통해서 개발자가 운영 Branch에 push를 하면 감지�
 <br>
 
 
-### 3. 문의 게시판
+### 7. 배송 관리
 
 
 <br>
 
 
-- 문의 리스트
+![image](https://github.com/user-attachments/assets/3ca1a04c-3df0-4abf-a15a-de9d5bfc8272)
 
-
-<br>
-
-
-
-![image](https://github.com/user-attachments/assets/48e70efd-716b-43eb-8191-05b68ac24ff4)
-
-<br>
-
-
-- 문의 등록(유저)
-
-
-<br>
-
-
-![Inquiry](https://github.com/user-attachments/assets/c8116a3e-f194-4102-819c-4ed00a381303)
-
-
-<br>
-
-
-- 문의 답변(운영자)
-
-
-<br>
-
-
-![Inquiry Status](https://github.com/user-attachments/assets/2a76e981-8bd7-4c39-b0bd-b19eaa4dee6f)
-
-
-<br>
-
-
----
 
 
 <br>
 
 
 
+관리자는 주문에 대해 배송 상태를 보거나 임의로 설정이 가능합니다.
+
 
 
 <br>
+
+
 
 
 ### 5. 결제 시스템
