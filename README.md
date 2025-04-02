@@ -400,9 +400,13 @@ Github Action을 통해서 개발자가 운영 Branch에 push를 하면 감지�
 
 
   기존의 Processor를 그대로 이용하면 process 과정에서 가격을 불러오는 DB작업을 유저 수 만큼 호출하므로 비효율적이라 판단했습니다.
+  
   그래서 Reader와 Processor를 커스터마이징해주었습니다.
+  
   Reader에서는 Chunk 주기마다 한번에 Redis에 id들을 캐싱해주었으며
+  
   Processor에서는 Chunk 주기마다 한번에 Redis의 id를 가져와 가격을 벌크쿼리를 통해 가져온 후에 등급을 처리하였습니다.
+  
   500만건의 DB 호출에서 chunk의 크기인 1000배 만큼 호출 수를 줄여서 최적화해주었습니다.
 
 
