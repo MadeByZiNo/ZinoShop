@@ -172,6 +172,7 @@ Github Action을 통해서 개발자가 운영 Branch에 push를 하면 감지�
 
 
 
+![image](https://github.com/user-attachments/assets/665456ea-fb76-4a79-aeba-209a9a2a5c04)
 
 
 
