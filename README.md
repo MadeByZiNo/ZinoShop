@@ -145,7 +145,8 @@ Github Action을 통해서 개발자가 운영 Branch에 push를 하면 감지�
 <br>
 
 
-![image](https://github.com/user-attachments/assets/916b1382-a895-4067-a661-c9a912edc70c)
+![image](https://github.com/user-attachments/assets/0d023fcb-7808-496a-8aea-395e26993739)
+
 
 
 <br>
