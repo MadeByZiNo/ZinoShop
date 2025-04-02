@@ -203,6 +203,18 @@ Github Action을 통해서 개발자가 운영 Branch에 push를 하면 감지�
 <br>
 
 
+- 문의 리스트
+
+
+<br>
+
+
+
+![image](https://github.com/user-attachments/assets/48e70efd-716b-43eb-8191-05b68ac24ff4)
+
+<br>
+
+
 - 문의 등록(유저)
 
 
