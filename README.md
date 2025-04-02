@@ -418,13 +418,18 @@ Github Action을 통해서 개발자가 운영 Branch에 push를 하면 감지�
 <br>
 
 
-![Log Tracker](https://github.com/user-attachments/assets/24fb9520-a26e-4264-8145-b840971d9968)
+![image](https://github.com/user-attachments/assets/c69913b2-74f6-4257-8b74-28bfac653982)
+
 
 
 <br>
 
 
-Spring AOP를 이용하여 로그 추적기를 구현했습니다. (고칠게많다)
+Spring AOP와 Logback MDC를 이용해 요청 단위로 로그를 추적할 수 있도록 구현했습니다.
+주 관심사인 Controller, Service, Repository 계층에 AOP를 적용해 메서드의 실행 흐름과 처리 시간, 예외 발생 지점을 추적할 수 있도록 했습니다.
+
+요청마다 고유한 traceId가 생성되며, MDC를 통해 멀티 스레드 환경에서도 로그가 섞이지 않도록 관리됩니다.
+로그는 콘솔과 별도의 로그 파일로 함께 기록되며, 파일은 운영 중 이슈 분석이나 디버깅 시 활용할 수 있도록 저장됩니다.
 
 <br>
 
