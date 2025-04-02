@@ -169,17 +169,29 @@ Github Action을 통해서 개발자가 운영 Branch에 push를 하면 감지�
 
 <br>
 
+![image](https://github.com/user-attachments/assets/ec468b57-9f9d-45df-9eae-34def3e7ee4c)
 
-- 상품 등록, 수정, 삭제 기능
-
-
-- **Parent ID**를 활용한 다중 카테고리 설정
 
 
 <br>
 
 
----
+ **상품 등록 , 수정 및 삭제**
+
+
+
+<br>
+
+
+
+![image](https://github.com/user-attachments/assets/3141d7cd-21aa-425d-8dbd-6c4937e0822c)
+
+
+<br>
+
+
+![image](https://github.com/user-attachments/assets/a9a2c022-7d43-4e27-8af9-5c197c4956c7)
+
 
 
 <br>
