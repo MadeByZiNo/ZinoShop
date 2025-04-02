@@ -161,11 +161,33 @@ Github Action을 통해서 개발자가 운영 Branch에 push를 하면 감지�
 ## 📌 주요 기능
 
 
+<br>
+
+
+### 1. 회원 가입 및 로그인
+
 
 <br>
 
 
-### 1. 상품 조회
+
+영상 예정
+
+
+
+<br>
+
+
+ **일반 회원가입 및 네이버 및 카카오를 통한 회원가입이 가능합니다.**
+
+
+
+<br>
+
+
+
+
+### 2. 상품 조회
 
 
 <br>
@@ -188,7 +210,7 @@ Github Action을 통해서 개발자가 운영 Branch에 push를 하면 감지�
 
 
 
-### 2. 좋아요(찜) 기능
+### 3. 좋아요(찜) 기능
 
 
 <br>
@@ -212,7 +234,7 @@ Github Action을 통해서 개발자가 운영 Branch에 push를 하면 감지�
 
 
 
-### 3. 장바구니 담기
+### 4. 장바구니 담기
 
 
 <br>
@@ -233,7 +255,7 @@ Github Action을 통해서 개발자가 운영 Branch에 push를 하면 감지�
 
 
 
-### 4. 상품 주문
+### 5. 상품 주문
 
 
 <br>
@@ -259,7 +281,7 @@ Github Action을 통해서 개발자가 운영 Branch에 push를 하면 감지�
 
 
 
-### 5. 리뷰 작성
+### 6. 리뷰 작성
 
 
 <br>
@@ -285,7 +307,7 @@ Github Action을 통해서 개발자가 운영 Branch에 push를 하면 감지�
 
 
 
-### 5. 문의 게시판
+### 7. 문의 게시판
 
 
 
@@ -313,7 +335,7 @@ Github Action을 통해서 개발자가 운영 Branch에 push를 하면 감지�
 
 
 
-### 6. 상품 관리
+### 8. 상품 관리
 
 
 <br>
@@ -346,7 +368,7 @@ Github Action을 통해서 개발자가 운영 Branch에 push를 하면 감지�
 <br>
 
 
-### 7. 배송 관리
+### 99. 배송 관리
 
 
 <br>
@@ -369,7 +391,7 @@ Github Action을 통해서 개발자가 운영 Branch에 push를 하면 감지�
 
 
 
-### 8. 상품 판매 분석 
+### 10. 상품 판매 분석 
 
 
 <br>
@@ -406,8 +428,6 @@ Github Action을 통해서 개발자가 운영 Branch에 push를 하면 감지�
 ### **회원 및 인증 관리**
 
 
-![image](https://github.com/user-attachments/assets/5b092cbe-b98d-4086-b007-5b837ae4ccdd)
-![image](https://github.com/user-attachments/assets/686a920e-d023-4992-859f-f3ab67e18633)
 
 <br>
 
