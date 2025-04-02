@@ -1,5 +1,7 @@
 package com.JH.JhOnlineJudge.domain.inquiry.service;
 
+import com.JH.JhOnlineJudge.domain.Image.ImageFrom;
+import com.JH.JhOnlineJudge.domain.Image.ImageUploadService;
 import com.JH.JhOnlineJudge.domain.Image.InquiryImage.InquiryImage;
 import com.JH.JhOnlineJudge.domain.Image.InquiryImage.InquiryImageRepository;
 import com.JH.JhOnlineJudge.domain.inquiry.entity.Inquiry;
@@ -8,8 +10,8 @@ import com.JH.JhOnlineJudge.domain.inquiry.exception.DuplicateInquiryReplyExcept
 import com.JH.JhOnlineJudge.domain.inquiry.exception.InquiryPermissionException;
 import com.JH.JhOnlineJudge.domain.inquiry.exception.NotFoundInquiryException;
 import com.JH.JhOnlineJudge.domain.inquiry.repository.InquiryRepository;
-import com.JH.JhOnlineJudge.domain.notification.entity.NotificationFrom;
-import com.JH.JhOnlineJudge.domain.notification.service.NotificationService;
+import com.JH.JhOnlineJudge.common.notification.entity.NotificationFrom;
+import com.JH.JhOnlineJudge.common.notification.service.NotificationService;
 import com.JH.JhOnlineJudge.domain.order.entity.Order;
 import com.JH.JhOnlineJudge.domain.order.service.OrderService;
 import com.JH.JhOnlineJudge.domain.product.exception.NotFoundProductException;
@@ -38,9 +40,7 @@ public class InquiryService {
     private final UserService userService;
     private final OrderService orderService;
     private final NotificationService notificationService;
-    private final S3Uploader s3Uploader;
-
-    private final String DIR_NAME = "Inquiry";
+    private final ImageUploadService imageUploadService;
 
 
     @Transactional(readOnly = true)
@@ -91,18 +91,10 @@ public class InquiryService {
 
         List<InquiryImage> imageList = new ArrayList<>();
 
-         if (images != null && images.length > 0){
+         if (images != null){
              for (MultipartFile file : images) {
-                   String uploadUrl = s3Uploader.upload(file, DIR_NAME);
-
-                 InquiryImage inquiryImage = InquiryImage.builder()
-                           .url(uploadUrl)
-                           .inquiry(inquiry)
-                           .build();
-
-                   imageList.add(inquiryImage);
+                 imageUploadService.uploadAndSaveInquiryImage(file, ImageFrom.INQUIRY.getDir(), inquiry);
              }
-             inquiryImageRepository.saveAll(imageList);
          }
         return inquiry;
     }

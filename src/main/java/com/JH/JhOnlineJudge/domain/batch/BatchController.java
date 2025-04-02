@@ -23,7 +23,10 @@ public class BatchController {
 
     @GetMapping("/vip")
     public ResponseEntity<String> vipBatch() throws Exception {
-        jobLauncher.run(jobRegistry.getJob("updateVipJob"), new JobParameters());
+        JobParameters jobParameters = new JobParametersBuilder()
+                .addLong("timestamp", System.currentTimeMillis())  // 매번 다른 값으로
+                .toJobParameters();
+        jobLauncher.run(jobRegistry.getJob("updateVipJob"), jobParameters);
 
         return ResponseEntity.ok().build();
     }

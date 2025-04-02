@@ -2,7 +2,7 @@ package com.JH.JhOnlineJudge.domain.user.admin.domain;
 
 import com.JH.JhOnlineJudge.domain.user.dto.UserTokenDto;
 import com.JH.JhOnlineJudge.domain.user.exception.AccessDeniedException;
-import com.JH.JhOnlineJudge.domain.user.service.TokenService;
+import com.JH.JhOnlineJudge.domain.user.auth.TokenService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;

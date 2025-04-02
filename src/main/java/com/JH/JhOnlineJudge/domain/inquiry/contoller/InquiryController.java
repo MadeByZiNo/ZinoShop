@@ -6,7 +6,7 @@ import com.JH.JhOnlineJudge.domain.inquiry.dto.InquiryReplyRequest;
 import com.JH.JhOnlineJudge.domain.inquiry.dto.InquirySaveRequest;
 import com.JH.JhOnlineJudge.domain.inquiry.service.InquiryService;
 import com.JH.JhOnlineJudge.domain.user.admin.domain.Admin;
-import com.JH.JhOnlineJudge.domain.user.entity.AuthUser;
+import com.JH.JhOnlineJudge.domain.user.auth.AuthUser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;

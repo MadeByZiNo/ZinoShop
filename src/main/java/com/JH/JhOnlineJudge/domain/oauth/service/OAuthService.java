@@ -4,7 +4,7 @@ import com.JH.JhOnlineJudge.domain.oauth.domain.OAuthProvider;
 import com.JH.JhOnlineJudge.domain.oauth.domain.OAuthUserInfo;
 
 public interface OAuthService {
-    OAuthProvider getProvider(); // ✅ 이거 추가
+    OAuthProvider getProvider();
     String getAccessToken(String code, String state);
     OAuthUserInfo getUserInfo(String accessToken);
 }

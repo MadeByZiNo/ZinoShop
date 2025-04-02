@@ -124,25 +124,32 @@
         <div class="modal-body">
             <form id="product-form">
                 <input type="hidden" id="product-id">
-                <label>상품명</label>
-                <input type="text" id="product-name" class="form-control" required>
-                <label>가격</label>
-                <input type="number" id="product-price" class="form-control" min="0" step="1" required>
-                <label>설명</label>
-                <textarea id="product-description" class="form-control" rows="3" required></textarea>
-                <label>남은 수량</label>
-                <input type="number" id="product-remain" class="form-control" min="0" max="1000" step="1" required>
-                <label>상태</label>
-                <select id="product-state" class="form-control" required>
+                <label for="product-name">상품명</label>
+                <input type="text" id="product-name" name="name" class="form-control" required>
+
+                <label for="product-price">가격</label>
+                <input type="number" id="product-price" name="price" class="form-control" min="0" step="1" required>
+
+                <label for="product-description">설명</label>
+                <textarea id="product-description" name="description" class="form-control" rows="3" required></textarea>
+
+                <label for="product-remain">남은 수량</label>
+                <input type="number" id="product-remain" name="remain" class="form-control" min="0" max="1000" step="1" required>
+
+                <label for="product-state">상태</label>
+                <select id="product-state" name="state" class="form-control" required>
                     <option value="판매중">판매중</option>
                     <option value="품절">품절</option>
                 </select>
-                <label>카테고리</label>
-                <select id="product-category" class="form-control" required>
+
+                <label for="product-category">카테고리</label>
+                <select id="product-category" name="categoryId" class="form-control" required>
                     <option th:each="category : ${categories}" th:value="${category.id}" th:text="${category.name}"></option>
                 </select>
-                <label>이미지 (최대 5개, 첫번째 사진이 썸네일이 적용됩니다, 첨부 시 기존 사진은 초기화됩니다.)</label>
-                <input type="file" id="product-images" class="form-control" accept="image/*" multiple required>
+
+                <label for="product-images">이미지 (최대 5개, 첫번째 사진이 썸네일이 적용됩니다, 첨부 시 기존 사진은 초기화됩니다.)</label>
+                <input type="file" id="product-images" name="images" class="form-control" accept="image/*" multiple required>
+
             </form>
         </div>
         <div class="modal-footer">
@@ -217,13 +224,11 @@
                 formData.append('id', productId);
 
                 const images = document.getElementById('product-images').files;
-                if (!productId && (images.length < 1 || images.length > 5)) {
-                    alert('이미지는 1개 이상, 5개 이하로 첨부 가능합니다.');
+                if (!productId && (images.length < 1 || images.length > 10)) {
+                    alert('이미지는 1개 이상, 10개 이하로 첨부 가능합니다.');
                     return;
                 }
-                for (let i = 0; i < images.length; i++) {
-                    formData.append('images', images[i]);
-                }
+
 
                 fetch('/product', { method: productId ? 'PUT' : 'POST', body: formData })
                     .then(response => response.json())

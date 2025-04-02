@@ -1,8 +1,8 @@
 package com.JH.JhOnlineJudge.common.config;
 
 import com.JH.JhOnlineJudge.domain.user.admin.domain.AdminResolver;
-import com.JH.JhOnlineJudge.domain.user.entity.AuthUserResolver;
-import com.JH.JhOnlineJudge.domain.user.entity.IsLoginResolver;
+import com.JH.JhOnlineJudge.domain.user.auth.AuthUserResolver;
+import com.JH.JhOnlineJudge.domain.user.auth.IsLoginResolver;
 import com.JH.JhOnlineJudge.domain.user.interceptor.TokenCheckInterceptor;
 import com.JH.JhOnlineJudge.common.utils.JwtUtil;
 import lombok.RequiredArgsConstructor;

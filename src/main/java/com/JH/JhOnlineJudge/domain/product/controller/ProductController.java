@@ -84,7 +84,7 @@ public class ProductController {
         Category parentCategory = (Category) result.get("rootCategory");
 
         int pageIndex = page - 1; // 0-index 맞추기
-        int pageSize = 21; // 한 페이지 21개 기준
+        int pageSize = 9;
         Slice<ProductListResponse> products = productService.getProductSliceByCategoryIds(categoryIds, pageIndex, pageSize);
 
         model.addAttribute("category", parentCategory);
@@ -102,9 +102,10 @@ public class ProductController {
     public String getProductPage(@PathVariable(value = "product_id", required = true) Long id, Model model) {
 
         Product product = productService.getProductById(id);
-        model.addAttribute("product", product);
 
         List<ProductImage> productImages = product.getImages();
+
+        model.addAttribute("product", product);
         model.addAttribute("productImages",productImages);
 
         return "product/detail";

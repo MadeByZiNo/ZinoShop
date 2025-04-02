@@ -1,15 +1,17 @@
 package com.JH.JhOnlineJudge.domain.product.service;
 
-import com.JH.JhOnlineJudge.domain.category.CategoryService;
-import com.JH.JhOnlineJudge.domain.category.entity.Category;
+import com.JH.JhOnlineJudge.common.utils.S3Uploader;
+import com.JH.JhOnlineJudge.domain.Image.ImageFrom;
+import com.JH.JhOnlineJudge.domain.Image.ImageUploadService;
 import com.JH.JhOnlineJudge.domain.Image.ProductImage.ProductImage;
 import com.JH.JhOnlineJudge.domain.Image.ProductImage.ProductImageRepository;
-import com.JH.JhOnlineJudge.domain.product.entity.Product;
+import com.JH.JhOnlineJudge.domain.category.CategoryService;
+import com.JH.JhOnlineJudge.domain.category.entity.Category;
 import com.JH.JhOnlineJudge.domain.product.dto.ProductDto;
 import com.JH.JhOnlineJudge.domain.product.dto.ProductListResponse;
+import com.JH.JhOnlineJudge.domain.product.entity.Product;
 import com.JH.JhOnlineJudge.domain.product.exception.NotFoundProductException;
 import com.JH.JhOnlineJudge.domain.product.repository.ProductRepository;
-import com.JH.JhOnlineJudge.common.utils.S3Uploader;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.*;
@@ -25,11 +27,10 @@ import java.util.List;
 @Slf4j
 public class ProductService {
 
-    private final String DIR_NAME = "Product";
-
     private final ProductRepository productRepository;
     private final ProductImageRepository productImageRepository;
     private final CategoryService categoryService;
+    private final ImageUploadService imageUploadService;
     private final S3Uploader s3Uploader;
 
     @Transactional(readOnly = true)
@@ -59,19 +60,10 @@ public class ProductService {
         productRepository.save(product);
 
         // 이미지 설정
-        List<ProductImage> imageList = new ArrayList<>();
         if (images != null){
             for (MultipartFile file : images) {
-                      String uploadUrl = s3Uploader.upload(file, DIR_NAME);
-
-                      ProductImage productImage = ProductImage.builder()
-                              .url(uploadUrl)
-                              .product(product)
-                              .build();
-
-                      imageList.add(productImage);
-                  }
-            productImageRepository.saveAll(imageList);
+                imageUploadService.uploadAndSaveProductImage(file, ImageFrom.PRODUCT.getDir(), product);
+            }
         }
         return product;
     }
@@ -103,7 +95,7 @@ public class ProductService {
             imageList.clear();
 
              for (MultipartFile file : images) {
-                String uploadUrl = s3Uploader.upload(file, DIR_NAME);
+                String uploadUrl = s3Uploader.upload(file, ImageFrom.PRODUCT.getDir());
 
                 ProductImage productImage = ProductImage.builder()
                        .url(uploadUrl)

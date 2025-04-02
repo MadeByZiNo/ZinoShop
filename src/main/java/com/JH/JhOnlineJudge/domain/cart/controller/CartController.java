@@ -3,7 +3,7 @@ package com.JH.JhOnlineJudge.domain.cart.controller;
 import com.JH.JhOnlineJudge.domain.cart.dto.UpdateQuantityRequest;
 import com.JH.JhOnlineJudge.domain.cart.service.CartService;
 import com.JH.JhOnlineJudge.domain.cart.CartProduct.CartProduct;
-import com.JH.JhOnlineJudge.domain.user.entity.AuthUser;
+import com.JH.JhOnlineJudge.domain.user.auth.AuthUser;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;

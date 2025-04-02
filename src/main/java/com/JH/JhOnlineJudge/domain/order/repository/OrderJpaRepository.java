@@ -1,5 +1,6 @@
 package com.JH.JhOnlineJudge.domain.order.repository;
 
+import com.JH.JhOnlineJudge.domain.batch.BatchPriceDto;
 import com.JH.JhOnlineJudge.domain.order.entity.Order;
 import com.JH.JhOnlineJudge.domain.order.entity.OrderStatus;
 import org.springframework.data.domain.Page;
@@ -59,4 +60,17 @@ public interface OrderJpaRepository extends JpaRepository<Order, Long> {
             "WHERE o.id = :orderId")
     Order findOrderWithProducts(@Param("orderId") Long orderId);
 
+    @Query("SELECT new com.JH.JhOnlineJudge.domain.batch.BatchPriceDto(o.user.id, SUM(op.price * op.quantity)) " +
+            "FROM Order o " +
+            "JOIN o.orderProducts op " +
+            "WHERE o.user.id IN :userIds " +
+            "AND o.status = :status " +
+            "AND o.orderAt BETWEEN :start AND :end " +
+            "GROUP BY o.user.id")
+    List<BatchPriceDto> findTotalPriceByUserIds(
+            @Param("userIds") List<Long> userIds,
+            @Param("status") OrderStatus status,
+            @Param("start") LocalDateTime start,
+            @Param("end") LocalDateTime end
+    );
 }

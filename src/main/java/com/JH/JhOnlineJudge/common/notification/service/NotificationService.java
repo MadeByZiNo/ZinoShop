@@ -1,9 +1,9 @@
-package com.JH.JhOnlineJudge.domain.notification.service;
+package com.JH.JhOnlineJudge.common.notification.service;
 
 import com.JH.JhOnlineJudge.common.utils.ObjectSerializer;
-import com.JH.JhOnlineJudge.domain.notification.entity.NotificationFrom;
-import com.JH.JhOnlineJudge.domain.notification.dto.NotificationMessageResponse;
-import com.JH.JhOnlineJudge.domain.notification.dto.NotificationStatusResponse;
+import com.JH.JhOnlineJudge.common.notification.entity.NotificationFrom;
+import com.JH.JhOnlineJudge.common.notification.dto.NotificationMessageResponse;
+import com.JH.JhOnlineJudge.common.notification.dto.NotificationStatusResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

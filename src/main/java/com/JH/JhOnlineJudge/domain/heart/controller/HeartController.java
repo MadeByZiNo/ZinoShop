@@ -2,8 +2,8 @@ package com.JH.JhOnlineJudge.domain.heart.controller;
 
 import com.JH.JhOnlineJudge.domain.heart.service.HeartService;
 import com.JH.JhOnlineJudge.domain.heart.entity.Heart;
-import com.JH.JhOnlineJudge.domain.user.entity.AuthUser;
-import com.JH.JhOnlineJudge.domain.user.entity.IsLogin;
+import com.JH.JhOnlineJudge.domain.user.auth.AuthUser;
+import com.JH.JhOnlineJudge.domain.user.auth.IsLogin;
 import com.JH.JhOnlineJudge.domain.user.dto.IsLoginRequest;
 import com.JH.JhOnlineJudge.domain.user.exception.LoginInvalidException;
 import lombok.RequiredArgsConstructor;

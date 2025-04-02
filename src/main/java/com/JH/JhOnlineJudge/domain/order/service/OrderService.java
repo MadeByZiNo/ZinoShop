@@ -3,6 +3,9 @@ package com.JH.JhOnlineJudge.domain.order.service;
 import com.JH.JhOnlineJudge.domain.cart.CartProduct.CartProduct;
 import com.JH.JhOnlineJudge.domain.coupon.entity.Coupon;
 import com.JH.JhOnlineJudge.domain.coupon.service.CouponService;
+import com.JH.JhOnlineJudge.domain.email.EmailSender;
+import com.JH.JhOnlineJudge.domain.email.OrderEmailForm;
+import com.JH.JhOnlineJudge.domain.email.WelcomeEmailForm;
 import com.JH.JhOnlineJudge.domain.order.OrderProduct.OrderProduct;
 import com.JH.JhOnlineJudge.domain.order.dto.*;
 import com.JH.JhOnlineJudge.domain.order.entity.Order;
@@ -35,6 +38,8 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -49,6 +54,7 @@ public class OrderService {
     private final CouponService couponService;
     private final OrderRepository orderRepository;
     private final RestTemplate restTemplate;
+    private final EmailSender emailSender;
 
     private static int COUNT = 0;
 
@@ -189,6 +195,7 @@ public class OrderService {
         // 결제 확정 처리
         order.updateConfirm(order.getPaymentKey(), order.getPaymentMethod());
 
+        emailSender.send(new OrderEmailForm(user.getUsername(), user.getNickname(), order.getPaymentKey(), order.getOrderAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))));
         Map<String, Object> responseData = new HashMap<>();
         responseData.put("result", true);
         responseData.put("point", point);

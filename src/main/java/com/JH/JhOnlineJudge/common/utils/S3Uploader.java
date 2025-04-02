@@ -1,5 +1,6 @@
 package com.JH.JhOnlineJudge.common.utils;
 
+import com.JH.JhOnlineJudge.domain.Image.ProductImage.ProductImage;
 import com.JH.JhOnlineJudge.domain.Image.S3FileUploadException;
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.CannedAccessControlList;

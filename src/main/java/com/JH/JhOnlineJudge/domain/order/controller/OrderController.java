@@ -10,7 +10,7 @@ import com.JH.JhOnlineJudge.domain.order.dto.OrderConfirmRequest;
 import com.JH.JhOnlineJudge.domain.order.dto.OrderDetailRequest;
 import com.JH.JhOnlineJudge.domain.order.dto.OrderSaveRequest;
 import com.JH.JhOnlineJudge.domain.order.service.OrderService;
-import com.JH.JhOnlineJudge.domain.user.entity.AuthUser;
+import com.JH.JhOnlineJudge.domain.user.auth.AuthUser;
 import com.JH.JhOnlineJudge.domain.user.entity.User;
 import com.JH.JhOnlineJudge.domain.user.service.UserService;
 import lombok.RequiredArgsConstructor;

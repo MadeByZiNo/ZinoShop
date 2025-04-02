@@ -11,6 +11,10 @@
     .form-label {
       font-weight: bold;
     }
+    input[readonly] {
+      background-color: #e9ecef;
+      cursor: not-allowed;
+    }
   </style>
   <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
   <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
@@ -32,7 +36,115 @@
             }
         }).open();
     }
-</script>
+
+
+     document.addEventListener("DOMContentLoaded", function () {
+
+      const sendBtn = document.getElementById("sendCodeBtn");
+      const verifyBtn = document.getElementById("verifyCodeBtn");
+
+      const usernameInput = document.getElementById("username");
+      const emailCodeSection = document.getElementById("emailCodeSection");
+      const emailCodeInput = document.getElementById("emailCode");
+      const resultDiv = document.getElementById("codeVerifyMsg");
+
+      const timerContainer = document.getElementById("timerText");
+      const timerText = document.getElementById("timer");
+
+      let emailVerified = false;
+      let timerInterval = null;
+      let remainingTime = 180; // 3분
+
+      function startTimer() {
+        clearInterval(timerInterval); // 기존 타이머 중지
+        remainingTime = 180;
+        timerContainer.style.display = "block";
+
+        timerInterval = setInterval(() => {
+          if (remainingTime <= 0) {
+            clearInterval(timerInterval);
+            timerText.textContent = "시간 만료";
+            resultDiv.textContent = "인증 시간이 만료되었습니다.";
+            resultDiv.style.color = "red";
+
+            // 인증 코드 입력창 비활성화
+            emailCodeInput.disabled = true;
+            verifyBtn.disabled = true;
+          } else {
+            const min = String(Math.floor(remainingTime / 60)).padStart(2, '0');
+            const sec = String(remainingTime % 60).padStart(2, '0');
+            timerText.textContent = `${min}:${sec}`;
+            remainingTime--;
+          }
+        }, 1000);
+      }
+
+      sendBtn.addEventListener("click", function () {
+        const email = usernameInput.value;
+        const errorDiv = document.getElementById("emailError");
+        errorDiv.textContent = "";
+
+        if (!email) {
+          errorDiv.textContent = "이메일을 입력해주세요.";
+          return;
+        }
+
+        fetch(`/email/send-code?email=${encodeURIComponent(email)}`)
+          .then(res => res.json())
+          .then(data => {
+            if (data.success) {
+              alert("인증 코드가 전송되었습니다.");
+              emailCodeSection.style.display = "block";
+              emailCodeInput.disabled = false;
+              verifyBtn.disabled = false;
+              resultDiv.textContent = "";
+              startTimer(); // ⏱ 타이머 시작
+            } else {
+              errorDiv.textContent = data.message || "코드 발송에 실패했습니다.";
+            }
+          })
+          .catch(() => {
+            errorDiv.textContent = "서버 오류가 발생했습니다.";
+          });
+      });
+
+      verifyBtn.addEventListener("click", function () {
+        const email = usernameInput.value;
+        const code = emailCodeInput.value;
+        resultDiv.textContent = "";
+
+        fetch("/email/verify-code", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, code })
+        })
+          .then(res => res.json())
+          .then(data => {
+            if (data.success) {
+              resultDiv.textContent = "인증 완료!";
+              resultDiv.style.color = "green";
+              emailVerified = true;
+
+              // ✅ 입력창 비활성화
+              usernameInput.readOnly = true;
+              emailCodeInput.disabled = true;
+              verifyBtn.disabled = true;
+              sendBtn.disabled = true;
+
+              // ⏱ 타이머 중지
+              clearInterval(timerInterval);
+              timerText.textContent = "인증 완료";
+            } else {
+              resultDiv.textContent = "인증 코드가 일치하지 않습니다.";
+              resultDiv.style.color = "red";
+            }
+          })
+          .catch(() => {
+            resultDiv.textContent = "인증 중 오류가 발생했습니다.";
+          });
+      });
+    });
+  </script>
 </head>
 <body>
 <div layout:fragment="content">
@@ -42,9 +154,24 @@
         <h2 class="card-title" style="margin-top: 25px; margin-bottom: 40px; text-align: center;">회원가입</h2>
         <form th:action="@{/users/signup}" method="post" th:object="${signUpRequest}">
           <div class="mb-3 rounded">
-            <label for="username" class="form-label">아이디</label>
-            <input type="text" class="form-control" id="username" th:field="*{username}" th:errorclass="field-error">
-            <div class="field-error" th:errors="*{username}"></div>
+            <label for="username" class="form-label">아이디 (이메일)</label>
+            <div class="input-group">
+              <input type="email" class="form-control" id="username" th:field="*{username}" th:errorclass="field-error">
+              <button type="button" class="btn btn-secondary" id="sendCodeBtn">인증 코드 발송</button>
+            </div>
+            <div class="field-error" id="emailError">
+              <span th:errors="*{username}"></span>
+            </div>
+
+          </div>
+          <div id="timerText" style="margin-top: 5px; font-size: 14px; color: #666; display: none;">
+            인증 유효 시간: <span id="timer"></span>
+          </div>
+          <div class="mb-3 rounded" id="emailCodeSection" style="display: none;">
+            <label for="emailCode" class="form-label">인증 코드</label>
+            <input type="text" class="form-control" id="emailCode">
+            <button type="button" class="btn btn-outline-primary mt-2" id="verifyCodeBtn">인증 확인</button>
+            <div class="field-error" id="codeVerifyMsg"></div>
           </div>
           <div class="mb-3 rounded">
             <label for="password" class="form-label">비밀번호</label>
@@ -95,6 +222,7 @@
         </div>
     </div>
   </div>
+</div>
 </div>
 </body>
 </html>

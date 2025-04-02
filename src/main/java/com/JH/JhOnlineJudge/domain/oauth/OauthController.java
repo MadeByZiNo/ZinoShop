@@ -6,7 +6,7 @@ import com.JH.JhOnlineJudge.domain.user.entity.User;
 import com.JH.JhOnlineJudge.domain.oauth.domain.OAuthUserInfo;
 import com.JH.JhOnlineJudge.domain.oauth.service.OAuthProviderServiceFactory;
 import com.JH.JhOnlineJudge.domain.oauth.service.OAuthService;
-import com.JH.JhOnlineJudge.domain.user.service.TokenService;
+import com.JH.JhOnlineJudge.domain.user.auth.TokenService;
 import com.JH.JhOnlineJudge.domain.user.service.UserService;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -95,6 +95,7 @@ public class OauthController {
         OAuthUserInfo userInfo = providerService.getUserInfo(accessToken);
 
         User user = userService.findOrRegister(userInfo);
+
 
         ConcurrentHashMap<String, String> tokenMap = tokenService.issueJwt(user);
         JwtUtil.addJwtToken(response, tokenMap.get("accessToken"), tokenMap.get("refreshToken"));

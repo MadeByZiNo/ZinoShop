@@ -176,8 +176,8 @@
                           th:text="${cartProduct.product.price} * ${cartProduct.quantity}">총 가격</span>
                 </td>
                 <td>
-                    <form action="/cart/remove-product" method="post">
-                        <input type="hidden" name="_method" value="DELETE">
+                    <form action="/cart/product" method="post">
+                        <input type="hidden" name="_method" value="delete">
                         <input type="hidden" th:value="${cartProduct.product.id}" name="productId">
                         <button type="submit" class="btn btn-primary">삭제</button>
                     </form>

@@ -1,5 +1,7 @@
 package com.JH.JhOnlineJudge.domain.review.service;
 
+import com.JH.JhOnlineJudge.domain.Image.ImageFrom;
+import com.JH.JhOnlineJudge.domain.Image.ImageUploadService;
 import com.JH.JhOnlineJudge.domain.Image.ReviewImage.ReviewImage;
 import com.JH.JhOnlineJudge.domain.Image.ReviewImage.ReviewImageRepository;
 import com.JH.JhOnlineJudge.domain.product.entity.Product;
@@ -36,9 +38,7 @@ public class ReviewService {
     private final UserService userService;
     private final ProductService productService;
     private final ReviewImageRepository reviewImageRepository;
-    private final S3Uploader s3Uploader;
-
-    private final String DIR_NAME = "Review";
+    private final ImageUploadService imageUploadService;
 
     @Transactional
     public Page<ReviewListResponse> getReviewsByProductId(Long productId, int page, int size) {
@@ -98,18 +98,10 @@ public class ReviewService {
 
         List<ReviewImage> imageList = new ArrayList<>();
 
-        if (images != null && images.length > 0){
+        if (images != null){
             for (MultipartFile file : images) {
-               String uploadUrl = s3Uploader.upload(file, DIR_NAME);
-
-               ReviewImage reviewImage = ReviewImage.builder()
-                       .url(uploadUrl)
-                       .review(review)
-                       .build();
-
-               imageList.add(reviewImage);
+               imageUploadService.uploadAndSaveReviewImage(file, ImageFrom.REVIEW.getDir(), review);
             }
-            reviewImageRepository.saveAll(imageList);
         }
 
         return review;

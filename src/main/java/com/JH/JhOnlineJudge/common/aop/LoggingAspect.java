@@ -19,9 +19,10 @@ public class LoggingAspect {
     private final LogTracer logTracer;
 
     // 메서드 시작 시점에 로그 시작
-    @Before("execution(* com.JH.JhOnlineJudge..controller..*(..)) " +
-            "|| execution(* com.JH.JhOnlineJudge..service..*(..)) " +
-            "|| execution(* com.JH.JhOnlineJudge..repository.*Impl.*(..))")
+    @Before("@within(org.springframework.stereotype.Service) " +
+            "|| @within(org.springframework.stereotype.Repository) " +
+            "|| @within(org.springframework.stereotype.Controller)" +
+            "|| @within(org.springframework.web.bind.annotation.RestController)")
     public void logMethodStart(JoinPoint joinPoint) {
         String methodName = joinPoint.getSignature().toShortString();
 
@@ -30,19 +31,23 @@ public class LoggingAspect {
     }
 
     // 메서드 실행 종료 시점에 로그 종료
-    @After("execution(* com.JH.JhOnlineJudge..controller..*(..)) " +
-            "|| execution(* com.JH.JhOnlineJudge..service..*(..)) " +
-            "|| execution(* com.JH.JhOnlineJudge..repository.*Impl.*(..))")
+    @After( "@within(org.springframework.stereotype.Service) " +
+            "|| @within(org.springframework.stereotype.Repository) " +
+            "|| @within(org.springframework.stereotype.Controller)" +
+            "|| @within(org.springframework.web.bind.annotation.RestController)")
     public void logMethodEnd(JoinPoint joinPoint) {
         String methodName = joinPoint.getSignature().toShortString();
         LogTracer.logEnd(methodName);
         LogTracer.prevStep();  // 단계 감소
+
+        logTracer.clearIfDone();
     }
 
     // 예외 발생 시 로깅
-    @AfterThrowing(value = "execution(* com.JH.JhOnlineJudge..controller..*(..)) " +
-            "|| execution(* com.JH.JhOnlineJudge..service..*(..)) " +
-            "|| execution(* com.JH.JhOnlineJudge..repository.*Impl.*(..))", throwing = "throwable")
+    @AfterThrowing(value = "@within(org.springframework.stereotype.Service) " +
+            "|| @within(org.springframework.stereotype.Repository) " +
+            "|| @within(org.springframework.stereotype.Controller)" +
+            "|| @within(org.springframework.web.bind.annotation.RestController)", throwing = "throwable")
     public void logException(JoinPoint joinPoint, Throwable throwable) {
         String methodName = joinPoint.getSignature().toShortString();
         LogTracer.logException(methodName, throwable.getMessage());

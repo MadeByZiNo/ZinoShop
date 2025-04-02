@@ -1,14 +1,15 @@
 package com.JH.JhOnlineJudge.domain.user.controller;
 
-import com.JH.JhOnlineJudge.domain.user.entity.AuthUser;
+import com.JH.JhOnlineJudge.domain.user.auth.AuthUser;
 import com.JH.JhOnlineJudge.domain.user.dto.UpdateRequest;
 import com.JH.JhOnlineJudge.domain.user.exception.DuplicateNicknameException;
 import com.JH.JhOnlineJudge.domain.user.exception.DuplicateUsernameException;
+import com.JH.JhOnlineJudge.domain.user.exception.InvalidAuthEmailException;
 import com.JH.JhOnlineJudge.domain.user.exception.LoginFailedException;
 import com.JH.JhOnlineJudge.domain.user.entity.User;
 import com.JH.JhOnlineJudge.domain.user.dto.LoginRequest;
 import com.JH.JhOnlineJudge.domain.user.dto.SignUpRequest;
-import com.JH.JhOnlineJudge.domain.user.service.TokenService;
+import com.JH.JhOnlineJudge.domain.user.auth.TokenService;
 import com.JH.JhOnlineJudge.domain.user.service.UserService;
 import com.JH.JhOnlineJudge.domain.user.validator.SignupValidator;
 import com.JH.JhOnlineJudge.common.utils.JwtUtil;
@@ -99,7 +100,7 @@ public class UserController {
         User newUser;
         try {
              newUser = userService.signup(signUpRequest);
-        } catch (DuplicateUsernameException e){
+        } catch (DuplicateUsernameException | InvalidAuthEmailException e){
             bindingResult.rejectValue("username", null, e.getMessage());
             return "users/signup";
         } catch (DuplicateNicknameException e){
@@ -107,7 +108,7 @@ public class UserController {
             return "users/signup";
         }
 
-        log.info("회원가입 생성={}",newUser);
+
         model.addAttribute("nickname",signUpRequest.getNickname());
         return "redirect:/users/signup-success";
     }

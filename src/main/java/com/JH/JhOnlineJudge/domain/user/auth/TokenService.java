@@ -1,4 +1,4 @@
-package com.JH.JhOnlineJudge.domain.user.service;
+package com.JH.JhOnlineJudge.domain.user.auth;
 
 import com.JH.JhOnlineJudge.common.utils.JwtUtil;
 import com.JH.JhOnlineJudge.common.utils.ObjectSerializer;

@@ -12,19 +12,39 @@
         }
 
         .heart-item {
-            width: calc(25% - 20px);
+            width: 240px;
             margin: 20px;
             text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
+
+        .heart-image-container {
+            width: 220px;
+            height: 220px;
+            overflow: hidden;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #f9f9f9;
+        }
+
+        .heart-image-container img {
+            min-width: 220px; /* 좌우로 쪼그라드는 걸 방지 */
+            min-height: 220px;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
 
         .heart-item a {
-            text-decoration: none; /* 링크 밑줄 제거 */
-            color: inherit; /* 링크 기본 색상 상속 */
-        }
-
-        .heart-item img {
-            max-width: 100%;
-            height: auto;
+            text-decoration: none;
+            color: inherit;
         }
 
         .sale-tag {
@@ -60,14 +80,14 @@
             background-color: #ddd;
         }
 
-         .heart-icon {
-                font-size: 1.5em;
-                margin-left: 6px; /* 왼쪽 마진 추가 */
-                cursor: pointer;
-         }
+        .heart-icon {
+            font-size: 1.5em;
+            margin-left: 6px;
+            cursor: pointer;
+        }
     </style>
 
-    <script type="text/javascript" th:inline="javascript">
+<script type="text/javascript" th:inline="javascript">
          var toggleHeart = function(productId) {
              const heartIcon = document.getElementById(`heart-icon-${productId}`);
              if (!heartIcon) {
@@ -147,24 +167,28 @@
 
     <div th:unless="${hearts.isEmpty()}">
         <div class="sort-by">     </div>
+        <!-- 바디 부분 -->
         <div class="heart-container">
             <div th:each="heart : ${hearts}" class="heart-item">
                 <a th:href="@{'/product/detail/' + ${heart.product.id}}">
-                <img th:src="${heart.product.images[0].url}" alt="heart Image" style="max-width: 100%; height: auto; margin-bottom: 10px;">
-                <h3 th:text="${heart.product.name}" style="font-weight: bold; margin-top: 10px;"></h3>
-                <p th:text="'가격: ' + ${heart.product.price}" style="display: inline-block;"></p>
-                <div>
-                    <p th:if="${heart.product.remain == 0 or heart.product.state eq '품절'}" style="text-align: center; display: inline-block; margin-right: 10px;">
-                        <span class="sale-tag">품절</span>
-                    </p>
-
-                <button id="heart-button" th:onclick="'toggleHeart(' + ${heart.product.id} + ');'" class="btn">
-                       <span th:id="'heart-icon-' + ${heart.product.id}" class="bi bi-heart text-muted" th:data-product-id="${heart.product.id}" style="cursor: pointer;"></span>
-                </button>
-                 </div>
+                    <div class="heart-image-container">
+                        <img th:src="${heart.product.images[0].url}" alt="heart Image">
+                    </div>
+                    <h3 th:text="${heart.product.name}" style="font-weight: bold; margin-top: 10px;"></h3>
+                    <p th:text="'가격: ' + ${heart.product.price}"></p>
+                    <div>
+                        <p th:if="${heart.product.remain == 0 or heart.product.state eq '품절'}" style="margin-right: 10px;">
+                            <span class="sale-tag">품절</span>
+                        </p>
+                        <button id="heart-button" th:onclick="'toggleHeart(' + ${heart.product.id} + ');'" class="btn">
+                    <span th:id="'heart-icon-' + ${heart.product.id}" class="bi bi-heart text-muted"
+                          th:data-product-id="${heart.product.id}"></span>
+                        </button>
+                    </div>
                 </a>
             </div>
         </div>
+    </div>
 
         <!-- 페이지네이션 -->
         <div class="pagination">

@@ -357,19 +357,19 @@
              <ul>
                  <!-- 이전 페이지 버튼 -->
                  <li th:if="${currentPage > 5}" class="page-item">
-                     <a th:href="@{/review(page=${startPage - 5})}">이전</a>
+                     <a th:href="@{/review/page(page=${startPage - 5})}">이전</a>
                  </li>
 
                  <!-- 페이지 번호 -->
                  <li th:each="pageNum : ${#numbers.sequence(startPage, endPage)}" class="page-item">
-                     <a th:href="@{/review(page=${pageNum})}"
+                     <a th:href="@{/review/page(page=${pageNum})}"
                         th:text="${pageNum}"
                         th:classappend="${currentPage == pageNum} ? 'active' : ''"></a>
                  </li>
 
                  <!-- 다음 페이지 버튼 -->
                  <li th:if="${endPage < totalPages}" class="page-item">
-                     <a th:href="@{/review(page=${endPage + 1})}">다음</a>
+                     <a th:href="@{/review/page(page=${endPage + 1})}">다음</a>
                  </li>
              </ul>
          </div>

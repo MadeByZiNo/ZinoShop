@@ -3,7 +3,7 @@ package com.JH.JhOnlineJudge.domain.user.interceptor;
 import com.JH.JhOnlineJudge.domain.user.entity.UserRole;
 import com.JH.JhOnlineJudge.common.utils.JwtUtil;
 import com.JH.JhOnlineJudge.domain.user.dto.UserTokenDto;
-import com.JH.JhOnlineJudge.domain.user.service.TokenService;
+import com.JH.JhOnlineJudge.domain.user.auth.TokenService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

@@ -2,20 +2,21 @@ package com.JH.JhOnlineJudge.domain.user.service;
 
 import com.JH.JhOnlineJudge.domain.cart.entity.Cart;
 import com.JH.JhOnlineJudge.domain.cart.repository.CartRepository;
+import com.JH.JhOnlineJudge.domain.email.EmailSender;
+import com.JH.JhOnlineJudge.domain.email.WelcomeEmailForm;
+import com.JH.JhOnlineJudge.domain.user.auth.TokenService;
 import com.JH.JhOnlineJudge.domain.user.entity.UserRole;
 import com.JH.JhOnlineJudge.domain.user.dto.UpdateRequest;
-import com.JH.JhOnlineJudge.domain.user.exception.DuplicateNicknameException;
-import com.JH.JhOnlineJudge.domain.user.exception.DuplicateUsernameException;
-import com.JH.JhOnlineJudge.domain.user.exception.LoginFailedException;
+import com.JH.JhOnlineJudge.domain.user.exception.*;
 import com.JH.JhOnlineJudge.domain.user.entity.User;
 import com.JH.JhOnlineJudge.domain.user.dto.LoginRequest;
 import com.JH.JhOnlineJudge.domain.user.dto.SignUpRequest;
-import com.JH.JhOnlineJudge.domain.user.exception.NotFoundUserException;
 import com.JH.JhOnlineJudge.domain.oauth.domain.OAuthUserInfo;
 import com.JH.JhOnlineJudge.domain.user.repository.UserRepository;
 import com.JH.JhOnlineJudge.common.utils.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,8 +32,8 @@ public class UserService {
     private final UserRepository userRepository;
     private final CartRepository cartRepository;
     private final PasswordEncoder passwordEncoder;
-    private final JwtUtil jwtUtil;
-
+    private final RedisTemplate<String, String> redisTemplate;
+    private final EmailSender emailSender;
     public User findUserById(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(NotFoundUserException::new);
@@ -49,6 +50,12 @@ public class UserService {
         if (userRepository.existsByNickname(signUpDto.getNickname())) {
             throw new DuplicateNicknameException();
         }
+
+        if (!"true".equals(redisTemplate.opsForValue().get("email-auth:verified:" + signUpDto.getUsername()))) {
+            throw new InvalidAuthEmailException();
+        }
+
+        emailSender.send(new WelcomeEmailForm(signUpDto.getUsername(), signUpDto.getNickname()));
 
         return registerUser(signUpDto);
     }
@@ -121,6 +128,9 @@ public class UserService {
     public User findOrRegister(OAuthUserInfo userInfo) {
         return userRepository.findByOauthId(userInfo.getId())
                 .orElseGet(() -> {
+                    if (userRepository.existsByUsername(userInfo.getEmail())) {
+                        throw new DuplicateUsernameException();
+                    }
                     User newUser = new User(userInfo.getEmail(), userInfo.getNickname(), userInfo.getId(), userInfo.getProvider(), 0, UserRole.고객님);
                     Cart cart = new Cart();
                     newUser.attachCart(cart);

@@ -4,7 +4,7 @@ import com.JH.JhOnlineJudge.domain.review.dto.ReviewCreateRequest;
 import com.JH.JhOnlineJudge.domain.review.dto.ReviewListResponse;
 import com.JH.JhOnlineJudge.domain.review.exception.ReviewPermissionException;
 import com.JH.JhOnlineJudge.domain.review.service.ReviewService;
-import com.JH.JhOnlineJudge.domain.user.entity.AuthUser;
+import com.JH.JhOnlineJudge.domain.user.auth.AuthUser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;

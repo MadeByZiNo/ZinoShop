@@ -1,8 +1,7 @@
-package com.JH.JhOnlineJudge.domain.user.entity;
+package com.JH.JhOnlineJudge.domain.user.auth;
 
 import com.JH.JhOnlineJudge.domain.user.dto.UserTokenDto;
 import com.JH.JhOnlineJudge.domain.user.exception.LoginInvalidException;
-import com.JH.JhOnlineJudge.domain.user.service.TokenService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;

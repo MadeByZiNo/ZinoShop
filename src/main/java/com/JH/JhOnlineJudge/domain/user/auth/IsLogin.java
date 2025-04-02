@@ -1,4 +1,4 @@
-package com.JH.JhOnlineJudge.domain.user.entity;
+package com.JH.JhOnlineJudge.domain.user.auth;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -7,5 +7,5 @@ import java.lang.annotation.Target;
 
 @Target(ElementType.PARAMETER)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface AuthUser {
+public @interface IsLogin {
 }

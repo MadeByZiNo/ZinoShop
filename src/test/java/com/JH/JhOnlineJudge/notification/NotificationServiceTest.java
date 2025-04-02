@@ -1,8 +1,8 @@
 package com.JH.JhOnlineJudge.notification;
 
 
-import com.JH.JhOnlineJudge.domain.notification.entity.NotificationFrom;
-import com.JH.JhOnlineJudge.domain.notification.service.NotificationService;
+import com.JH.JhOnlineJudge.common.notification.entity.NotificationFrom;
+import com.JH.JhOnlineJudge.common.notification.service.NotificationService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
