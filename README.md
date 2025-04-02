@@ -405,6 +405,10 @@ Github Action을 통해서 개발자가 운영 Branch에 push를 하면 감지�
   Processor에서는 Chunk 주기마다 한번에 Redis의 id를 가져와 가격을 벌크쿼리를 통해 가져온 후에 등급을 처리하였습니다.
   500만건의 DB 호출에서 chunk의 크기인 1000배 만큼 호출 수를 줄여서 최적화해주었습니다.
 
+
+<br>
+
+
   **redis를 이용해서 캐싱한 이유**
 
   executionContext를 통해서 Step단위에서 Reader와 Processor가 Id들을 공유하는 것을 생각했으나 2500kb까지밖에 담지 못하는 이유로 Redis를 이용하였습니다.
@@ -489,7 +493,7 @@ Spring의 `@Async`와 `ThreadPoolTaskExecutor`를 사용하여
 - **N+1 문제 해결**: Fetch Join을 사용하여 N+1 문제를 방지했습니다.
 
 
-- Pageable을 사용한 경우, Fetch Join 시 **limit**문이 해결되지 않는 문제를 보았습니다.  
+- Pageable을 사용한 경우, Fetch Join 시 **limit**문이 적용되지 않는 문제를 보았습니다.  
 그래서 @BatchSize 어노테이션을 사용하여 동일한 where문에 대한 N+1 문제를 한번에 불러올 수 있도록 최적화했습니다.
 
 
