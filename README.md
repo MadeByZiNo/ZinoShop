@@ -386,18 +386,33 @@ Github Action을 통해서 개발자가 운영 Branch에 push를 하면 감지�
 
 <br>
 
-- **결제 취소 자동 처리**  
-  주문 후 일정 시간 내 결제가 이루어지지 않은 주문을  
-  배치 스케줄러가 자동으로 취소 처리합니다.  
-  (※ 실제 PG 결제는 구현되어 있지 않지만, 취소 상태 전환 로직 구현)
-
-<br>
 
 - 🌟 **회원 VIP 등급 자동 처리**  
-  회원의 등급을 달의 마지막 날에 이번 달의 구매량을 분석하여 일반 → VIP로 자동 승격시키고
-  부족한 유저는 →  일반으로 강등시켰습니다.
+  매달 말일, 회원들의 이번 달 구매 금액을 기준으로 VIP 등급을 자동으로 부여하거나 해제하는 배치 기능을 구현했습니다.
+  10만 원 이상 구매한 회원은 VIP 고객님으로, 그 외는 일반 고객님으로 변경됩니다.
 
 <br>
+
+![image](https://github.com/user-attachments/assets/43fe64dd-fad6-4d79-861f-08b759a387a6)
+
+
+<br>
+
+
+  기존의 Processor를 그대로 이용하면 process 과정에서 가격을 불러오는 DB작업을 유저 수 만큼 호출하므로 비효율적이라 판단했습니다.
+  그래서 Reader와 Processor를 커스터마이징해주었습니다.
+  Reader에서는 Chunk 주기마다 한번에 Redis에 id들을 캐싱해주었으며
+  Processor에서는 Chunk 주기마다 한번에 Redis의 id를 가져와 가격을 벌크쿼리를 통해 가져온 후에 등급을 처리하였습니다.
+  500만건의 DB 호출에서 chunk의 크기인 1000배 만큼 호출 수를 줄여서 최적화해주었습니다.
+
+  **redis를 이용해서 캐싱한 이유**
+
+  executionContext를 통해서 Step단위에서 Reader와 Processor가 Id들을 공유하는 것을 생각했으나 2500kb까지밖에 담지 못하는 이유로 Redis를 이용하였습니다.
+
+
+<br>
+
+
 
 - 📊 **상품 판매량 분석**  
   매일매일 상품들의 판매 이력을 집계하여 별도 통계 테이블에 저장합니다.  
@@ -420,6 +435,7 @@ Github Action을 통해서 개발자가 운영 Branch에 push를 하면 감지�
 
 ![image](https://github.com/user-attachments/assets/c69913b2-74f6-4257-8b74-28bfac653982)
 
+![image](https://github.com/user-attachments/assets/450e0134-36f8-4c9e-b466-105da5e0c849)
 
 
 <br>
