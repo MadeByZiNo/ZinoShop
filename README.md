@@ -369,49 +369,38 @@ Github Action을 통해서 개발자가 운영 Branch에 push를 하면 감지�
 
 
 
-### 5. 결제 시스템
-
-
-<br>
-
-
-![Coupon](https://github.com/user-attachments/assets/f05c174d-367c-4aed-8e34-02d2851997df)
-
-
-<br>
-
-
-고객은 제품들을 장바구니에 담아서 주문 할 수 있습니다.
+### 8. 상품 판매 분석 
 
 
 <br>
 
 
 
+![1](https://github.com/user-attachments/assets/a68aa403-fac5-4d29-8b8a-3ea8398fddfd)
+![2](https://github.com/user-attachments/assets/7f2f7049-ec1f-478b-b95b-1dd947a15044)
 
-
-<br>
-
-
-![Payment](https://github.com/user-attachments/assets/0eca0f12-1edd-46c7-ac2d-00dab8964117)
 
 
 <br>
 
 
-![Payment Confirmation](https://github.com/user-attachments/assets/e5542f29-e33c-4b36-b4b2-1c8968e0df8a)
+상품 자체의 판매 내역이나 해당 일, 월, 년의 가장 많이 팔린 상품 및 가장 많은 수익을 낸 상품 Top30을 그래프로 확인이 가능합니다.
 
-
-<br>
-
-
----
 
 
 <br>
 
 
-### **낙관적 락을 통한 동시성 문제 해결**
+
+### **성능 최적화**
+
+
+
+<br>
+
+
+
+## **낙관적 락을 통한 동시성 문제 해결**
 
 
 <br>
@@ -538,7 +527,7 @@ Github Action을 통해서 개발자가 운영 Branch에 push를 하면 감지�
 <br>
 
 
-### **7. 로그 추적기**
+### **로그 추적기**
 
 
 <br>
@@ -568,7 +557,7 @@ Spring AOP와 Logback MDC를 이용해 요청 단위로 로그를 추적할 수 
 
 
 
-### **8. 비동기 이미지 업로드 & 이메일 전송**
+### **비동기 이미지 업로드 & 이메일 전송**
 
 <br>
 
@@ -577,6 +566,7 @@ Spring의 `@Async`와 `ThreadPoolTaskExecutor`를 사용하여
 
 <br>
 
+
 - **상품 이미지 업로드**  
   Amazon S3를 통해 여러 장 이미지를 동시에 업로드할 경우 사용자 응답 속도가 저하될 수 있습니다.
   10개의 이미지를 업로드 한 후에 상품 추가 버튼을 누르면 4초가량 페이지가 멈춘듯한 느낌을 주고 저장완료 처리가 되었기에    
@@ -584,14 +574,11 @@ Spring의 `@Async`와 `ThreadPoolTaskExecutor`를 사용하여
 
 <br>
 
+
 - **이메일 전송**  
   회원가입 인증 등 메일 발송도 외부 SMTP와의 통신으로 인해 지연 요소가 되므로 비동기처리를 통해 메일 전송 로직을 분리하고,  
   메일 발송 중에도 사용자에게는 빠르게 응답을 돌려주는 구조를 구현했습니다.
 
-
-<br>
-
-### **성능 최적화**
 
 
 <br>
