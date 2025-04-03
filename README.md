@@ -474,7 +474,7 @@ Github Action을 통해서 개발자가 운영 Branch에 push를 하면 감지�
 - **ArgumentResolver와 Annotation**을 활용한 역할 기반 인가 처리
 
 
-![Authorization](https://github.com/user-attachments/assets/3f47c45f-3898-472d-a322-584362f6a848)
+![image](https://github.com/user-attachments/assets/f485ca3a-bd76-4678-8d24-171aaa4067cd)
 ![AuthUser Annotation](https://github.com/user-attachments/assets/ac4ad6cb-602c-46a7-91f6-a2dbfd4eea30)
 
 
