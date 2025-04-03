@@ -79,7 +79,7 @@
 <br>
 
 
-![ERD](https://github.com/user-attachments/assets/918f56f4-449f-454b-a552-4e14f935766a)
+![erd](https://github.com/user-attachments/assets/fd7d1f9b-37fc-49e0-9d13-a4dcbfbdd01e)
 
 
 <br>
