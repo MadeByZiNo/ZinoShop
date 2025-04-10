@@ -12,6 +12,8 @@ import com.JH.JhOnlineJudge.domain.product.dto.ProductListResponse;
 import com.JH.JhOnlineJudge.domain.product.entity.Product;
 import com.JH.JhOnlineJudge.domain.product.exception.NotFoundProductException;
 import com.JH.JhOnlineJudge.domain.product.repository.ProductRepository;
+import com.JH.JhOnlineJudge.domain.product.search.ProductIndexService;
+import com.JH.JhOnlineJudge.domain.product.search.ProductSearchService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.*;
@@ -31,6 +33,8 @@ public class ProductService {
     private final ProductImageRepository productImageRepository;
     private final CategoryService categoryService;
     private final ImageUploadService imageUploadService;
+    private final ProductIndexService productIndexService;
+    private final ProductSearchService productSearchService;
     private final S3Uploader s3Uploader;
 
     @Transactional(readOnly = true)
@@ -65,6 +69,9 @@ public class ProductService {
                 imageUploadService.uploadAndSaveProductImage(file, ImageFrom.PRODUCT.getDir(), product);
             }
         }
+
+        productIndexService.indexProduct(product, category);
+
         return product;
     }
 
@@ -126,32 +133,52 @@ public class ProductService {
 
     }
 
-    /*
-    @Transactional(readOnly = true)
-    public Page<ProductListResponse> getProductsPageByCategoryIds(List<Long> categoryIds, int page) {
-        Pageable pageable = PageRequest.of(page - 1, 6, Sort.by("id").ascending());
-
-        Page<Product> products = productRepository.getProductsPageWithImages(categoryIds, pageable);
-
-        return products.map(ProductListResponse::from);
-    }*/
 
     public Slice<ProductListResponse> getProductSliceByCategoryIds(List<Long> categoryIds, int page, int size) {
         Pageable pageable = PageRequest.of(page, size + 1, Sort.by(Sort.Direction.ASC, "id"));
 
-        List<Product> productEntities = productRepository.findSliceByCategoryIds(categoryIds, pageable);
+        Slice<Product> productEntities = productRepository.findSliceByCategoryIds(categoryIds, pageable);
 
-        boolean hasNext = productEntities.size() > size;
-        if (hasNext) {
-            productEntities.remove(productEntities.size() - 1); // 초과분 제거
-        }
+        List<Product> content = productEntities.getContent();
+        boolean hasNext = content.size() > size;
 
-        List<ProductListResponse> dtoList = productEntities.stream()
+        List<ProductListResponse> dtoList = content.stream()
+                .limit(size)
                 .map(ProductListResponse::from)
                 .toList();
 
         return new SliceImpl<>(dtoList, pageable, hasNext);
     }
 
+
+    public Slice<ProductListResponse> searchByCategoryIdsAndKeyword(List<Long> categoryIds, String keyword, int page, int size) {
+        List<Long> ids = productSearchService.searchIdWithKeyword(keyword);
+        System.out.println("ids.size() = " + ids.size());
+        Pageable pageable = PageRequest.of(page, size + 1, Sort.by(Sort.Direction.ASC, "id"));
+
+        Slice<Product> productSlice = productRepository.findSliceByIds(ids, pageable);
+
+        List<ProductListResponse> dtoList = productSlice.getContent().stream()
+                .map(ProductListResponse::from)
+                .toList();
+
+        boolean hasNext = productSlice.hasNext();
+
+        // 7. SliceImpl로 결과 반환
+        return new SliceImpl<>(dtoList, pageable, hasNext);
+    }
+
+
+
+    @Transactional(readOnly = true)
+    public List<Product> getProductsByIds(List<Long> ids) {
+        List<Product> products = productRepository.findAllById(ids);
+
+        if (products.size() != ids.size()) {
+            throw new NotFoundProductException(); // 일부라도 없으면 예외
+        }
+
+        return products;
+    }
 
 }

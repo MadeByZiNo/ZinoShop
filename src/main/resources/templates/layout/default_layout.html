@@ -8,28 +8,32 @@
   <meta charset="UTF-8">
   <style>
 
- body {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-  margin: 0;
-}
+    html, body {
+      height: 100%;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+    }
 
-.fixed-header {
-  height: 100px;
-}
+    .fixed-header {
+      height: 100px;
+    }
 
-.container {
-  flex: 1;
-  margin-top: 50px;
-  margin-bottom: 50px;
-}
+   .main-container {
+    flex: 1;
+    margin-top: 50px;
+    margin-bottom: 50px;
 
-.fixed-footer {
-  height: 100px;
+    max-width: 1200px;   /* 최대 폭 제한 */
+    width: 100%;
+    margin-left: auto;   /* 가운데 정렬 */
+    margin-right: auto;
+    padding: 0 16px;     /* 좌우 여백 */
+  }
 
-
-}
+    .fixed-footer {
+      height: 100px;
+    }
 
   </style>
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -40,15 +44,19 @@
     <div th:replace="~{fragments/header :: header(username=${username},userStatus=${userStatus},nickname=${nickname})}" class="fixed-header"></div>
 </div>
 
-<div class="container">
+<div class="main-container">
   <div class="row w-100 justify-content-center">
     <div class="content" layout:fragment="content"></div>
   </div>
 </div>
 
+
+
 <div class="fixed-footer">
     <div th:replace="~{fragments/footer :: footer}"></div>
 </div>
+
+<th:block th:replace="~{fragments/aside :: chat(nickname=${nickname})}" />
 
 </body>
 </html>

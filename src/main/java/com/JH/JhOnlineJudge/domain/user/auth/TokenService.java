@@ -1,7 +1,7 @@
 package com.JH.JhOnlineJudge.domain.user.auth;
 
 import com.JH.JhOnlineJudge.common.utils.JwtUtil;
-import com.JH.JhOnlineJudge.common.utils.ObjectSerializer;
+import com.JH.JhOnlineJudge.common.utils.RedisHelper;
 import com.JH.JhOnlineJudge.domain.user.entity.User;
 import com.JH.JhOnlineJudge.domain.user.dto.UserTokenDto;
 import lombok.RequiredArgsConstructor;
@@ -24,28 +24,28 @@ public class TokenService {
     @Value("${jwt.refreshExpire}")
     private long REFRESH_EXPIRE;
 
-    private final ObjectSerializer objectSerializer;
+    private final RedisHelper redisHelper;
     private final RedisTemplate<String, String> redisTemplate;
     private final JwtUtil jwtUtil;
 
     public void saveAuthInfo(String accessToken, UserTokenDto userTokenDto) {
-        objectSerializer.saveData("auth:" + accessToken, userTokenDto, Duration.ofMillis(ACCESS_EXPIRE));
+        redisHelper.saveData("auth:" + accessToken, userTokenDto, Duration.ofMillis(ACCESS_EXPIRE));
     }
 
     // RefreshToken 저장
     public void saveRefreshToken(String refreshToken, Long userId) {
-        objectSerializer.saveData("refresh:" + userId, refreshToken, Duration.ofMillis(REFRESH_EXPIRE));
+        redisHelper.saveData("refresh:" + userId, refreshToken, Duration.ofMillis(REFRESH_EXPIRE));
     }
 
     // RefreshToken 조회
     public String getRefreshToken(Long userId) {
-        return objectSerializer.getData("refresh:" + userId, String.class)
+        return redisHelper.getData("refresh:" + userId, String.class)
                 .orElse(null);
     }
 
     // AccessToken에 저장된 authInfo 조회
     public UserTokenDto getAuthInfo(String accessToken) {
-        Optional<UserTokenDto> userTokenDtoOptional = objectSerializer.getData("auth:" + accessToken, UserTokenDto.class);
+        Optional<UserTokenDto> userTokenDtoOptional = redisHelper.getData("auth:" + accessToken, UserTokenDto.class);
 
         return userTokenDtoOptional.orElse(null);
     }

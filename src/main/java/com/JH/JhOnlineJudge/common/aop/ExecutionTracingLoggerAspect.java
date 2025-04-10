@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 @Aspect
 @Component
 @RequiredArgsConstructor
-public class LoggingAspect {
+public class ExecutionTracingLoggerAspect {
 
     private final LogTracer logTracer;
 

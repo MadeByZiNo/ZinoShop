@@ -1,6 +1,6 @@
 package com.JH.JhOnlineJudge.domain.batch;
 
-import com.JH.JhOnlineJudge.common.utils.ObjectSerializer;
+import com.JH.JhOnlineJudge.common.utils.RedisHelper;
 import com.JH.JhOnlineJudge.domain.order.entity.OrderStatus;
 import com.JH.JhOnlineJudge.domain.order.repository.OrderJpaRepository;
 import com.JH.JhOnlineJudge.domain.user.entity.User;
@@ -28,7 +28,7 @@ public class VipProcessor implements ItemProcessor<User, User>, ItemStream {
     private Map<Long, Long> totalPriceMap = new HashMap<>();
     private boolean loaded = false;
     private final OrderJpaRepository orderJpaRepository;
-    private final ObjectSerializer objectSerializer;
+    private final RedisHelper redisHelper;
 
     @Override
     public void open(ExecutionContext executionContext) {
@@ -38,7 +38,7 @@ public class VipProcessor implements ItemProcessor<User, User>, ItemStream {
     public User process(User user) {
         if (!loaded) {
             System.out.println("loaded");
-            List<Long> userIds = objectSerializer.getListData("batch:vip:userIds", Long.class);
+            List<Long> userIds = redisHelper.getListData("batch:vip:userIds", Long.class);
             LocalDateTime now = LocalDateTime.now().minusDays(1);
             LocalDateTime start = now.withDayOfMonth(1).toLocalDate().atStartOfDay();
             LocalDateTime end = start.plusMonths(1).minusNanos(1);

@@ -1,6 +1,6 @@
 package com.JH.JhOnlineJudge.domain.batch;
 
-import com.JH.JhOnlineJudge.common.utils.ObjectSerializer;
+import com.JH.JhOnlineJudge.common.utils.RedisHelper;
 import com.JH.JhOnlineJudge.domain.user.entity.User;
 import com.JH.JhOnlineJudge.domain.user.repository.UserJpaRepository;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +20,7 @@ import java.util.List;
 public class VipReader implements ItemReader<User>, ItemStream {
 
     private final UserJpaRepository userRepository;
-    private final ObjectSerializer objectSerializer;
+    private final RedisHelper redisHelper;
 
     private List<User> currentChunk = new ArrayList<>();
     private int currentIndex = 0;
@@ -42,8 +42,8 @@ public class VipReader implements ItemReader<User>, ItemStream {
             List<Long> userIds = currentChunk.stream()
                     .map(User::getId)
                     .toList();
-            objectSerializer.deleteData("batch:vip:userIds" );
-            objectSerializer.saveListData("batch:vip:userIds", userIds, Duration.ofMinutes(10));
+            redisHelper.deleteData("batch:vip:userIds" );
+            redisHelper.saveListData("batch:vip:userIds", userIds, Duration.ofMinutes(10));
 
             // 다음 청크를 위한 마지막 ID 저장
             lastId = currentChunk.get(currentChunk.size() - 1).getId();

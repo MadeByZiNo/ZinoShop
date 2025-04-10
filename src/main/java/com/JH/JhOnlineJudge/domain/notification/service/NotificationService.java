@@ -1,9 +1,9 @@
-package com.JH.JhOnlineJudge.common.notification.service;
+package com.JH.JhOnlineJudge.domain.notification.service;
 
-import com.JH.JhOnlineJudge.common.utils.ObjectSerializer;
-import com.JH.JhOnlineJudge.common.notification.entity.NotificationFrom;
-import com.JH.JhOnlineJudge.common.notification.dto.NotificationMessageResponse;
-import com.JH.JhOnlineJudge.common.notification.dto.NotificationStatusResponse;
+import com.JH.JhOnlineJudge.common.utils.RedisHelper;
+import com.JH.JhOnlineJudge.domain.notification.entity.NotificationFrom;
+import com.JH.JhOnlineJudge.domain.notification.dto.NotificationMessageResponse;
+import com.JH.JhOnlineJudge.domain.notification.dto.NotificationStatusResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -16,7 +16,7 @@ import java.util.Set;
 @Service
 @RequiredArgsConstructor
 public class NotificationService {
-    private final ObjectSerializer objectSerializer;
+    private final RedisHelper redisHelper;
 
 
     private final String keyBase = "notification.";
@@ -42,15 +42,15 @@ public class NotificationService {
     // 모든 알림 읽음처리
     public void setNotificationRead(Long userId) {
         String keyScan = keyBase + userId + keyLast;
-        Set<String> keys = objectSerializer.getKeys(keyScan);
+        Set<String> keys = redisHelper.getKeys(keyScan);
 
         keys.forEach(key -> {
-            List<NotificationMessageResponse> notifications = objectSerializer.getListData(key, NotificationMessageResponse.class);
-            objectSerializer.deleteData(key);
+            List<NotificationMessageResponse> notifications = redisHelper.getListData(key, NotificationMessageResponse.class);
+            redisHelper.deleteData(key);
 
             notifications.forEach(notification -> notification.setRead(true));
 
-            objectSerializer.saveListData(key, notifications, Duration.ofDays(7));
+            redisHelper.saveListData(key, notifications, Duration.ofDays(7));
         });
     }
 
@@ -59,19 +59,19 @@ public class NotificationService {
         String key = keyBase + userId + from.getFrom();
         NotificationMessageResponse notificationMessage = new NotificationMessageResponse(message, false, LocalDateTime.now());
 
-        List<NotificationMessageResponse> existing = objectSerializer.getListData(key, NotificationMessageResponse.class);
+        List<NotificationMessageResponse> existing = redisHelper.getListData(key, NotificationMessageResponse.class);
         existing.add(notificationMessage);
 
-        objectSerializer.saveListData(key, existing, Duration.ofDays(7));
+        redisHelper.saveListData(key, existing, Duration.ofDays(7));
     }
 
     // 모든 알림들을 가져와 최신순 정렬 후 반환
     private List<NotificationMessageResponse> getAllNotifications(String keyScan) {
-        Set<String> keys = objectSerializer.getKeys(keyScan);
+        Set<String> keys = redisHelper.getKeys(keyScan);
         List<NotificationMessageResponse> notifications = new ArrayList<>();
 
         for (String key : keys) {
-            notifications.addAll(objectSerializer.getListData(key, NotificationMessageResponse.class));
+            notifications.addAll(redisHelper.getListData(key, NotificationMessageResponse.class));
         }
 
         notifications.sort((n1, n2) -> n2.getCreatedAt().compareTo(n1.getCreatedAt()));

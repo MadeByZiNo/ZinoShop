@@ -4,6 +4,7 @@ import com.JH.JhOnlineJudge.domain.product.entity.Product;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -23,7 +24,7 @@ public interface ProductJpaRepository extends JpaRepository<Product, Long> {
     Page<Product> getProductsPageWithImages(@Param("categoryIds") List<Long> categoryIds, Pageable pageable);
 
     @Query("SELECT p FROM Product p WHERE p.category.id IN :categoryIds ORDER BY p.id ASC")
-    List<Product> findSliceByCategoryIds(@Param("categoryIds") List<Long> categoryIds, Pageable pageable);
+    Slice<Product> findSliceByCategoryIds(@Param("categoryIds") List<Long> categoryIds, Pageable pageable);
 
     Slice<Product> findAllBy(Pageable pageable);
 
@@ -38,4 +39,20 @@ public interface ProductJpaRepository extends JpaRepository<Product, Long> {
             Pageable pageable
     );
 
+
+    @Query("SELECT p FROM Product p " +
+    "WHERE p.category.id IN :categoryIds " +
+    "AND (:keyword IS NULL OR LOWER(p.name) LIKE LOWER(CONCAT('%', :keyword, '%')))" +
+    "ORDER BY p.id ASC")
+    Slice<Product> findSliceByCategoryAndKeyword(
+            @Param("categoryIds") List<Long> categoryIds,
+            @Param("keyword") String keyword,
+            Pageable pageable
+    );
+
+    @EntityGraph(attributePaths = {"category"})
+    Slice<Product> findSliceBy(Pageable pageable);
+
+    @Query("SELECT p FROM Product p WHERE p.id IN :ids")
+    Slice<Product> findSliceByIds(@Param("ids") List<Long> ids, Pageable pageable);
 }

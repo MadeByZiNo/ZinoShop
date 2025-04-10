@@ -1,4 +1,4 @@
-package com.JH.JhOnlineJudge.common.notification.entity;
+package com.JH.JhOnlineJudge.domain.notification.entity;
 
 public enum NotificationFrom {
     배송(".delivery"),

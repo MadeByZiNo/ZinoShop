@@ -44,7 +44,7 @@
                    window.location.href = window.location.origin + "/order/fail?externalId=" + externalId;
                 }
             } catch (error) {
-                console.error("Error during payment confirmation:", error);
+                console.error("결제 확정 실패:", error);
                 window.location.href = window.location.origin + "/order/fail?externalId=" + externalId;
             }
         }

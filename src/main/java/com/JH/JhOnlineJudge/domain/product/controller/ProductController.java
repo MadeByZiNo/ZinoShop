@@ -77,24 +77,31 @@ public class ProductController {
 
     @GetMapping("/list")
     public String getProductListSlicePage(@RequestParam(value = "category_id") Long categoryId,
+                                          @RequestParam(value = "query", required = false) String query,
                                           @RequestParam(value = "page", defaultValue = "1") int page,
                                           Model model) {
         Map<String, Object> result = categoryService.getCategoryIdsWithParentCategory(categoryId);
         List<Long> categoryIds = (List<Long>) result.get("categoryIds");
         Category parentCategory = (Category) result.get("rootCategory");
 
-        int pageIndex = page - 1; // 0-index 맞추기
+        int pageIndex = page - 1;
         int pageSize = 9;
-        Slice<ProductListResponse> products = productService.getProductSliceByCategoryIds(categoryIds, pageIndex, pageSize);
+
+        // 🔍 검색어 유무에 따라 서비스 메서드 분기
+        Slice<ProductListResponse> products = (query == null || query.isBlank())
+                ? productService.getProductSliceByCategoryIds(categoryIds, pageIndex, pageSize)
+                : productService.searchByCategoryIdsAndKeyword(categoryIds, query, pageIndex, pageSize);
 
         model.addAttribute("category", parentCategory);
         model.addAttribute("childCategories", parentCategory.getChild());
         model.addAttribute("products", products.getContent());
         model.addAttribute("hasNext", products.hasNext());
-        model.addAttribute("currentPage", page );
+        model.addAttribute("currentPage", page);
+        model.addAttribute("query", query); // ✅ 검색창 유지용
 
         return "product/list";
     }
+
 
 
     // 제품 상세 페이지

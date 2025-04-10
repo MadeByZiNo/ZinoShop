@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class ObjectSerializer {
+public class RedisHelper{
 
     private final RedisTemplate<String, String> redisTemplate;
     private final ObjectMapper objectMapper;
@@ -26,7 +26,6 @@ public class ObjectSerializer {
 
     public <T> Optional<T> getData(String key, Class<T> classType) {
         String stringData = (String) redisTemplate.opsForValue().get(key);
-
         try {
             if (StringUtils.hasText(stringData)) {
                 return Optional.ofNullable(objectMapper.readValue(stringData, classType));
@@ -82,6 +81,27 @@ public class ObjectSerializer {
         redisTemplate.expire(key, timeout);
     }
 
+    // 기존 리스트에 데이터 1개 추가
+    public <T> void saveDataToList(String key, T item) {
+        try {
+            String json = objectMapper.writeValueAsString(item);
+            redisTemplate.opsForList().rightPush(key, json);
+        } catch (JsonProcessingException e) {
+            log.error("리스트 항목 추가 실패 (key: {})", key, e);
+        }
+    }
+
+    // 기존 리스트에 데이터 1개 추가
+    public <T> void saveDataToList(String key, T item, int max) {
+        try {
+            String json = objectMapper.writeValueAsString(item);
+            redisTemplate.opsForList().rightPush(key, json);
+            redisTemplate.opsForList().trim(key,0,max);
+        } catch (JsonProcessingException e) {
+            log.error("리스트 항목 추가 실패 (key: {})", key, e);
+        }
+    }
+
     // 패턴 기반 key 가져오기
     public Set<String> getKeys(String pattern) {
         return redisTemplate.keys(pattern);
@@ -90,5 +110,22 @@ public class ObjectSerializer {
     // key 삭제
     public void deleteData(String key) {
         redisTemplate.delete(key);
+    }
+
+
+    public void publishData(String topic, Object data) {
+        try {
+            String json = objectMapper.writeValueAsString(data);
+            redisTemplate.convertAndSend(topic, json);
+        } catch (JsonProcessingException e) {
+            log.error("Redis JSON 직렬화 실패 (topic: {})", topic, e);
+        } catch (Exception e) {
+            log.error("Redis convertAndSend 실패 (topic: {})", topic, e);
+        }
+    }
+
+
+    public RedisTemplate<String, String> getRedisTemplate() {
+        return redisTemplate;
     }
 }

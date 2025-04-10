@@ -3,7 +3,6 @@ package com.JH.JhOnlineJudge.domain.product.repository;
 import com.JH.JhOnlineJudge.domain.product.entity.Product;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Repository;
@@ -37,28 +36,24 @@ public class ProductRepositoryImpl implements ProductRepository {
     }
 
     @Override
-    public Page<Product> findProductsByCategoryIds(List<Long> categoryIds, Pageable pageable) {
-        return productJpaRepository.findProductsByCategoryIds(categoryIds,pageable);
-    }
-
-    @Override
-    public Page<Product> getProductsPageWithImages(List<Long> categoryIds, Pageable pageable){
-        return productJpaRepository.getProductsPageWithImages(categoryIds, pageable);
-    }
-
-    @Override
-    public List<Product> findSliceByCategoryIds(List<Long> categoryIds, Pageable pageable) {
+    public Slice<Product> findSliceByCategoryIds(List<Long> categoryIds, Pageable pageable) {
         return productJpaRepository.findSliceByCategoryIds(categoryIds, pageable);
     }
 
     @Override
-    public Slice<Product> findAllBy(Pageable pageable) {
-        return productJpaRepository.findAllBy(pageable);
+    public List<Product> findAllById(List<Long> ids ) {
+        return productJpaRepository.findAllById(ids);
     }
 
     @Override
     public Slice<Product> findProductsByConditions(List<Long> categoryIds, String name, Pageable pageable){
         return productJpaRepository.findProductsByConditions(categoryIds, name, pageable);
     }
+
+    @Override
+    public Slice<Product> findSliceByIds(List<Long> ids, Pageable pageable) {
+        return productJpaRepository.findSliceByIds(ids, pageable);
+    }
+
 
 }

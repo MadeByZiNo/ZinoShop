@@ -1,7 +1,6 @@
 package com.JH.JhOnlineJudge.domain.product.repository;
 
 import com.JH.JhOnlineJudge.domain.product.entity.Product;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 
@@ -18,13 +17,11 @@ public interface ProductRepository {
 
     Optional<Product> findById(Long id);
 
-    Page<Product> findProductsByCategoryIds(List<Long> categoryIds, Pageable pageable);
+    Slice<Product> findSliceByCategoryIds(List<Long> categoryIds, Pageable pageable);
 
-    Page<Product> getProductsPageWithImages(List<Long> categoryIds, Pageable pageable);
-
-    List<Product> findSliceByCategoryIds(List<Long> categoryIds, Pageable pageable);
-
-    Slice<Product> findAllBy(Pageable pageable);
+    List<Product> findAllById(List<Long> ids);
 
     Slice<Product> findProductsByConditions(List<Long> categoryIds, String name, Pageable pageable);
+
+    Slice<Product> findSliceByIds(List<Long> ids, Pageable pageable);
 }

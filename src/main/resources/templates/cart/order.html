@@ -237,6 +237,7 @@
     const clientKey = [[${clientKey}]];
     const tossPayments = TossPayments(clientKey);
     const payment = tossPayments.payment({customerKey: TossPayments.ANONYMOUS})
+    const customerEmail = [[${user.username}]]
 
     const form = document.getElementById('orderForm');
 
@@ -282,7 +283,7 @@
         orderName: result.orderName,
         successUrl: window.location.origin + "/order/success",
         failUrl: window.location.origin + "/order/fail",
-        customerEmail: "customer123@gmail.com",
+            customerEmail: customerEmail,
         customerName: result.recipientName,
         customerMobilePhone: "01012341234",
         card: {

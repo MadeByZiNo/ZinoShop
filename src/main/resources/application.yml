@@ -31,6 +31,32 @@ spring:
         enabled: true
 logging:
   level:
+    org.apache.kafka: error
+    kafka: error
     org:
       hibernate:
         stat: DEBUG
+  kafka:
+    bootstrap-servers: localhost:9092
+    producer:
+      retries: 3
+      retry-backoff-ms: 1000
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      properties:
+        spring.json.trusted.packages: "*"
+
+    consumer:
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: "*"
+
+  elasticsearch:
+    uris: https://localhost:9200
+    username: elastic
+    password: d89m=Ml-W=-i3vJstcVA
+    socket-timeout: 10s
+    connection-timeout: 10s
+    repositories:
+      enabled: true

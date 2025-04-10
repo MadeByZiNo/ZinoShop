@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+</head>
+<aside class="chat-aside" th:fragment="chat(nickname)">
+    <div class="chat-box shadow">
+        <div class="chat-header">
+            실시간 채팅
+        </div>
+        <div class="chat-messages" id="chatMessages">
+            <button id="loadPreviousBtn" class="btn btn-sm btn-secondary w-100 mb-2" style="display: none;" onclick="loadPreviousMessages()">
+                이전 메시지 불러오기
+            </button>
+            <!-- 채팅 메시지들이 동적으로 들어올 영역 -->
+        </div>
+        <div class="chat-input">
+            <div class="input-group">
+                <input type="text" id="chatInput" class="form-control" placeholder="메시지를 입력하세요" maxlength="50" onkeydown="handleKeyPress(event)">
+                <button class="btn btn-primary" onclick="sendMessage()">전송</button>
+            </div>
+        </div>
+    </div>
+    <div class="popular-products border-top p-2 bg-light">
+        <h6 class="text-center mt-2 mb-3">🔥 많이 본 상품 Top 4</h6>
+        <div id="popular-products-container" class="d-grid gap-2" style="grid-template-columns: repeat(2, 1fr);">
+            <!-- JS로 채워짐 -->
+        </div>
+    </div>
+
+
+
+    <style>
+        .chat-aside {
+          position: fixed;
+          top: 150px;
+          right: 0;
+          width: 300px;
+          height: calc(100% - 150px);
+          z-index: 999;
+        }
+
+        .chat-box {
+          display: flex;
+          flex-direction: column;
+          height: 400px;
+          background-color: white;
+          border: 1px solid #ccc;
+          border-radius: 10px;
+          overflow: hidden;
+        }
+        .chat-header {
+          background-color: #f1f1f1;
+          color: black;
+          padding: 10px;
+          font-weight: bold;
+        }
+        .chat-messages {
+          flex: 1;
+          overflow-y: auto;
+          font-size: 14px;
+          padding: 10px;
+          display: flex;
+          flex-direction: column;
+          word-wrap: break-word;
+          word-break: break-all;
+        }
+        .chat-input {
+          background-color: #f1f1f1;
+            color: black;
+
+          padding: 10px;
+          border-top: 1px solid #ccc;
+        }
+        .chat-input input {
+          width: 100%;
+          font-size: 14px;
+
+        }
+    </style>
+
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+
+    <script th:inline="javascript">
+        let stompClient = null;
+        const roomId = 'global';
+        const nickname = [[${nickname}]];
+        let canSend = true;
+
+        connectWebSocket();
+
+        function connectWebSocket() {
+            const socket = new SockJS('/ws'); // WebSocket 엔드포인트
+            stompClient = Stomp.over(socket);
+
+            stompClient.connect({}, function () {
+                console.log('웹소켓 연결 완료');
+
+                // 채팅방 구독
+                stompClient.subscribe(`/topic/chat/${roomId}`, function (message) {
+                    const chat = JSON.parse(message.body);
+                    appendMessage(chat.message, chat.nickname === nickname, chat.nickname);
+                });
+            });
+        }
+
+        function handleKeyPress(event) {
+            if (event.key === "Enter") {
+                event.preventDefault();
+                sendMessage();
+            }
+        }
+
+        function sendMessage() {
+            const input = document.getElementById("chatInput");
+            const msg = input.value.trim();
+            if (!msg || msg.length > 50) return;
+
+            if (!nickname || nickname.trim() === "") {
+                  alert("로그인 후 채팅을 이용할 수 있습니다.");
+                  return;
+            }
+
+             if (!canSend) {
+                    alert("채팅은 5초에 한 번만 보낼 수 있습니다.");
+                    return;
+                }
+
+            const payload = {
+                roomId: roomId,
+                nickname: nickname,
+                message: msg
+            };
+
+            stompClient.send("/zinoshop/chat.send", {}, JSON.stringify(payload));
+            input.value = "";
+
+
+            canSend = false;
+            setTimeout(() => {
+                canSend = true;
+            }, 5000); // 5초 후 다시 활성화
+        }
+
+       function appendMessage(text, isMine, senderNickname) {
+            const chatBox = document.getElementById("chatMessages");
+            const div = document.createElement("div");
+
+            div.className = `message text-dark mb-2`;
+            div.innerText = `${isMine ? "[나]" : senderNickname} : ${text}`;
+
+            chatBox.appendChild(div);
+
+            while (chatBox.querySelectorAll('.message').length > 50) {
+                chatBox.removeChild(chatBox.querySelector('.message'));
+            }
+
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        document.addEventListener("DOMContentLoaded", function () {
+
+
+        fetch("/chat/history?roomId=global")
+            .then(res => res.json())
+            .then(messages => {
+                messages.reverse().forEach(msg => {
+                    appendMessage(msg.message, msg.nickname === nickname, msg.nickname);
+                });
+            });
+
+        fetch('/popular/today')
+            .then(response => response.json())
+            .then(data => {
+                const container = document.getElementById("popular-products-container");
+                container.innerHTML = ""; // 초기화
+
+                data.forEach(product => {
+                    const productHtml = `
+                        <div class="text-center me-2 mb-2">
+                            <a href="/products/${product.productId}">
+                                <img src="${product.imageUrl}" alt="product" class="img-thumbnail"
+                                     style="width: 80px; height: 80px; object-fit: cover;">
+                                <div class="small mt-1 text-dark">${product.name}</div>
+                            </a>
+                        </div>
+                    `;
+                    container.insertAdjacentHTML("beforeend", productHtml);
+                });
+            })
+            .catch(err => {
+                console.error("🔥 인기 상품 가져오기 실패:", err);
+            });
+    });
+    </script>
+</aside>
+
+</html>

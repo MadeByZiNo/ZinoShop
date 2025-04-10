@@ -10,15 +10,14 @@ import com.JH.JhOnlineJudge.domain.inquiry.exception.DuplicateInquiryReplyExcept
 import com.JH.JhOnlineJudge.domain.inquiry.exception.InquiryPermissionException;
 import com.JH.JhOnlineJudge.domain.inquiry.exception.NotFoundInquiryException;
 import com.JH.JhOnlineJudge.domain.inquiry.repository.InquiryRepository;
-import com.JH.JhOnlineJudge.common.notification.entity.NotificationFrom;
-import com.JH.JhOnlineJudge.common.notification.service.NotificationService;
+import com.JH.JhOnlineJudge.domain.notification.entity.NotificationFrom;
+import com.JH.JhOnlineJudge.domain.notification.service.NotificationService;
 import com.JH.JhOnlineJudge.domain.order.entity.Order;
 import com.JH.JhOnlineJudge.domain.order.service.OrderService;
 import com.JH.JhOnlineJudge.domain.product.exception.NotFoundProductException;
 import com.JH.JhOnlineJudge.domain.user.entity.User;
 import com.JH.JhOnlineJudge.domain.user.entity.UserRole;
 import com.JH.JhOnlineJudge.domain.user.service.UserService;
-import com.JH.JhOnlineJudge.common.utils.S3Uploader;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;

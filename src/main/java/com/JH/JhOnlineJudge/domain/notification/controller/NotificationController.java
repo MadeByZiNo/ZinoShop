@@ -1,8 +1,8 @@
-package com.JH.JhOnlineJudge.common.notification.controller;
+package com.JH.JhOnlineJudge.domain.notification.controller;
 
-import com.JH.JhOnlineJudge.common.notification.service.NotificationService;
-import com.JH.JhOnlineJudge.common.notification.dto.NotificationMessageResponse;
-import com.JH.JhOnlineJudge.common.notification.dto.NotificationStatusResponse;
+import com.JH.JhOnlineJudge.domain.notification.service.NotificationService;
+import com.JH.JhOnlineJudge.domain.notification.dto.NotificationMessageResponse;
+import com.JH.JhOnlineJudge.domain.notification.dto.NotificationStatusResponse;
 import com.JH.JhOnlineJudge.domain.user.auth.AuthUser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
