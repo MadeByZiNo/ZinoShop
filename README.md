@@ -767,75 +767,127 @@ JPA에서 제공하는 **Page**로 데이터를 받을 때 모든 PRODUCT 데이
 
 <br>
 
+
+
 ### 인덱스를 이용한 성능 최적화
+
 
 720만 건 이상의 데이터를 가진 `product_stat` 테이블에서 상품별 통계를 조회하는 과정에서 성능 병목이 발생했습니다.  
 이를 개선하기 위해 **인덱스를 추가 적용**하여 조회 속도를 대폭 개선하였습니다.
 
+
 <br>
+
 
 ![테이블 구성](https://github.com/user-attachments/assets/9a1e17b4-d9e9-4471-a900-47c840b7da43)  
 *이미지: product_stat 테이블 구성 (상품 ID, 날짜 기준 통계)*
 
+
 <br>
+
 
 통계 조회 시 초기에는 **약 2.1초**가 소요되었으며, 데이터가 많아질수록 더욱 느려질 것이므로 성능 저하가 우려되었습니다.
 
+
 <br>
+
 
 ![쿼리 속도 전](https://github.com/user-attachments/assets/9e623928-f045-4252-918a-eead0d61fa38)  
 *이미지: 인덱스 적용 전 통계 조회 쿼리 소요 시간*
 
+
 <br>
+
 
 JPQL 쿼리에서 `product_id`와 `date` 순으로 조회가 이루어졌기 때문에  
 해당 컬럼 조합에 대해 복합 인덱스를 생성하였습니다.
 
+
 <br>
+
 
 ![인덱스 생성 후 속도](https://github.com/user-attachments/assets/bacc071d-846a-44ab-8f30-7ef0843f4f79)  
 *이미지: 인덱스 적용 후 통계 쿼리 속도 개선 결과*
+
 
 <br>
 
 ---
 
+
+
+<br>
+
+
+
 #### ✅ 상품별 통계 TOP30 조회 속도 비교
+
+
+<br>
+
 
 TOP30 통계를 일/월/년 단위로 각각 조회하였고, 인덱스 적용 전후 성능 차이를 확인해보았습니다.
 
+
 <br>
+
+
 
 ![일별 TOP30 - Before](https://github.com/user-attachments/assets/26862e70-f1c7-4230-90fc-0f56433bd1cf)  
 *이미지: 인덱스 적용 전 일별 TOP30 조회 속도*
 
+
+
 <br>
+
+
 
 ![월별 TOP30 - Before](https://github.com/user-attachments/assets/279e1442-5d4c-422c-8598-d40aa34aa458)  
 *이미지: 인덱스 적용 전 월별 TOP30 조회 속도*
 
+
+
 <br>
+
 
 ![연별 TOP30 - Before](https://github.com/user-attachments/assets/3534c939-21c7-4047-928d-8c3b648d1c8d)  
 *이미지: 인덱스 적용 전 연별 TOP30 조회 속도 (최대 8초)*
 
+
 <br>
+
+
 
 전과는 달리 `date`, `product_id` 순서를 기준으로 인덱스를 생성하여 최적화하였습니다.
 
+
+
 <br>
+
+
 
 ![일별 TOP30 - After](https://github.com/user-attachments/assets/de080bc2-93c9-4e77-9901-957deece8d05)  
 *이미지: 인덱스 적용 후 일별 TOP30 속도 개선*
 
+
+
 <br>
+
+
 
 ![월별 TOP30 - After](https://github.com/user-attachments/assets/6d1c0750-1f17-45ff-882d-e8d96cc7f3a9)  
 *이미지: 인덱스 적용 후 월별 TOP30 속도 개선*
 
 
+<br>
+
+
 
 ### 검색 속도 개선 ###
+
+
+
+<br>
 
 기존에는 단순한 RDBMS를 사용하여 쿼리문으로 상품을 가져올 때 LIMIT을 걸어도 데이터가 적을 경우 해당 LIMIT만큼 채우지 못하고, 3천만개 데이터에 대해 풀 스캔이 발생하여 검색 속도가 느려지는 문제가 있었습니다. 
 
