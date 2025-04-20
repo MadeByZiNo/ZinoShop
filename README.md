@@ -174,7 +174,7 @@ Github Action을 통해서 개발자가 운영 Branch에 push를 하면 감지�
 
 
 
-영상 예정
+![ezgif-678f742c6d0330](https://github.com/user-attachments/assets/1242ce87-590a-42bf-81fe-486e3c6d0363)
 
 
 
