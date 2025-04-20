@@ -953,7 +953,7 @@ TOP30 통계를 일/월/년 단위로 각각 조회하였고, 인덱스 적용 �
 <br>
 
 
-**Elasticsearch 활용**
+## Elasticsearch 활용 ##
 
 
 <br>
@@ -972,22 +972,33 @@ ElasticSearch는 강력한 검색기능 외에도 집계, 분석, 시각화 등 
 
 
 
-**Copy_to를 활용한 형태소 분석 및 데이터 처리:**
+## Copy_to를 활용한 형태소 분석 및 데이터 처리:##
+
+
+<br>
+
 
 상품 이름과 카테고리를 모두 keywordtext로 넣어서 하나의 필드에서 바로 쉽게 검색할 수 있도록 했습니다. 이 과정에서 Copy_to 기능을 활용하여 여러 필드를 하나로 묶어 놓음으로써 복잡한 JOIN 없이 빠르게 검색할 수 있도록 최적화했습니다.
 
+
 <br>
+
 
 
 이를 통해, 검색 성능은 물론이고, 데이터 조회 속도도 대폭 향상되었습니다. 또 조건이 추가되어도 성능 저하 없이 빠르고 효율적인 검색이 가능해졌습니다.
 
+
+
 <br>
 
 
 
-**Elasticsearch 활용해서 얻은 이점**
+## Elasticsearch 활용해서 얻은 이점##
+
+
 
 <br>
+
 
 
 **ElasticSearch의 역색인을 통한 매우 빠른 검색기능을 통해서 상품검색 자동완성 기능을 구현이 가능하였습니다.**
@@ -997,7 +1008,12 @@ ElasticSearch는 강력한 검색기능 외에도 집계, 분석, 시각화 등 
 
 
 
-**검색 부분에서 매우 빠른 속도 향상을 보여주었습니다.**
+## 검색 부분에서 매우 빠른 속도 향상을 보여주었습니다.##
+
+
+
+<br>
+
 
 
 3천만개의 데이터를 임의로 삽입하고 http://localhost:8080/product/list?category_id=1&minPrice=0&maxPrice=60000&keyword=%EA%B2%80%EC%A0%95&sort=price_asc 다음과 같이 복합적인 조건이 있는 검색을 요청해보았습니다.
@@ -1006,10 +1022,23 @@ ElasticSearch는 강력한 검색기능 외에도 집계, 분석, 시각화 등 
 <br>
 
 
+
+
 ElasticSearch 도입 전 DB에 쿼리를 통해서 데이터를 가져올때는 
 
 
+
+<br>
+
+
+
 ![image](https://github.com/user-attachments/assets/56a1b83e-07c5-4c11-89f2-c87618e2e9e4)
+
+
+
+
+<br>
+
 
 
 다음과 같이 14초나 소모되었습니다.
@@ -1023,15 +1052,25 @@ ElasticSearch를 도입할때 일관성 보장이 낮고 트랜잭이 없으므�
 
 <br>
 
+
+
 그래서 product 인덱스안에는 가격 이름 id정도의 정보만 저장하게끔 해놓고 해당 조건에 맞는 상품들의 id들을 불러와서
 
 
+
+
 <br>
+
+
 
 In절을 통해서 매우 빠르게 데이터를 가져오게끔 구현했습니다.
 
 
+
+
 <br>
+
+
 
 
 ![image](https://github.com/user-attachments/assets/4a9c859c-95ee-43d6-af51-b4374303a7c8)
