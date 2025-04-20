@@ -197,7 +197,11 @@ Github Action을 통해서 개발자가 운영 Branch에 push를 하면 감지�
 
 
 
-![ezgif-830ad77538d43f](https://github.com/user-attachments/assets/e74a084f-060b-4404-be8d-62e37c0be59f)
+![1](https://github.com/user-attachments/assets/21d1074b-453b-40d5-ba49-1381405723d6)
+
+<br>
+
+무한 스크롤을 통한 상품 조회
 
 
 
@@ -205,7 +209,27 @@ Github Action을 통해서 개발자가 운영 Branch에 push를 하면 감지�
 <br>
 
 
- **상품들을 조회 할 수 있으며 , 달린 리뷰를 볼 수 있습니다.**
+
+![2](https://github.com/user-attachments/assets/f7211a94-513e-4128-92b7-46e01424bec6)
+
+<br>
+
+정렬 순서 및 가격 제한 필터
+
+
+
+
+
+<br>
+
+
+
+![3](https://github.com/user-attachments/assets/5f3b6064-b45a-412b-ba44-391388712836)
+
+<br>
+
+상품 직접 검색 및 자동완성 기능
+
 
 
 <br>
