@@ -772,7 +772,7 @@ Spring의 `@Async`와 `ThreadPoolTaskExecutor`를 사용하여
 
 
 
-- **N+1 문제 해결**: Fetch Join을 사용하여 N+1 문제를 방지했습니다.
+-### **N+1 문제 해결**: Fetch Join을 사용하여 N+1 문제를 방지했습니다.
 
 
 - Pageable을 사용한 경우, Fetch Join 시 **limit**문이 적용되지 않는 문제를 보았습니다.  
@@ -985,6 +985,57 @@ ElasticSearch는 강력한 검색기능 외에도 집계, 분석, 시각화 등 
 
 
 
-1. ElasticSearch를 통해서 상품검색 자동완성 기능을 구현하였으며
+**Elasticsearch 활용해서 얻은 이점**
 
-2.
+<br>
+
+
+**ElasticSearch의 역색인을 통한 매우 빠른 검색기능을 통해서 상품검색 자동완성 기능을 구현이 가능하였습니다.**
+
+
+<br>
+
+
+
+**검색 부분에서 매우 빠른 속도 향상을 보여주었습니다.**
+
+
+3천만개의 데이터를 임의로 삽입하고 http://localhost:8080/product/list?category_id=1&minPrice=0&maxPrice=60000&keyword=%EA%B2%80%EC%A0%95&sort=price_asc 다음과 같이 복합적인 조건이 있는 검색을 요청해보았습니다.
+
+
+<br>
+
+
+ElasticSearch 도입 전 DB에 쿼리를 통해서 데이터를 가져올때는 
+
+
+![image](https://github.com/user-attachments/assets/56a1b83e-07c5-4c11-89f2-c87618e2e9e4)
+
+
+다음과 같이 14초나 소모되었습니다.
+
+
+<br>
+
+
+ElasticSearch를 도입할때 일관성 보장이 낮고 트랜잭이 없으므로 실제 RDBMS처럼 사용 할 수는 없다고 생각했습니다.
+
+
+<br>
+
+그래서 product 인덱스안에는 가격 이름 id정도의 정보만 저장하게끔 해놓고 해당 조건에 맞는 상품들의 id들을 불러와서
+
+
+<br>
+
+In절을 통해서 매우 빠르게 데이터를 가져오게끔 구현했습니다.
+
+
+<br>
+
+
+![image](https://github.com/user-attachments/assets/4a9c859c-95ee-43d6-af51-b4374303a7c8)
+
+
+
+
