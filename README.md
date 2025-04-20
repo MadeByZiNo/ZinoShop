@@ -995,7 +995,7 @@ ElasticSearch는 강력한 검색기능 외에도 집계, 분석, 시각화 등 
 
 
 
-## Elasticsearch 활용해서 얻은 이점##
+## Elasticsearch 활용해서 얻은 이점
 
 
 
@@ -1018,7 +1018,11 @@ ElasticSearch는 강력한 검색기능 외에도 집계, 분석, 시각화 등 
 
 
 
-3천만개의 데이터를 임의로 삽입하고 http://localhost:8080/product/list?category_id=1&minPrice=0&maxPrice=60000&keyword=%EA%B2%80%EC%A0%95&sort=price_asc 다음과 같이 복합적인 조건이 있는 검색을 요청해보았습니다.
+3천만개의 데이터를 임의로 삽입하고 
+
+http://localhost:8080/product/list?category_id=1&minPrice=0&maxPrice=60000&keyword=%EA%B2%80%EC%A0%95&sort=price_asc 
+
+다음과 같이 복합적인 조건이 있는 검색을 요청해보았습니다.
 
 
 <br>
