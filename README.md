@@ -94,7 +94,7 @@
 <br>
 
 
-![설계구조](https://github.com/user-attachments/assets/6733435d-b05c-4bae-a9da-47159541b56e)
+추가예정
 
 
 <br>
