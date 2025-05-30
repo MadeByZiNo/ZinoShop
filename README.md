@@ -100,10 +100,7 @@
 <br>
 
 
-Github Action을 통해서 개발자가 운영 Branch에 push를 하면 감지를 해서 EC2에서 pull을 하고 빌드해서 JAR파일을 생성 후 Dockerfile을 통해서  
-
-
-프로젝트 서버 Docker 이미지를 생성하고 컨테이너에서 실행시키게 해놓아서 자동배포를 구현하였습니다.
+Github Action, Docker, nginx등을 통한 무중단자동배포
 
 
 ### 현재는 비용 문제로 인해 로컬에서 돌리는중입니다.
