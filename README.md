@@ -769,7 +769,7 @@ Spring의 `@Async`와 `ThreadPoolTaskExecutor`를 사용하여
 
 
 
--### **N+1 문제 해결**: Fetch Join을 사용하여 N+1 문제를 방지했습니다.
+**N+1 문제 해결**: Fetch Join을 사용하여 N+1 문제를 방지했습니다.
 
 
 - Pageable을 사용한 경우, Fetch Join 시 **limit**문이 적용되지 않는 문제를 보았습니다.  
